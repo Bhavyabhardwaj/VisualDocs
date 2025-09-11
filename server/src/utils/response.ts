@@ -1,5 +1,6 @@
 import type { Response } from "express";
 
+// Standard API response format
 export interface ApiResponse<T = any> {
     success: boolean;
     data?: T;
@@ -8,6 +9,7 @@ export interface ApiResponse<T = any> {
     timestamp: string;
 }
 
+// Success response 
 export const successResponse = <T>(
     res: Response,
     data: T,
@@ -22,6 +24,7 @@ export const successResponse = <T>(
     });
 }
 
+// Error response
 export const errorResponse = <T>(
     res: Response,
     error: string,
