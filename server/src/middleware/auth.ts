@@ -2,6 +2,7 @@ import type { Request, Response, NextFunction } from 'express';
 import { errorResponse } from '../utils';
 import jwt from 'jsonwebtoken';
 
+// Extend Express Request interface to include user property
 declare global {
   namespace Express {
     interface Request {
@@ -15,7 +16,7 @@ export const authenticateToken = (req: Request, res: Response, next: NextFunctio
     const token = authHeader && authHeader.split(' ')[1];
 
     if(!token) {
-        return errorResponse(res, 'Access token required', '401');
+        return errorResponse(res, 'Access token required', 401);
     }
 
     try {
@@ -23,7 +24,7 @@ export const authenticateToken = (req: Request, res: Response, next: NextFunctio
         req.user = user;
         next();
     } catch (error) {
-        return errorResponse(res, 'Invalid or expired token', '403');
+        return errorResponse(res, 'Invalid or expired token', 403);
     }
 
 }

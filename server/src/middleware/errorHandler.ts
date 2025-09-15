@@ -1,6 +1,6 @@
 import type { NextFunction } from "express";
 import type { Request, Response } from "express";
-import logger from "../utils/logger";
+import { logger } from "../utils";
 import { errorResponse } from "../utils";
 
 export const errorHandler = (
@@ -19,6 +19,6 @@ export const errorHandler = (
     return errorResponse(
         res,
         process.env.NODE_ENV === 'development' ? err.message : 'Internal server error',
-        '500'
+        500
     );
 }
