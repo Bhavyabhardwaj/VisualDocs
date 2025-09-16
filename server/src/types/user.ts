@@ -3,7 +3,7 @@ export interface User {
     id: string;
     name: string;
     email: string;
-    passoword: string;
+    password: string;
     avatar?: string;
     role: 'USER' | 'ADMIN' | 'SUPER_ADMIN';
     isActive: boolean;
