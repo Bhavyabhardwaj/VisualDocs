@@ -1,0 +1,245 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User model
+model User {
+  id            String   @id @default(uuid())
+  email         String   @unique
+  name          String
+  password      String
+  avatar        String?
+  role          Role     @default(USER)
+  isActive      Boolean  @default(true)
+  emailVerified Boolean  @default(false)
+  lastLoginAt   DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relationships
+  projects  Project[]
+  sessions  Session[]
+
+  @@map("users")
+}
+
+// Project model
+model Project {
+  id          String            @id @default(uuid())
+  name        String
+  description String?
+  language    ProgrammingLanguage
+  framework   String?
+  status      ProjectStatus     @default(ACTIVE)
+  visibility  ProjectVisibility @default(PRIVATE)
+  settings    Json?
+  
+  // Foreign keys
+  userId      String
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relationships
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  codeFiles   CodeFile[]
+  analyses    Analysis[]
+  diagrams    Diagram[]
+  sessions    Session[]
+
+  // Indexes
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("projects")
+}
+
+// Code file model
+model CodeFile {
+  id       String @id @default(uuid())
+  name     String
+  path     String
+  content  String
+  language String
+  size     Int
+  hash     String
+  encoding String @default("utf-8")
+  ast      Json?
+  metadata Json?
+  
+  // Foreign keys
+  projectId String
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relationships
+  project   Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  diagrams  Diagram[]
+
+  // Indexes
+  @@index([projectId])
+  @@index([hash])
+  @@index([language])
+  @@map("code_files")
+}
+
+// Analysis model
+model Analysis {
+  id                    String   @id @default(uuid())
+  totalFiles           Int
+  totalLinesOfCode     Int
+  totalComplexity      Int
+  averageComplexity    Float    @default(0)
+  functionCount        Int      @default(0)
+  classCount           Int      @default(0)
+  interfaceCount       Int      @default(0)
+  languageDistribution Json
+  frameworksDetected   String[]
+  dependencies         Json
+  recommendations      String[]
+  metrics              Json?
+  
+  // Foreign keys
+  projectId String @unique
+  
+  completedAt DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relationships
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  // Indexes
+  @@index([completedAt])
+  @@map("analyses")
+}
+
+// Diagram model
+model Diagram {
+  id              String        @id @default(uuid())
+  type            DiagramType
+  title           String
+  description     String?
+  prompt          String
+  imageUrl        String?
+  imageData       String?
+  style           DiagramStyle  @default(MODERN)
+  format          String        @default("png")
+  dimensions      Json?
+  status          DiagramStatus @default(PENDING)
+  error           String?
+  metadata        Json?
+  generationTime  Int?
+  
+  // Foreign keys
+  projectId  String
+  codeFileId String?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relationships
+  project  Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  codeFile CodeFile? @relation(fields: [codeFileId], references: [id], onDelete: SetNull)
+
+  // Indexes
+  @@index([projectId])
+  @@index([type])
+  @@index([status])
+  @@index([createdAt])
+  @@map("diagrams")
+}
+
+// Session model for real-time collaboration
+model Session {
+  id            String   @id @default(uuid())
+  title         String
+  isActive      Boolean  @default(true)
+  lastActivity  DateTime @default(now())
+  collaborators Json     @default("[]")
+  settings      Json?
+  
+  // Foreign keys
+  userId    String
+  projectId String
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relationships
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  // Indexes
+  @@index([userId])
+  @@index([projectId])
+  @@index([isActive])
+  @@map("sessions")
+}
+
+// Enums
+enum Role {
+  USER
+  ADMIN
+  SUPER_ADMIN
+}
+
+enum ProgrammingLanguage {
+  typescript
+  javascript
+  python
+  java
+  csharp
+  cpp
+  php
+  ruby
+  go
+}
+
+enum ProjectStatus {
+  ACTIVE
+  ARCHIVED
+  DELETED
+}
+
+enum ProjectVisibility {
+  PRIVATE
+  PUBLIC
+  TEAM
+}
+
+enum DiagramType {
+  ARCHITECTURE
+  FLOWCHART
+  SEQUENCE
+  CLASS
+  ER
+  COMPONENT
+}
+
+enum DiagramStyle {
+  MODERN
+  MINIMALIST
+  DETAILED
+  COLORFUL
+}
+
+enum DiagramStatus {
+  PENDING
+  GENERATING
+  COMPLETED
+  FAILED
+}
