@@ -1,4 +1,4 @@
-import type { AuthResponse, CreateUserRequest, LoginRequest, UserProfile } from "../types";
+import type { AuthResponse, CreateUserRequest, LoginRequest, UpdateUserRequest, UserProfile } from "../types";
 import { BcryptUtils, generateTokenPair, logger } from "../utils";
 import prisma from "../config/db";
 import { BadRequestError, ConflictError, NotFoundError, UnauthorizedError } from "../errors";
@@ -195,5 +195,132 @@ export class AuthService {
         }
     }
 
+    // update user profile
+    async updateUserProfile(userId: string, updates: UpdateUserRequest): Promise<UserProfile> {
+        try {
+            logger.info("User profile update attempt", { userId, updates });
+            const existingUser = await prisma.user.findUnique({
+                where: { id: userId }
+            });
+            if (!existingUser) {
+                throw new NotFoundError("User not found");
+            }
+            if (!existingUser.isActive) {
+                throw new UnauthorizedError('Account is deactivated');
+            }
+            const updatedUser = await prisma.user.update({
+                where: { id: userId },
+                data: {
+                    ...updates,
+                    updatedAt: new Date()
+                },
+                select: {
+                    id: true, email: true, name: true, avatar: true,
+                    role: true, isActive: true, emailVerified: true,
+                    createdAt: true, updatedAt: true, lastLoginAt: true
+                }
+            });
+            logger.info("User profile updated successfully", { userId, updates });
+            return {
+                ...updatedUser,
+                avatar: updatedUser.avatar || ''
+            };
+        } catch (error) {
+            if (error instanceof NotFoundError || error instanceof UnauthorizedError) {
+                throw error;
+            }
+            logger.error('Profile update failed', {
+                userId,
+                error: error instanceof Error ? error.message : 'Unknown error'
+            });
+            throw new BadRequestError('Profile update failed');
+        }
+    }
+
+    // get user statictics
+    async getUserStats(userId: string): Promise<{
+    projectCount: number;
+    diagramCount: number;
+    analysisCount: number;
+    lastActivity: Date | null;
+  }> {
+    try {
+      const [projectCount, diagramCount, analysisCount, user] = await Promise.all([
+        prisma.project.count({
+          where: { 
+            userId, 
+            status: { not: 'DELETED' } 
+          }
+        }),
+        prisma.diagram.count({
+          where: { 
+            project: { userId },
+            status: 'COMPLETED'
+          }
+        }),
+        prisma.analysis.count({
+          where: { 
+            project: { userId }
+          }
+        }),
+        prisma.user.findUnique({
+          where: { id: userId },
+          select: { lastLoginAt: true }
+        })
+      ]);
+
+      return {
+        projectCount,
+        diagramCount,
+        analysisCount,
+        lastActivity: user?.lastLoginAt || null,
+      };
+
+    } catch (error) {
+      logger.error('Get user stats failed', { 
+        userId, 
+        error: error instanceof Error ? error.message : 'Unknown error' 
+      });
+      
+      throw new BadRequestError('Failed to get user statistics');
+    }
+  }
+  // dectivate account
+  async deactivateAccount(userId: string): Promise<void> {
+    try {
+      logger.info('Account deactivation attempt', { userId });
+
+      const user = await prisma.user.findUnique({
+        where: { id: userId }
+      });
+
+      if (!user) {
+        throw new NotFoundError('User not found');
+      }
+
+      // Deactivate user
+      await prisma.user.update({
+        where: { id: userId },
+        data: {
+          isActive: false,
+          updatedAt: new Date(),
+        }
+      });
+
+      logger.info('Account deactivated successfully', { userId });
+
+    } catch (error) {
+      if (error instanceof NotFoundError) {
+        throw error;
+      }
+      
+      logger.error('Account deactivation failed', { 
+        userId, 
+        error: error instanceof Error ? error.message : 'Unknown error' 
+      });
+      
+      throw new BadRequestError('Account deactivation failed');
+    }
+  }
 }
 
