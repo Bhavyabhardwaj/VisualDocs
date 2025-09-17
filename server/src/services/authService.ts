@@ -1,0 +1,199 @@
+import type { AuthResponse, CreateUserRequest, LoginRequest, UserProfile } from "../types";
+import { BcryptUtils, generateTokenPair, logger } from "../utils";
+import prisma from "../config/db";
+import { BadRequestError, ConflictError, NotFoundError, UnauthorizedError } from "../errors";
+
+export class AuthService {
+    async register(userData: CreateUserRequest): Promise<AuthResponse> {
+        try {
+            logger.info("user Registering attempt", { userData });
+            // check if already exists
+            const existingUser = await prisma.user.findUnique({
+                where: { email: userData.email }
+            })
+            if (existingUser) {
+                throw new ConflictError("User with this email already exists");
+            }
+            const hashedPassword = await BcryptUtils.hashPassword(userData.password);
+
+            const newUser = await prisma.user.create({
+                data: {
+                    email: userData.email,
+                    name: userData.name,
+                    password: hashedPassword,
+                    role: 'USER',
+                    isActive: true,
+                    emailVerified: false,
+                },
+                select: {
+                    id: true, email: true, name: true, avatar: true,
+                    role: true, isActive: true, emailVerified: true,
+                    createdAt: true, updatedAt: true,
+                }
+            });
+            // token generation
+            const tokens = generateTokenPair({
+                id: newUser.id,
+                email: newUser.email,
+                name: newUser.name,
+                role: newUser.role
+            });
+            logger.info("User registered successfully", { userId: newUser.id, email: newUser.email });
+            return {
+                user: {
+                    ...newUser,
+                    avatar: newUser.avatar || ''
+                },
+                token: tokens
+            };
+        } catch (error) {
+            if (error instanceof ConflictError) {
+                throw error;
+            }
+
+            logger.error('Registration failed', {
+                email: userData.email,
+                error: error instanceof Error ? error.message : 'Unknown error'
+            });
+
+            throw new BadRequestError('Registration failed');
+        }
+    }
+
+    // login
+    async login(credentials: LoginRequest): Promise<AuthResponse> {
+        try {
+            logger.info("User login attempt", { email: credentials.email });
+            const user = await prisma.user.findUnique({
+                where: { email: credentials.email },
+                select: {
+                    id: true, email: true, name: true, avatar: true,
+                    role: true, isActive: true, emailVerified: true,
+                    password: true,
+                    createdAt: true, updatedAt: true,
+                }
+            });
+            if (!user) {
+                throw new BadRequestError("Invalid email or password");
+            }
+            if (!user.isActive) {
+                throw new UnauthorizedError('Account is deactivated. Please contact support.');
+            }
+            const isPasswordValid = await BcryptUtils.verifyPassword(credentials.password, user.password);
+            if (!isPasswordValid) {
+                throw new UnauthorizedError("Invalid email or password");
+            }
+            // Update last login
+            await prisma.user.update({
+                where: { id: user.id },
+                data: {
+                    lastLoginAt: new Date(),
+                    updatedAt: new Date()
+                }
+            });
+            const { password, ...userProfile } = user;
+
+            const tokens = generateTokenPair({
+                id: user.id,
+                email: user.email,
+                name: user.name,
+                role: user.role
+            });
+            logger.info("User logged in successfully", { userId: user.id, email: user.email });
+            return {
+                user: {
+                    ...userProfile,
+                    avatar: user.avatar || ''
+                },
+                token: tokens
+            };
+        } catch (error) {
+            if (error instanceof UnauthorizedError) {
+                throw error;
+            }
+            logger.error('Login failed', {
+                email: credentials.email,
+                error: error instanceof Error ? error.message : 'Unknown error'
+            });
+
+            throw new UnauthorizedError('Login failed');
+
+        }
+    }
+    // change password
+    async changePassword(userId: string, currentPassword: string, newPassword: string): Promise<void> {
+        try {
+            logger.info("Password change attempt", { userId });
+            const user = await prisma.user.findUnique({
+                where: { id: userId }
+            });
+            if (!user) {
+                throw new NotFoundError("User not found");
+            }
+            // check if password is right
+            const isPasswordValid = await BcryptUtils.verifyPassword(currentPassword, user.password);
+            if (!isPasswordValid) {
+                throw new UnauthorizedError("Current password is incorrect");
+            }
+            const hashedNewPassword = await BcryptUtils.hashPassword(newPassword);
+
+            // update password
+            await prisma.user.update({
+                where: { id: userId },
+                data: {
+                    password: hashedNewPassword,
+                    updatedAt: new Date()
+                }
+            });
+            logger.info("Password changed successfully", { userId });
+        } catch (error) {
+            if (error instanceof NotFoundError || error instanceof UnauthorizedError) {
+                throw error;
+            }
+            logger.error('Password change failed', {
+                userId,
+                error: error instanceof Error ? error.message : 'Unknown error'
+            });
+
+            throw new BadRequestError('Password change failed');
+        }
+    }
+
+    // get user profile
+    async getUserProfile(userId: string): Promise<UserProfile> {
+        try {
+            const user = await prisma.user.findUnique({
+                where: { id: userId },
+                select: {
+                    id: true, email: true, name: true, avatar: true,
+                    role: true, isActive: true, emailVerified: true,
+                    createdAt: true, updatedAt: true, lastLoginAt: true
+                }
+            })
+
+            if (!user) {
+                throw new NotFoundError("User not found");
+            }
+            if (!user.isActive) {
+                throw new UnauthorizedError('Account is deactivated. Please contact support.');
+            }
+            return {
+                ...user,
+                avatar: user.avatar || ''
+            };
+        } catch (error) {
+            if (error instanceof NotFoundError || error instanceof UnauthorizedError) {
+                throw error;
+            }
+
+            logger.error('Get user profile failed', {
+                userId,
+                error: error instanceof Error ? error.message : 'Unknown error'
+            });
+
+            throw new BadRequestError('Failed to get user profile');
+        }
+    }
+
+}
+
