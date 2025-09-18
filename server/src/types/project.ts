@@ -1,13 +1,13 @@
-// project types
+// project types - matches Prisma schema exactly
 export interface Project {
     id: string;
     name: string;
-    description?: string;
-    language: 'typescript' | 'javascript' | 'python' | 'java' | 'csharp' | 'cpp';
-    framework?: string;
+    description: string | null;
+    language: 'typescript' | 'javascript' | 'python' | 'java' | 'csharp' | 'cpp' | 'php' | 'ruby' | 'go';
+    framework: string | null;
     status: 'ACTIVE' | 'ARCHIVED' | 'DELETED';
     visibility: 'PRIVATE' | 'PUBLIC' | 'TEAM';
-    settings?: ProjectSettings;
+    settings: any | null; // JsonValue from Prisma
     userId: string;
     createdAt: Date;
     updatedAt: Date;

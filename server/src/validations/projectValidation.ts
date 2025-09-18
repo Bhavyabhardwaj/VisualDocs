@@ -15,7 +15,7 @@ export const createProjectSchema = z.object({
       .optional(),
       // by using enum user can only select one of the predefined languages else it will throw an error
     language: z
-      .enum(['typescript', 'javascript', 'python', 'java', 'csharp', 'cpp'], {
+      .enum(['typescript', 'javascript', 'python', 'java', 'csharp', 'cpp', 'php', 'ruby', 'go'], {
         message: 'Invalid programming language'
       }),
     framework: z
