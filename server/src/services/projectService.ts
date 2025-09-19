@@ -1,6 +1,6 @@
 import type { Prisma } from "../generated/prisma";
 import prisma from "../config/db";
-import { BadRequestError, ConflictError } from "../errors";
+import { BadRequestError, ConflictError, NotFoundError, UnauthorizedError } from "../errors";
 import type { CreateProjectRequest, PaginationOptions, Project } from "../types";
 import { logger } from "../utils";
 
@@ -143,6 +143,90 @@ export class projectService {
                 error: error instanceof Error ? error.message : 'Unknown error'
             });
             throw new BadRequestError('Failed to get projects');
+        }
+    }
+
+    // get project by id
+    async getProjectById(userId: string, projectId: string): Promise<Project & {
+        codeFiles?: any[];
+        latestAnalysis?: any[];
+        recentDiagrams?: any[];
+    }> {
+        try {
+            const project = await prisma.project.findUnique({
+                where: { id: projectId },
+                include: {
+                    user: {
+                        select: {
+                            id: true,
+                            email: true,
+                            name: true
+                        }
+                    },
+                    codeFiles: {
+                        select: {
+                            id: true,
+                            name: true,
+                            path: true,
+                            language: true,
+                            size: true,
+                            createdAt: true,
+                        },
+                        orderBy: { createdAt: 'desc' },
+                    },
+                    analyses: {
+                        orderBy: { completedAt: 'desc' },
+                        take: 1,
+                    },
+                    diagrams: {
+                        where: { status: 'COMPLETED' },
+                        orderBy: { createdAt: 'desc' },
+                        take: 5,
+                        select: {
+                            id: true,
+                            title: true,
+                            type: true,
+                            createdAt: true,
+                            imageUrl: true,
+                            style: true,
+                        }
+                    },
+                    _count: {
+                        select: {
+                            codeFiles: true,
+                            diagrams: true,
+                            analyses: true,
+                        }
+                    }
+                }
+            });
+            if (!project) {
+                throw new BadRequestError('Project not found');
+            }
+            // check if the user has access to the project
+            if (project.userId !== userId && project.visibility === 'PRIVATE') {
+                throw new UnauthorizedError('Access denied to this project');
+            }
+            // check if the project is deleted
+            if (project.status === 'DELETED') {
+                throw new NotFoundError('Project not found');
+            }
+            logger.info(`Project retrieved: ${project.id} for user: ${userId}`);
+            return {
+                ...project,
+                latestAnalysis: project.analyses,
+                recentDiagrams: project.diagrams,
+            };
+        } catch (error) {
+            if (error instanceof BadRequestError || error instanceof UnauthorizedError || error instanceof NotFoundError) {
+                throw error;
+            }
+            logger.error('Failed to get project by id', {
+                userId,
+                projectId,
+                error: error instanceof Error ? error.message : 'Unknown error'
+            });
+            throw new BadRequestError('Failed to get project');
         }
     }
 }
