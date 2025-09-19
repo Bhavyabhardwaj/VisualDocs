@@ -1,6 +1,7 @@
 export * from './user';
 export * from './project';
 export * from './auth';
+export * from './events'
 export * from './api';
 
 export type EntityWithTimestamps = {
@@ -10,3 +11,18 @@ export type EntityWithTimestamps = {
 };
 
 export type PartialUpdate<T> = Partial<Omit<T, 'id' | 'createdAt' | 'updatedAt'>>;
+
+export type PaginationOptions = {
+  page: number;
+  limit: number;
+  sort?: string;
+  order?: 'asc' | 'desc';
+};
+
+export type QueryFilters = {
+  search?: string;
+  status?: string;
+  language?: string;
+  dateFrom?: Date;
+  dateTo?: Date;
+};
