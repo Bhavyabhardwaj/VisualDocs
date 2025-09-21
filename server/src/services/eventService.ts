@@ -14,8 +14,17 @@ export class EventService extends EventEmitter {
     // Analysis progress events
     emitAnalysisProgress(event: AnalysisProgressEvent): void {
         try {
-            logger.debug('Emitting analysis progress', event);
+            // Enhanced logging with visual indicators
+            logger.info('📊 Analysis Progress Update', {
+                projectId: event.projectId,
+                status: event.status,
+                progress: `${event.progress}%`,
+                currentFile: event.currentFile,
+                completedFiles: event.completedFiles,
+                totalFiles: event.totalFiles,
+            });
 
+            // Multi-channel emission for flexible subscriptions
             this.emit('analysis:progress', event);
             this.emit(`analysis:progress:${event.projectId}`, event);
             this.emit(`user:${event.userId}:analysis:progress`, event);
@@ -31,8 +40,16 @@ export class EventService extends EventEmitter {
     // Diagram generation events
     emitDiagramProgress(event: DiagramGenerationEvent): void {
         try {
-            logger.debug('Emitting diagram progress', event);
+            // Enhanced logging with visual indicators
+            logger.info('🎨 Diagram Generation Progress', {
+                diagramId: event.diagramId,
+                projectId: event.projectId,
+                status: event.status,
+                progress: `${event.progress}%`,
+                stage: event.stage,
+            });
 
+            // Multi-channel emission
             this.emit('diagram:progress', event);
             this.emit(`diagram:progress:${event.diagramId}`, event);
             this.emit(`project:${event.projectId}:diagram:progress`, event);
@@ -49,8 +66,14 @@ export class EventService extends EventEmitter {
     // Project update events
     emitProjectUpdate(event: ProjectUpdateEvent): void {
         try {
-            logger.debug('Emitting project update', event);
+            // Enhanced logging with visual indicators
+            logger.info('📁 Project Update', {
+                projectId: event.projectId,
+                type: event.type,
+                userId: event.userId,
+            });
 
+            // Multi-channel emission
             this.emit('project:update', event);
             this.emit(`project:update:${event.projectId}`, event);
             this.emit(`user:${event.userId}:project:update`, event);
@@ -195,5 +218,30 @@ export class EventService extends EventEmitter {
             // stop listening to the event
             this.off(eventName, callback);
         };
+    }
+
+    // Get service statistics 
+    getStats(): {
+        connectedUsers: number;
+        totalSubscriptions: number;
+        eventListeners: number;
+        uptime: string;
+    } {
+        return {
+            connectedUsers: this.connectedUsers.size,
+            totalSubscriptions: Array.from(this.subscriptions.values())
+                .reduce((total, subs) => total + subs.length, 0),
+            eventListeners: this.listenerCount('analysis:progress') +
+                this.listenerCount('diagram:progress') +
+                this.listenerCount('project:update'),
+            uptime: process.uptime().toString(),
+        };
+    }
+
+    // Clear all subscriptions (for cleanup)
+    clearAllSubscriptions(): void {
+        this.subscriptions.clear();
+        this.removeAllListeners();
+        logger.info('All event subscriptions and listeners cleared');
     }
 }
