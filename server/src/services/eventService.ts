@@ -2,9 +2,9 @@ import { EventEmitter } from 'events';
 import { logger } from '../utils/logger';
 import type { AnalysisProgressEvent, CollaborationEvent, DiagramGenerationEvent, EventSubscription, ProjectUpdateEvent, SocketUserData, SystemNotificationEvent } from '../types';
 
-class EventService extends EventEmitter {
-    private connectedUsers: Map<string, SocketUserData> = new Map();
-    private subscriptions: Map<string, EventSubscription[]> = new Map();
+export class EventService extends EventEmitter {
+    private connectedUsers: Map<string, SocketUserData> = new Map();    // store connected users(userId, socketId, etc.)
+    private subscriptions: Map<string, EventSubscription[]> = new Map();    // store user subscriptions(what user what to listen to)
 
     constructor() {
         super();
@@ -79,7 +79,7 @@ class EventService extends EventEmitter {
         }
     }
 
-    // Collaboration events (for Phase 10)
+    // Collaboration events 
     emitCollaborationEvent(event: CollaborationEvent): void {
         try {
             logger.debug('Emitting collaboration event', event);
@@ -96,8 +96,8 @@ class EventService extends EventEmitter {
         }
     }
 
-    // User connection management (for Phase 10)
-    addConnectedUser(userId: string, userData: Omit<SocketUserData, 'userId'>): void {
+    // User connection management 
+    addConnectedUser(userId: string, userData: Omit<SocketUserData, 'userId'>): void { // remove userId from userData to avoid duplication
         this.connectedUsers.set(userId, {
             userId,
             ...userData,
@@ -140,7 +140,7 @@ class EventService extends EventEmitter {
 
     unsubscribeUser(userId: string, subscriptionId: string): boolean {
         const userSubscriptions = this.subscriptions.get(userId) || [];
-        const index = userSubscriptions.findIndex(sub => sub.id === subscriptionId);
+        const index = userSubscriptions.findIndex(sub => sub.id === subscriptionId); // findIndex will return -1 if not found
 
         if (index > -1) {
             userSubscriptions.splice(index, 1);
@@ -188,9 +188,11 @@ class EventService extends EventEmitter {
         callback: (event: ProjectUpdateEvent) => void
     ): () => void {
         const eventName = `user:${userId}:project:update`;
+        // start listening to the event
         this.on(eventName, callback);
 
         return () => {
+            // stop listening to the event
             this.off(eventName, callback);
         };
     }

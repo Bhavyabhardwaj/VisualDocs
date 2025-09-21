@@ -14,7 +14,7 @@ import type {
 } from "../types";
 import { logger } from "../utils";
 
-export class projectService {
+export class ProjectService {
     // create a new project
     async createProject(
         userId: string,
