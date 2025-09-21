@@ -1,7 +1,9 @@
 export * from './user';
 export * from './project';
 export * from './auth';
-export * from './events'
+export * from './events';
+export * from './analysis';
+export * from './diagram';
 export * from './api';
 
 export type EntityWithTimestamps = {
