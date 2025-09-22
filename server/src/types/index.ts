@@ -17,8 +17,8 @@ export type PartialUpdate<T> = Partial<Omit<T, 'id' | 'createdAt' | 'updatedAt'>
 export type PaginationOptions = {
   page: number;
   limit: number;
-  sort?: string;
-  order?: 'asc' | 'desc';
+  sort?: string | undefined;
+  order?: 'asc' | 'desc' | undefined;
 };
 
 export type QueryFilters = {

@@ -115,7 +115,6 @@ export class AuthController {
         }
     }
 
-
     async refreshToken(req: Request, res: Response, next: NextFunction) {
         try {
             const { refreshToken } = req.body;
@@ -138,5 +137,4 @@ export class AuthController {
             next(error);
         }
     }
-
 }
