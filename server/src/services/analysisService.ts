@@ -51,8 +51,9 @@ export class AnalysisService {
             const BATCH_SIZE = 10; // Process 10 files concurrently
             const fileAnalyses: FileAnalysisResult[] = [];
             
+            // jump 0,10,20,30...
             for (let i = 0; i < files.length; i += BATCH_SIZE) {
-                const batch = files.slice(i, i + BATCH_SIZE);
+                const batch = files.slice(i, i + BATCH_SIZE);   // Get current batch
                 
                 try {
                     // Parallel processing of current batch
@@ -174,11 +175,6 @@ export class AnalysisService {
         };
     }
 
-    /**
-     * OPTIMIZED: Single-pass analysis using efficient data structures
-     * Time Complexity: O(n) where n is content length
-     * Space Complexity: O(k) where k is unique identifiers
-     */
     private performSinglePassAnalysis(content: string, language: string): {
         linesOfCode: number;
         functions: Set<string>;
@@ -232,9 +228,6 @@ export class AnalysisService {
         };
     }
 
-    /**
-     * OPTIMIZED: Precompiled regex patterns cached by language
-     */
     private languagePatternCache = new Map<string, any>();
     
     private getLanguagePatterns(language: string) {
@@ -346,11 +339,6 @@ export class AnalysisService {
         return complexity;
     }
 
-    /**
-     * OPTIMIZED: Stream-based aggregation with efficient data structures
-     * Time Complexity: O(n) where n is total analysis results
-     * Space Complexity: O(1) constant space for aggregation
-     */
     private async aggregateAndStore(projectId: string, fileAnalyses: FileAnalysisResult[]): Promise<ProjectAnalysisResult> {
         // Use Map for O(1) language distribution counting
         const languageDistribution = new Map<string, number>();
@@ -458,7 +446,7 @@ export class AnalysisService {
     }
 
     /**
-     * OPTIMIZED: Smart recommendations based on metrics
+     *  Smart recommendations based on metrics
      */
     private generateRecommendations(totalComplexity: number, averageComplexity: number, totalFiles: number): string[] {
         const recommendations: string[] = [];
