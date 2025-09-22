@@ -1,5 +1,5 @@
 import type { AuthResponse, CreateUserRequest, LoginRequest, UpdateUserRequest, UserProfile } from "../types";
-import { BcryptUtils, generateTokenPair, logger } from "../utils";
+import { BcryptUtils, generateTokenPair, verifyRefreshToken, logger } from "../utils";
 import prisma from "../config/db";
 import { BadRequestError, ConflictError, NotFoundError, UnauthorizedError } from "../errors";
 
