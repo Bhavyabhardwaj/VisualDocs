@@ -1,8 +1,11 @@
 import type { NextFunction, Request, Response } from "express";
 import { projectService } from "../services";
 import type { CreateProjectRequest, PaginationOptions } from "../types";
-import { paginatedResponse, successResponse } from "../utils";
-import { stat } from "fs";
+import { paginatedResponse, successResponse, logger } from "../utils";
+import { promises as fs } from 'fs';
+import path from 'path';
+import crypto from 'crypto';
+import prisma from "../config/db";
 
 export class ProjectController {
     // create new project
@@ -175,21 +178,388 @@ export class ProjectController {
             const projectId = req.params.id as string;
 
             // Verify project access
-            await projectService.getProjectById(projectId, userId);
+            await projectService.getProjectById(userId, projectId);
 
-            // TODO: Implement file processing logic
-            // This will be handled by file upload middleware and service
-            const uploadedFiles = req.files || [];
+            // Get uploaded files from multer middleware
+            const uploadedFiles = req.files as Express.Multer.File[] || [];
+
+            if (!uploadedFiles.length) {
+                return successResponse(
+                    res,
+                    null,
+                    'No files were uploaded',
+                    400
+                );
+            }
+
+            // Process and store each file
+            const processedFiles = await Promise.all(
+                uploadedFiles.map(file => this.processUploadedFile(file, projectId))
+            );
+
+            // Filter out failed uploads
+            const successfulUploads = processedFiles.filter(file => file !== null);
+            const failedUploads = processedFiles.length - successfulUploads.length;
+
+            logger.info('Files uploaded to project', {
+                projectId,
+                userId,
+                totalFiles: uploadedFiles.length,
+                successful: successfulUploads.length,
+                failed: failedUploads
+            });
 
             return successResponse(
                 res,
                 {
-                    uploadedFiles: Array.isArray(uploadedFiles) ? uploadedFiles.length : 1,
+                    uploadedFiles: successfulUploads,
+                    totalUploaded: successfulUploads.length,
+                    totalFailed: failedUploads,
                     projectId
                 },
-                'Files uploaded successfully'
+                `${successfulUploads.length} files uploaded successfully${failedUploads > 0 ? `, ${failedUploads} failed` : ''}`
             );
         } catch (error) {
+            logger.error('File upload failed', {
+                projectId: req.params.id,
+                userId: req.user?.userId,
+                error: error instanceof Error ? error.message : 'Unknown error'
+            });
+            next(error);
+        }
+    }
+
+    // Helper method to process individual uploaded files
+    private async processUploadedFile(file: Express.Multer.File, projectId: string) {
+        try {
+            // Read file content
+            const content = await fs.readFile(file.path, 'utf-8');
+
+            // Generate file hash for deduplication
+            const hash = crypto.createHash('sha256').update(content).digest('hex');
+
+            // Detect programming language from file extension
+            const language = this.detectLanguage(file.originalname);
+
+            // Check if file already exists in project (by hash)
+            const existingFile = await prisma.codeFile.findFirst({
+                where: {
+                    projectId,
+                    hash
+                }
+            });
+
+            if (existingFile) {
+                logger.info('Duplicate file detected, skipping', {
+                    fileName: file.originalname,
+                    hash,
+                    existingFileId: existingFile.id
+                });
+
+                // Clean up uploaded file
+                await fs.unlink(file.path).catch(() => { });
+
+                return {
+                    id: existingFile.id,
+                    name: existingFile.name,
+                    status: 'duplicate',
+                    message: 'File already exists in project'
+                };
+            }
+
+            // Create code file record in database
+            const codeFile = await prisma.codeFile.create({
+                data: {
+                    name: file.originalname,
+                    path: this.generateFilePath(file.originalname),
+                    content,
+                    language,
+                    size: file.size,
+                    hash,
+                    encoding: 'utf-8',
+                    projectId,
+                    metadata: {
+                        originalName: file.originalname,
+                        mimeType: file.mimetype,
+                        uploadedAt: new Date().toISOString(),
+                        fileExtension: path.extname(file.originalname)
+                    }
+                },
+                select: {
+                    id: true,
+                    name: true,
+                    path: true,
+                    language: true,
+                    size: true,
+                    createdAt: true
+                }
+            });
+
+            // Clean up uploaded file from temp location
+            await fs.unlink(file.path).catch(() => { });
+
+            logger.info('File processed successfully', {
+                fileId: codeFile.id,
+                fileName: file.originalname,
+                language,
+                size: file.size
+            });
+
+            return {
+                ...codeFile,
+                status: 'success',
+                message: 'File uploaded and processed successfully'
+            };
+
+        } catch (error) {
+            logger.error('Failed to process uploaded file', {
+                fileName: file.originalname,
+                error: error instanceof Error ? error.message : 'Unknown error'
+            });
+
+            // Clean up uploaded file on error
+            await fs.unlink(file.path).catch(() => { });
+
+            return null;
+        }
+    }
+
+    // Helper method to detect programming language from file extension
+    private detectLanguage(filename: string): string {
+        const ext = path.extname(filename).toLowerCase();
+
+        const languageMap: Record<string, string> = {
+            '.js': 'javascript',
+            '.jsx': 'javascript',
+            '.ts': 'typescript',
+            '.tsx': 'typescript',
+            '.py': 'python',
+            '.java': 'java',
+            '.cpp': 'cpp',
+            '.c': 'c',
+            '.cs': 'csharp',
+            '.php': 'php',
+            '.rb': 'ruby',
+            '.go': 'go',
+            '.rs': 'rust',
+            '.kt': 'kotlin',
+            '.swift': 'swift',
+            '.dart': 'dart',
+            '.scala': 'scala',
+            '.sh': 'shell',
+            '.bash': 'shell',
+            '.zsh': 'shell',
+            '.fish': 'shell',
+            '.ps1': 'powershell',
+            '.sql': 'sql',
+            '.html': 'html',
+            '.css': 'css',
+            '.scss': 'scss',
+            '.sass': 'sass',
+            '.less': 'less',
+            '.xml': 'xml',
+            '.json': 'json',
+            '.yaml': 'yaml',
+            '.yml': 'yaml',
+            '.toml': 'toml',
+            '.ini': 'ini',
+            '.cfg': 'config',
+            '.conf': 'config',
+            '.md': 'markdown',
+            '.txt': 'text',
+            '.log': 'log'
+        };
+
+        return languageMap[ext] || 'unknown';
+    }
+
+    // Helper method to generate consistent file paths
+    private generateFilePath(filename: string): string {
+        const sanitizedName = filename.replace(/[^a-zA-Z0-9.-]/g, '_');
+        return `/${sanitizedName}`;
+    }
+    async getProjectFiles(req: Request, res: Response, next: NextFunction) {
+        try {
+            const userId = req.user!.userId;
+            const projectId = req.params.id as string;
+
+            // Verify project access
+            const project = await projectService.getProjectById(projectId, userId);
+
+            // Return files from project data (included from getProjectById)
+            const files = (project as any).codeFiles || [];
+
+            return successResponse(
+                res,
+                { files },
+                'Project files retrieved successfully'
+            );
+        } catch (error) {
+            next(error);
+        }
+    }
+    async getCollaborators(req: Request, res: Response, next: NextFunction) {
+        try {
+            const userId = req.user!.userId;
+            const projectId = req.params.id as string;
+
+            // Verify project access
+            const project = await projectService.getProjectById(userId, projectId) as any;
+
+            // Get active sessions for this project with collaborators
+            const activeSessions = await prisma.session.findMany({
+                where: {
+                    projectId,
+                    isActive: true,
+                    lastActivity: {
+                        gte: new Date(Date.now() - 24 * 60 * 60 * 1000) // Last 24 hours
+                    }
+                },
+                include: {
+                    user: {
+                        select: {
+                            id: true,
+                            name: true,
+                            email: true,
+                            avatar: true
+                        }
+                    }
+                },
+                orderBy: {
+                    lastActivity: 'desc'
+                }
+            });
+
+            // Process collaborators from sessions
+            const collaboratorMap = new Map();
+            
+            // Get project owner details
+            const projectOwner = {
+                id: project.user?.id || project.userId,
+                name: project.user?.name || 'Project Owner',
+                email: project.user?.email || '',
+                avatar: project.user?.avatar || '',
+                role: 'owner' as const,
+                isActive: true,
+                lastActivity: project.updatedAt,
+                permissions: ['read', 'write', 'admin'],
+                joinedAt: project.createdAt
+            };
+
+            // Add project owner
+            collaboratorMap.set(projectOwner.id, projectOwner);
+
+            // Process session collaborators
+            for (const session of activeSessions) {
+                const sessionUser = {
+                    id: session.user.id,
+                    name: session.user.name,
+                    email: session.user.email,
+                    avatar: session.user.avatar || '',
+                    role: session.user.id === project.userId ? 'owner' as const : 'collaborator' as const,
+                    isActive: session.isActive,
+                    lastActivity: session.lastActivity,
+                    permissions: session.user.id === project.userId ? 
+                        ['read', 'write', 'admin'] : 
+                        ['read', 'write'],
+                    joinedAt: session.createdAt,
+                    sessionId: session.id
+                };
+
+                collaboratorMap.set(sessionUser.id, sessionUser);
+
+                // Add collaborators from session.collaborators JSON
+                try {
+                    const sessionCollaborators = Array.isArray(session.collaborators) 
+                        ? session.collaborators 
+                        : JSON.parse(session.collaborators as string || '[]');
+                    
+                    for (const collab of sessionCollaborators) {
+                        if (collab.userId && !collaboratorMap.has(collab.userId)) {
+                            // Fetch user details for session collaborators
+                            const user = await prisma.user.findUnique({
+                                where: { id: collab.userId },
+                                select: {
+                                    id: true,
+                                    name: true,
+                                    email: true,
+                                    avatar: true
+                                }
+                            });
+
+                            if (user) {
+                                collaboratorMap.set(user.id, {
+                                    id: user.id,
+                                    name: user.name,
+                                    email: user.email,
+                                    avatar: user.avatar || '',
+                                    role: 'collaborator' as const,
+                                    isActive: collab.isActive || false,
+                                    lastActivity: new Date(collab.lastActivity || session.lastActivity),
+                                    permissions: collab.permissions || ['read'],
+                                    joinedAt: new Date(collab.joinedAt || session.createdAt),
+                                    sessionId: session.id,
+                                    cursor: collab.cursor,
+                                    currentFile: collab.currentFile
+                                });
+                            }
+                        }
+                    }
+                } catch (error) {
+                    logger.warn('Failed to parse session collaborators', {
+                        sessionId: session.id,
+                        error: error instanceof Error ? error.message : 'Unknown error'
+                    });
+                }
+            }
+
+            // Convert map to array and sort by role and activity
+            const collaborators = Array.from(collaboratorMap.values()).sort((a, b) => {
+                // Sort by role (owner first), then by last activity
+                if (a.role === 'owner' && b.role !== 'owner') return -1;
+                if (b.role === 'owner' && a.role !== 'owner') return 1;
+                return new Date(b.lastActivity).getTime() - new Date(a.lastActivity).getTime();
+            });
+
+            // Generate collaboration statistics
+            const stats = {
+                total: collaborators.length,
+                active: collaborators.filter(c => c.isActive).length,
+                online: collaborators.filter(c => 
+                    c.lastActivity && 
+                    new Date(c.lastActivity).getTime() > Date.now() - 5 * 60 * 1000 // Last 5 minutes
+                ).length,
+                owners: collaborators.filter(c => c.role === 'owner').length,
+                collaborators: collaborators.filter(c => c.role === 'collaborator').length
+            };
+
+            logger.info('Collaborators retrieved for project', {
+                projectId,
+                userId,
+                totalCollaborators: stats.total,
+                activeCollaborators: stats.active
+            });
+
+            return successResponse(
+                res,
+                {
+                    collaborators,
+                    stats,
+                    projectInfo: {
+                        id: project.id,
+                        name: project.name,
+                        visibility: project.visibility,
+                        owner: projectOwner
+                    }
+                },
+                'Collaborators retrieved successfully'
+            );
+        } catch (error) {
+            logger.error('Failed to get collaborators', {
+                projectId: req.params.id,
+                userId: req.user?.userId,
+                error: error instanceof Error ? error.message : 'Unknown error'
+            });
             next(error);
         }
     }
