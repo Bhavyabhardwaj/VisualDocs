@@ -322,5 +322,78 @@ export class AuthService {
       throw new BadRequestError('Account deactivation failed');
     }
   }
+
+  async refreshToken(refreshToken: string): Promise<AuthResponse> {
+    try {
+      logger.info('Refresh token attempt');
+      
+      // Verify the refresh token
+      const payload = verifyRefreshToken(refreshToken);
+      
+      if (!payload || !payload.userId) {
+        throw new UnauthorizedError('Invalid refresh token');
+      }
+
+      // Check if user still exists and is active
+      const user = await prisma.user.findUnique({
+        where: { 
+          id: payload.userId,
+          isActive: true // Ensure user is still active
+        },
+        select: {
+          id: true, 
+          email: true, 
+          name: true, 
+          avatar: true,
+          role: true, 
+          isActive: true, 
+          emailVerified: true,
+          createdAt: true, 
+          updatedAt: true,
+        }
+      });
+
+      if (!user) {
+        throw new UnauthorizedError('User not found or inactive');
+      }
+
+      // Generate new token pair
+      const tokens = generateTokenPair({
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role
+      });
+
+      // Update last login time
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { 
+          lastLoginAt: new Date()
+        }
+      });
+
+      logger.info('Tokens refreshed successfully', { userId: user.id });
+
+      return {
+        user: {
+          ...user,
+          avatar: user.avatar || ''
+        },
+        token: tokens
+      };
+
+    } catch (error) {
+      logger.error('Token refresh failed', {
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+
+      if (error instanceof UnauthorizedError) {
+        throw error;
+      }
+
+      throw new UnauthorizedError('Invalid or expired refresh token');
+    }
+  }
 }
 
