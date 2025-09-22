@@ -119,4 +119,79 @@ export class DiagramService {
             throw error;
         }
     }
+
+    // get diagram by id
+    async getDiagramById(diagramId: string, userId: string): Promise<any> {
+        try {
+            const diagram = await prisma.diagram.findUnique({
+                where: { id: diagramId },
+                include: {
+                    project: {
+                        select: { userId: true, id: true, name: true }
+                    }
+                }
+            });
+            if (!diagram || diagram.project.userId !== userId) {
+                throw new UnauthorizedError('Diagram not found or access denied');
+            }
+            return diagram;
+        } catch (error) {
+            logger.error('Get diagram failed', {
+                diagramId,
+                userId,
+                error: error instanceof Error ? error.message : 'Unknown error'
+            });
+
+            throw error;
+        }
+    }
+    // get project diagrams
+    async getProjectDiagrams(projectId: string, userId: string): Promise<any[]> {
+        try {
+            // verfy ownership
+            const project = await prisma.project.findUnique({
+                where: {
+                    id: projectId
+                }
+            })
+            if (!project || project.userId !== userId) {
+                throw new UnauthorizedError('Project not found or access denied');
+            }
+            const diagrams = await prisma.diagram.findMany({
+                where: { projectId },
+                orderBy: { createdAt: 'desc' },
+                select: {
+                    id: true,
+                    type: true,
+                    title: true,
+                    style: true,
+                    status: true,
+                    imageUrl: true,
+                    createdAt: true,
+                    description: true,
+                }
+            });
+            return diagrams;
+        } catch (error) {
+            logger.error('Get project diagrams failed', {
+                projectId,
+                userId,
+                error: error instanceof Error ? error.message : 'Unknown error'
+            });
+
+            throw error;
+        }
+    }
+    // generate prompt 
+    private generatePrompt(request: DiagramRequest, project: any): string {
+        let prompt = `Generate a ${request.style.toLowerCase()} ${request.type.toLowerCase()} diagram for "${request.title}" in the ${project.name} project. `;
+
+        if (request.description) {
+            prompt += `Description: ${request.description} `;
+        }
+
+        prompt += 'Make it professional and clear.';
+
+        return prompt;
+    }
 }
