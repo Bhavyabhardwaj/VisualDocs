@@ -79,6 +79,10 @@ export class AuthService {
             if (!user.isActive) {
                 throw new UnauthorizedError('Account is deactivated. Please contact support.');
             }
+            if (!user.password) {
+                throw new UnauthorizedError('Invalid credentials - OAuth account');
+            }
+
             const isPasswordValid = await BcryptUtils.verifyPassword(credentials.password, user.password);
             if (!isPasswordValid) {
                 throw new UnauthorizedError("Invalid email or password");
@@ -131,6 +135,10 @@ export class AuthService {
                 throw new NotFoundError("User not found");
             }
             // check if password is right
+            if (!user.password) {
+                throw new UnauthorizedError('Cannot change password for OAuth account');
+            }
+
             const isPasswordValid = await BcryptUtils.verifyPassword(currentPassword, user.password);
             if (!isPasswordValid) {
                 throw new UnauthorizedError("Current password is incorrect");
@@ -417,6 +425,176 @@ export class AuthService {
       });
 
       throw new BadRequestError('Logout failed');
+    }
+  }
+
+  // Get user by ID for passport deserialization
+  async getUserById(id: string): Promise<any> {
+    try {
+      const user = await prisma.user.findUnique({
+        where: { id },
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          avatar: true,
+          role: true,
+          isActive: true,
+          emailVerified: true,
+          provider: true,
+          providerId: true,
+          createdAt: true,
+          updatedAt: true,
+        }
+      });
+
+      if (!user) {
+        throw new NotFoundError('User not found');
+      }
+
+      return {
+        ...user,
+        avatar: user.avatar || ''
+      };
+    } catch (error) {
+      logger.error('Error getting user by ID:', { id, error });
+      throw error;
+    }
+  }
+
+  // Find or create OAuth user
+  async findOrCreateOAuthUser(oauthData: {
+    provider: 'GOOGLE' | 'GITHUB';
+    providerId: string;
+    email: string;
+    name: string;
+    avatar?: string;
+  }): Promise<any> {
+    try {
+      logger.info('Finding or creating OAuth user:', {
+        provider: oauthData.provider,
+        providerId: oauthData.providerId,
+        email: oauthData.email
+      });
+
+      // First, try to find existing user by provider ID
+      let user = await prisma.user.findFirst({
+        where: {
+          provider: oauthData.provider,
+          providerId: oauthData.providerId
+        },
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          avatar: true,
+          role: true,
+          isActive: true,
+          emailVerified: true,
+          provider: true,
+          providerId: true,
+          createdAt: true,
+          updatedAt: true,
+        }
+      });
+
+      if (user) {
+        // Update last login time
+        await prisma.user.update({
+          where: { id: user.id },
+          data: { lastLoginAt: new Date() }
+        });
+
+        logger.info('Found existing OAuth user:', { userId: user.id });
+        return {
+          ...user,
+          avatar: user.avatar || ''
+        };
+      }
+
+      // Check if user exists with same email (for linking accounts)
+      const existingEmailUser = await prisma.user.findUnique({
+        where: { email: oauthData.email }
+      });
+
+      if (existingEmailUser) {
+        // Link OAuth account to existing email account
+        user = await prisma.user.update({
+          where: { id: existingEmailUser.id },
+          data: {
+            provider: oauthData.provider,
+            providerId: oauthData.providerId,
+            avatar: oauthData.avatar || existingEmailUser.avatar,
+            emailVerified: true, // OAuth emails are verified
+            lastLoginAt: new Date()
+          },
+          select: {
+            id: true,
+            email: true,
+            name: true,
+            avatar: true,
+            role: true,
+            isActive: true,
+            emailVerified: true,
+            provider: true,
+            providerId: true,
+            createdAt: true,
+            updatedAt: true,
+          }
+        });
+
+        logger.info('Linked OAuth account to existing user:', { userId: user.id });
+        return {
+          ...user,
+          avatar: user.avatar || ''
+        };
+      }
+
+      // Create new OAuth user
+      user = await prisma.user.create({
+        data: {
+          email: oauthData.email,
+          name: oauthData.name,
+          provider: oauthData.provider,
+          providerId: oauthData.providerId,
+          avatar: oauthData.avatar || null,
+          role: 'USER',
+          isActive: true,
+          emailVerified: true, // OAuth emails are verified
+          lastLoginAt: new Date()
+        },
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          avatar: true,
+          role: true,
+          isActive: true,
+          emailVerified: true,
+          provider: true,
+          providerId: true,
+          createdAt: true,
+          updatedAt: true,
+        }
+      });
+
+      logger.info('Created new OAuth user:', { userId: user.id });
+      return {
+        ...user,
+        avatar: user.avatar || ''
+      };
+
+    } catch (error) {
+      logger.error('Error in findOrCreateOAuthUser:', {
+        provider: oauthData.provider,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+
+      if (error instanceof ConflictError || error instanceof NotFoundError) {
+        throw error;
+      }
+
+      throw new BadRequestError('Failed to process OAuth authentication');
     }
   }
 }

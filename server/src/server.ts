@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import compression from 'compression';
 import morgan from 'morgan';
 import type { Request, Response } from 'express';
+import { initializePassport } from './middleware';
 
 dotenv.config();
 
@@ -15,6 +16,9 @@ app.use(compression());  // compress response bodies
 app.use(morgan('combined'));  // log all requests
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
+
+// Initialize Passport
+app.use(initializePassport);
 
 app.get('/', (req, res) => {
   res.send('Server is running');

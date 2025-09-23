@@ -1,7 +1,15 @@
 import { Router } from 'express';
 import { authController } from '../controllers';
 import { changePasswordSchema, loginSchema, registerSchema, updateProfileSchema, validate } from '../validations';
-import { authLimiter } from '../middleware';
+import { 
+  authLimiter,
+  authenticateGoogle,
+  authenticateGitHub,
+  googleCallback,
+  gitHubCallback,
+  handleOAuthSuccess,
+  handleOAuthError
+} from '../middleware';
 
 const router = Router();
 
@@ -47,6 +55,31 @@ router.post('/logout',
 
 router.post('/refresh',
     authController.refreshToken
+);
+
+// OAuth routes
+// Google OAuth
+router.get('/google',
+    authLimiter,
+    authenticateGoogle
+);
+
+router.get('/google/callback',
+    googleCallback,
+    handleOAuthSuccess,
+    handleOAuthError
+);
+
+// GitHub OAuth
+router.get('/github',
+    authLimiter,
+    authenticateGitHub
+);
+
+router.get('/github/callback',
+    gitHubCallback,
+    handleOAuthSuccess,
+    handleOAuthError
 );
 
 export default router;

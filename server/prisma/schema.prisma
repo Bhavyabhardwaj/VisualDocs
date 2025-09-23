@@ -19,12 +19,19 @@ model User {
   id            String   @id @default(uuid())
   email         String   @unique
   name          String
-  password      String
+  password      String?  // Make password optional for OAuth users
   avatar        String?
   role          Role     @default(USER)
   isActive      Boolean  @default(true)
   emailVerified Boolean  @default(false)
   lastLoginAt   DateTime?
+  
+  // OAuth fields
+  provider      AuthProvider? // OAuth provider (GOOGLE, GITHUB, EMAIL)
+  providerId    String?       // OAuth provider user ID
+  accessToken   String?       // OAuth access token (encrypted)
+  refreshToken  String?       // OAuth refresh token (encrypted)
+  
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
@@ -32,6 +39,8 @@ model User {
   projects  Project[]
   sessions  Session[]
 
+  // Indexes
+  @@index([providerId])
   @@map("users")
 }
 
@@ -195,6 +204,12 @@ enum Role {
   USER
   ADMIN
   SUPER_ADMIN
+}
+
+enum AuthProvider {
+  EMAIL
+  GOOGLE
+  GITHUB
 }
 
 enum ProgrammingLanguage {
