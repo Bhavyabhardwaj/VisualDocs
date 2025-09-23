@@ -13,7 +13,7 @@ export const createProjectSchema = z.object({
       .max(500, 'Description cannot exceed 500 characters')
       .trim()
       .optional(),
-      // by using enum user can only select one of the predefined languages else it will throw an error
+    // by using enum user can only select one of the predefined languages else it will throw an error
     language: z
       .enum(['typescript', 'javascript', 'python', 'java', 'csharp', 'cpp', 'php', 'ruby', 'go'], {
         message: 'Invalid programming language'
@@ -47,7 +47,7 @@ export const updateProjectSchema = z.object({
       .trim()
       .optional(),
     status: z
-      .enum(['ACTIVE', 'ARCHIVED', 'DELETED'], { 
+      .enum(['ACTIVE', 'ARCHIVED', 'DELETED'], {
         message: 'Invalid project status'
       })
       .optional(),
@@ -98,5 +98,45 @@ export const paginationSchema = z.object({
       .enum(['asc', 'desc'])
       .optional()
       .default('desc'),
+  }),
+});
+
+export const changePasswordSchema = z.object({
+  body: z.object({
+    currentPassword: z
+      .string()
+      .min(1, 'Current password is required'),
+    newPassword: z
+      .string()
+      .min(8, 'Password must be at least 8 characters')
+      .max(128, 'Password cannot exceed 128 characters')
+      .regex(
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
+        'Password must contain at least one lowercase letter, one uppercase letter, and one number'
+      ),
+  }),
+});
+
+// File upload schema
+export const fileUploadSchema = z.object({
+  body: z.object({
+    files: z.array(z.any()).optional(),
+    metadata: z.any().optional(),
+  }),
+  params: z.object({
+    id: z.string().uuid('Invalid project ID format'),
+  }),
+});
+
+// Export query schema
+export const exportQuerySchema = z.object({
+  query: z.object({
+    format: z
+      .enum(['json', 'csv', 'pdf'])
+      .optional()
+      .default('json'),
+  }),
+  params: z.object({
+    projectId: z.string().uuid('Invalid project ID format'),
   }),
 });
