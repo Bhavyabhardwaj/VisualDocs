@@ -13,3 +13,6 @@ export { errorHandler, asyncHandler, notFoundHandler } from './errorHandler';
 export { requestId, requestLogger } from './requestLogger';
 export { corsOptions, helmetConfig, compressionConfig } from './security';
 export { singleFileUpload, multipleFilesUpload, fieldsUpload, handleUploadError } from './upload';
+
+// Export aliases for commonly used middleware
+export { fileUploadLimiter as uploadLimiter } from './rateLimiter';

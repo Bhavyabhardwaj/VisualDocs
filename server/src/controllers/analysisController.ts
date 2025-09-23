@@ -5,6 +5,28 @@ import { successResponse, logger } from "../utils";
 import prisma from "../config/db";
 
 export class AnalysisController {
+    // get project analysis
+    async getProjectAnalysis(req: Request, res: Response, next: NextFunction) {
+        try {
+            const userId = req.user!.userId;
+            const { projectId } = req.params;
+
+            if (!projectId) {
+                throw new UnauthorizedError("Project ID is required");
+            }
+
+            const analysis = await analysisService.getProjectAnalysis(userId, projectId);
+            return successResponse(
+                res,
+                { analysis },
+                "Project analysis retrieved successfully",
+                200
+            );
+        } catch (error) {
+            next(error);
+        }
+    }
+
     // analyse project
     async analyseProject(req: Request, res: Response, next: NextFunction) {
         try {
