@@ -1,7 +1,7 @@
 import type { NextFunction, Request, Response } from "express";
 import type { DiagramRequest } from "../types";
 import { successResponse } from "../utils";
-import { DiagramService } from "../services/diagramService";
+import { diagramService } from "../services";
 
 export class DiagramController {
 
@@ -15,7 +15,7 @@ export class DiagramController {
       const diagramRequest: DiagramRequest = req.body;
       
       // Start diagram generation (async process with real-time updates)
-      const diagram = await DiagramService.generateDiagram(diagramRequest, userId);
+      const diagram = await diagramService.generateDiagram(diagramRequest, userId);
       
       return successResponse(
         res,
@@ -37,7 +37,11 @@ export class DiagramController {
       const userId = req.user!.userId;
       const diagramId = req.params.id;
       
-      const diagram = await DiagramService.getDiagramById(diagramId, userId);
+      if (!diagramId) {
+        return res.status(400).json({ error: 'Diagram ID is required' });
+      }
+      
+      const diagram = await diagramService.getDiagramById(diagramId, userId);
       
       return successResponse(
         res,
@@ -57,6 +61,10 @@ export class DiagramController {
     try {
       const userId = req.user!.userId;
       const projectId = req.params.projectId;
+      
+      if (!projectId) {
+        return res.status(400).json({ error: 'Project ID is required' });
+      }
       
       const diagrams = await diagramService.getProjectDiagrams(projectId, userId);
       
@@ -79,6 +87,10 @@ export class DiagramController {
       const userId = req.user!.userId;
       const diagramId = req.params.id;
       
+      if (!diagramId) {
+        return res.status(400).json({ error: 'Diagram ID is required' });
+      }
+      
       await diagramService.deleteDiagram(diagramId, userId);
       
       return successResponse(
@@ -99,6 +111,10 @@ export class DiagramController {
     try {
       const userId = req.user!.userId;
       const diagramId = req.params.id;
+      
+      if (!diagramId) {
+        return res.status(400).json({ error: 'Diagram ID is required' });
+      }
       
       const diagram = await diagramService.getDiagramById(diagramId, userId);
       
@@ -129,6 +145,10 @@ export class DiagramController {
       const userId = req.user!.userId;
       const diagramId = req.params.id;
       
+      if (!diagramId) {
+        return res.status(400).json({ error: 'Diagram ID is required' });
+      }
+      
       // Get existing diagram
       const existingDiagram = await diagramService.getDiagramById(diagramId, userId);
       
@@ -139,7 +159,7 @@ export class DiagramController {
         title: existingDiagram.title,
         description: existingDiagram.description,
         style: existingDiagram.style,
-        codeFileId: existingDiagram.codeFileId,
+        codeFileIds: existingDiagram.codeFileId ? existingDiagram.codeFileId.split(',') : undefined,
       };
       
       const newDiagram = await diagramService.generateDiagram(diagramRequest, userId);

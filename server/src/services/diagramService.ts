@@ -5,9 +5,6 @@ import type { DiagramRequest, FileAnalysisResult, ProjectAnalysisResult } from "
 import { logger } from "../utils";
 
 export class DiagramService {
-    static generateDiagram(diagramRequest: DiagramRequest, userId: string) {
-        throw new Error("Method not implemented.");
-    }
     // Diagram service implementation
     async generateDiagram(request: DiagramRequest, userId: string): Promise<any> {
         let diagramId: string = '';
@@ -517,6 +514,39 @@ export class DiagramService {
         instructions += `\n- Include a legend if necessary for understanding`;
         
         return instructions;
+    }
+
+    /**
+     * Delete diagram
+     */
+    async deleteDiagram(diagramId: string, userId: string): Promise<void> {
+        try {
+            logger.info('Deleting diagram', { diagramId, userId });
+
+            // Get diagram to verify ownership
+            const diagram = await prisma.diagram.findUnique({
+                where: { id: diagramId },
+                include: { project: true }
+            });
+
+            if (!diagram) {
+                throw new Error('Diagram not found');
+            }
+
+            if (diagram.project.userId !== userId) {
+                throw new UnauthorizedError('Access denied');
+            }
+
+            // Delete the diagram
+            await prisma.diagram.delete({
+                where: { id: diagramId }
+            });
+
+            logger.info('Diagram deleted successfully', { diagramId });
+        } catch (error) {
+            logger.error('Failed to delete diagram', { diagramId, error });
+            throw error;
+        }
     }
     
     // generate basic prompt (fallback)
