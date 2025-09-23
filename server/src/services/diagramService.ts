@@ -5,6 +5,9 @@ import type { DiagramRequest, FileAnalysisResult, ProjectAnalysisResult } from "
 import { logger } from "../utils";
 
 export class DiagramService {
+    static generateDiagram(diagramRequest: DiagramRequest, userId: string) {
+        throw new Error("Method not implemented.");
+    }
     // Diagram service implementation
     async generateDiagram(request: DiagramRequest, userId: string): Promise<any> {
         let diagramId: string = '';
