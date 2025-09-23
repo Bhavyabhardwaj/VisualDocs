@@ -6,10 +6,7 @@ import prisma from '../config/db';
 import { eventService } from '.';
 
 export class AnalysisService {
-
-    /**
-     * Analyze project files and generate insights
-     */
+    // Analyze project 
     async analyzeProject(projectId: string, userId: string, fileIds?: string[]): Promise<ProjectAnalysisResult> {
         try {
             logger.info('Starting project analysis', { projectId, userId, fileIds });
@@ -157,7 +154,7 @@ export class AnalysisService {
         }
     }
 
-    // Private helper methods - OPTIMIZED for performance
+    // Private helper methods 
     private async analyzeFile(file: any): Promise<FileAnalysisResult> {
         // Single-pass analysis using optimized data structures
         const analysis = this.performSinglePassAnalysis(file.content, file.language);
@@ -183,7 +180,6 @@ export class AnalysisService {
         imports: Set<string>;
         complexity: number;
     } {
-        // Use Sets for O(1) duplicate prevention instead of O(n) array.includes()
         const functions = new Set<string>();
         const classes = new Set<string>();
         const interfaces = new Set<string>();
