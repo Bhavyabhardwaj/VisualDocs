@@ -137,4 +137,31 @@ export class AuthController {
             next(error);
         }
     }
+
+    // logout user
+    async logout(req: Request, res: Response, next: NextFunction) {
+        try {
+            const userId = req.user?.userId;        // from auth middleware
+            const refreshToken = req.body.refreshToken || req.cookies.refreshToken;
+
+            // Call the logout service method
+            await authService.logout(userId!, refreshToken);
+
+            // Clear refresh token cookie if it exists
+            res.clearCookie('refreshToken', {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'strict'
+            });
+
+            return successResponse(
+                res,
+                null,
+                'Logged out successfully'
+            );
+
+        } catch (error) {
+            next(error);
+        }
+    }
 }

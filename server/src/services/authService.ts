@@ -395,5 +395,29 @@ export class AuthService {
       throw new UnauthorizedError('Invalid or expired refresh token');
     }
   }
+
+  async logout(userId: string, refreshToken?: string): Promise<void> {
+    try {
+      logger.info(`User logging out: ${userId}`);
+
+      // Update user's last activity in database
+      await prisma.user.update({
+        where: { id: userId },
+        data: { 
+          lastLoginAt: new Date() // Update last activity
+        }
+      });
+
+      logger.info(`User logged out successfully: ${userId}`);
+
+    } catch (error) {
+      logger.error('Logout failed', {
+        userId,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+
+      throw new BadRequestError('Logout failed');
+    }
+  }
 }
 
