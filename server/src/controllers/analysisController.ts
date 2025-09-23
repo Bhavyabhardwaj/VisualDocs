@@ -4,7 +4,7 @@ import { UnauthorizedError } from "../errors";
 import { successResponse, logger } from "../utils";
 import prisma from "../config/db";
 
-class AnalysisController {
+export class AnalysisController {
     // analyse project
     async analyseProject(req: Request, res: Response, next: NextFunction) {
         try {
