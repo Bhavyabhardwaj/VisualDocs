@@ -4,6 +4,7 @@ export * from './auth';
 export * from './oauth';
 export * from './events';
 export * from './analysis';
+export * from './socket';
 export * from './diagram';
 export * from './api';
 
