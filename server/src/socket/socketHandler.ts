@@ -246,20 +246,20 @@ class SocketManager {
 
     }
 
-   // Integrate with existing event service for progress updates
+    // Integrate with existing event service for progress updates
     private setupEventServiceIntegration() {
         // Listen for analysis progress and broadcast to relevant project rooms
-        eventService.on('analysis:progress', (event) => {
+        eventService.on('analysis:progress', (event: any) => {
             this.io.to(`project-${event.projectId}`).emit('analysis:progress', event);
         });
 
         // Listen for diagram generation progress
-        eventService.on('diagram:progress', (event) => {
+        eventService.on('diagram:progress', (event: any) => {
             this.io.to(`project-${event.projectId}`).emit('diagram:progress', event);
         });
 
         // Listen for project updates
-        eventService.on('project:update', (event) => {
+        eventService.on('project:update', (event: any) => {
             this.io.to(`project-${event.projectId}`).emit('project:update', event);
         });
 

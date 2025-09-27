@@ -1,11 +1,13 @@
 import { Router } from 'express';
 import { successResponse } from '../utils/response';
 import { logger } from '../utils/logger';
+import { eventService } from '../services';
 
 const router = Router();
 
 // Health check endpoint
 router.get('/health', (req, res) => {
+  const eventStats = eventService.getStats();
   return successResponse(
     res,
     {
@@ -21,6 +23,7 @@ router.get('/health', (req, res) => {
 
 // API status endpoint
 router.get('/status', (req, res) => {
+  const eventStats = eventService.getStats();
   return successResponse(
     res,
     {
@@ -33,6 +36,7 @@ router.get('/status', (req, res) => {
         fileStorage: 'operational',
         realTime: 'active',
       },
+      realTimeStats: eventStats,
       timestamp: new Date().toISOString(),
     },
     'API status retrieved successfully'
