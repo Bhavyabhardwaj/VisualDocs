@@ -28,7 +28,7 @@ export const gitHubCallback = passport.authenticate('github', {
 });
 
 // Middleware to handle successful OAuth authentication
-export const handleOAuthSuccess = (req: Request, res: Response, next: NextFunction) => {
+export const handleOAuthSuccess = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const user = req.user as any;
     
@@ -37,35 +37,38 @@ export const handleOAuthSuccess = (req: Request, res: Response, next: NextFuncti
       return res.redirect(`${process.env.CLIENT_URL}/login?error=auth_failed`);
     }
 
-    // Generate JWT tokens for the authenticated user
-    const { generateTokenPair } = require('../utils');
-    const tokens = generateTokenPair({
-      id: user.id,
+    // Use the enhanced OAuth login method
+    const { authService } = require('../services');
+    const result = await authService.handleOAuthLogin({
+      id: user.providerId,
       email: user.email,
       name: user.name,
-      role: user.role
+      avatar: user.avatar,
+      provider: user.provider
     });
 
     // Set secure cookie for refresh token
-    res.cookie('refreshToken', tokens.refreshToken, {
+    res.cookie('refreshToken', result.tokens.refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
       maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
     });
 
-    // Redirect to frontend with access token
-    const redirectUrl = `${process.env.CLIENT_URL}/auth/callback?token=${tokens.accessToken}&user=${encodeURIComponent(JSON.stringify({
-      id: user.id,
-      email: user.email,
-      name: user.name,
-      avatar: user.avatar,
-      role: user.role
-    }))}`;
+    // Redirect to frontend with access token and user info
+    const redirectUrl = `${process.env.CLIENT_URL}/auth/callback?token=${result.tokens.accessToken}&user=${encodeURIComponent(JSON.stringify({
+      id: result.user.id,
+      email: result.user.email,
+      name: result.user.name,
+      avatar: result.user.avatar,
+      role: result.user.role,
+      isNewUser: result.isNewUser
+    }))}&provider=${result.provider}`;
 
     logger.info('OAuth authentication successful', {
-      userId: user.id,
-      provider: user.provider
+      userId: result.user.id,
+      provider: result.provider,
+      isNewUser: result.isNewUser
     });
 
     res.redirect(redirectUrl);

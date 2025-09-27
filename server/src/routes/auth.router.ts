@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { authController } from '../controllers';
-import { changePasswordSchema, loginSchema, registerSchema, updateProfileSchema, validate } from '../validations';
+import { changePasswordSchema, loginSchema, registerSchema, updateProfileSchema, linkOAuthAccountSchema, validate } from '../validations';
 import { 
   authLimiter,
   authenticateGoogle,
@@ -80,6 +80,16 @@ router.get('/github/callback',
     gitHubCallback,
     handleOAuthSuccess,
     handleOAuthError
+);
+
+// OAuth account management
+router.post('/oauth/link',
+    validate(linkOAuthAccountSchema),
+    authController.linkOAuthAccount
+);
+
+router.delete('/oauth/unlink',
+    authController.unlinkOAuthAccount
 );
 
 export default router;

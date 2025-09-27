@@ -164,4 +164,57 @@ export class AuthController {
             next(error);
         }
     }
+
+    // Link OAuth account to existing user
+    async linkOAuthAccount(req: Request, res: Response, next: NextFunction) {
+        try {
+            const userId = req.user?.userId;
+            const { provider, providerId, avatar } = req.body;
+
+            if (!userId) {
+                return res.status(401).json({ error: 'Authentication required' });
+            }
+
+            if (!provider || !providerId) {
+                return res.status(400).json({ error: 'Provider and providerId are required' });
+            }
+
+            const updatedUser = await authService.linkOAuthAccount(userId, {
+                provider,
+                providerId,
+                avatar
+            });
+
+            return successResponse(
+                res,
+                { user: updatedUser },
+                'OAuth account linked successfully'
+            );
+
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    // Unlink OAuth account
+    async unlinkOAuthAccount(req: Request, res: Response, next: NextFunction) {
+        try {
+            const userId = req.user?.userId;
+
+            if (!userId) {
+                return res.status(401).json({ error: 'Authentication required' });
+            }
+
+            const updatedUser = await authService.unlinkOAuthAccount(userId);
+
+            return successResponse(
+                res,
+                { user: updatedUser },
+                'OAuth account unlinked successfully'
+            );
+
+        } catch (error) {
+            next(error);
+        }
+    }
 }
