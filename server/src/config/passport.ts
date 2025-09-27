@@ -24,7 +24,7 @@ passport.deserializeUser(async (id: string, done) => {
 passport.use(new GoogleStrategy({
   clientID: process.env.GOOGLE_CLIENT_ID!,
   clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-  callbackURL: `${process.env.BASE_URL}/api/auth/google/callback`
+  callbackURL: `${process.env.BASE_URL}/api/oauth/google/callback`
 }, async (accessToken: string, refreshToken: string, profile: any, done: any) => {
   try {
     logger.info('Google OAuth profile received:', {
@@ -41,7 +41,12 @@ passport.use(new GoogleStrategy({
       avatar: profile.photos?.[0]?.value || undefined
     });
 
-    done(null, user);
+    // Return user with provider info for callback handling
+    done(null, {
+      ...user,
+      provider: 'GOOGLE',
+      providerId: profile.id
+    });
   } catch (error) {
     logger.error('Google OAuth error:', error);
     done(error, false);
@@ -52,7 +57,7 @@ passport.use(new GoogleStrategy({
 passport.use(new GitHubStrategy({
   clientID: process.env.GITHUB_CLIENT_ID!,
   clientSecret: process.env.GITHUB_CLIENT_SECRET!,
-  callbackURL: `${process.env.BASE_URL}/api/auth/github/callback`
+  callbackURL: `${process.env.BASE_URL}/api/oauth/github/callback`
 }, async (accessToken: string, refreshToken: string, profile: any, done: any) => {
   try {
     logger.info('GitHub OAuth profile received:', {
@@ -70,7 +75,12 @@ passport.use(new GitHubStrategy({
       avatar: profile.photos?.[0]?.value || undefined
     });
 
-    done(null, user);
+    // Return user with provider info for callback handling
+    done(null, {
+      ...user,
+      provider: 'GITHUB',
+      providerId: profile.id
+    });
   } catch (error) {
     logger.error('GitHub OAuth error:', error);
     done(error, false);

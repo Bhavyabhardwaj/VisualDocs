@@ -1,15 +1,14 @@
 import { Router } from 'express';
 import { authController } from '../controllers';
-import { changePasswordSchema, loginSchema, registerSchema, updateProfileSchema, linkOAuthAccountSchema, validate } from '../validations';
 import { 
-  authLimiter,
-  authenticateGoogle,
-  authenticateGitHub,
-  googleCallback,
-  gitHubCallback,
-  handleOAuthSuccess,
-  handleOAuthError
-} from '../middleware';
+    changePasswordSchema, 
+    loginSchema, 
+    registerSchema, 
+    updateProfileSchema, 
+    linkOAuthAccountSchema,
+    validate 
+} from '../validations';
+import { authLimiter, isAuthenticated } from '../middleware';
 
 const router = Router();
 
@@ -28,67 +27,50 @@ router.post('/login',
 
 // Protected routes (authentication required)
 router.get('/profile',
+    isAuthenticated,
     authController.getProfile
 );
 
 router.put('/profile',
+    isAuthenticated,
     validate(updateProfileSchema),
     authController.updateProfile
 );
 
 router.post('/change-password',
+    isAuthenticated,
     validate(changePasswordSchema), 
     authController.changePassword
 );
 
 router.get('/stats',
+    isAuthenticated,
     authController.getUserStats
 );
 
 router.delete('/account',
+    isAuthenticated,
     authController.deactivateAccount
 );
 
 router.post('/logout',
+    isAuthenticated,
     authController.logout
 );
 
 router.post('/refresh',
-    authController.refreshToken
+    authController.refreshToken  // No auth required for refresh token
 );
 
-// OAuth routes
-// Google OAuth
-router.get('/google',
-    authLimiter,
-    authenticateGoogle
-);
-
-router.get('/google/callback',
-    googleCallback,
-    handleOAuthSuccess,
-    handleOAuthError
-);
-
-// GitHub OAuth
-router.get('/github',
-    authLimiter,
-    authenticateGitHub
-);
-
-router.get('/github/callback',
-    gitHubCallback,
-    handleOAuthSuccess,
-    handleOAuthError
-);
-
-// OAuth account management
+// OAuth account management (for authenticated users)
 router.post('/oauth/link',
+    isAuthenticated,
     validate(linkOAuthAccountSchema),
     authController.linkOAuthAccount
 );
 
 router.delete('/oauth/unlink',
+    isAuthenticated,
     authController.unlinkOAuthAccount
 );
 

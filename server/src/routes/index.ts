@@ -3,6 +3,7 @@ import { isAuthenticated } from '../middleware';
 
 // Import individual routers
 import authRouter from './auth.router';
+import oauthRouter from './oauth.router';
 import projectRouter from './project.router';
 import analysisRouter from './analysis.router';
 import diagramRouter, { projectDiagramRouter } from './diagram.router';
@@ -13,6 +14,7 @@ const router = Router();
 // Define route structure 
 const apiRoutes = [
   { path: '/auth', route: authRouter },
+  { path: '/oauth', route: oauthRouter },
   { path: '/projects', route: projectRouter, isProtected: true },
   { path: '/analysis', route: analysisRouter, isProtected: true },
   { path: '/diagrams', route: diagramRouter, isProtected: true },

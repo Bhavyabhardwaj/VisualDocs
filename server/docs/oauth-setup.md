@@ -39,17 +39,17 @@ CLIENT_URL=http://localhost:3005
 2. Create a new project or select existing one
 3. Enable Google+ API
 4. Go to "Credentials" and create OAuth 2.0 Client ID
-5. Add authorized redirect URIs:
-   - `http://localhost:3004/api/auth/google/callback` (development)
-   - `https://your-domain.com/api/auth/google/callback` (production)
+3. Add authorized redirect URIs:
+   - `http://localhost:3004/api/oauth/google/callback` (development)
+   - `https://your-domain.com/api/oauth/google/callback` (production)
 
 ### 3. GitHub OAuth Setup
 
 1. Go to GitHub Settings > Developer settings > OAuth Apps
 2. Create a new OAuth App
 3. Set Authorization callback URL:
-   - `http://localhost:3004/api/auth/github/callback` (development)
-   - `https://your-domain.com/api/auth/github/callback` (production)
+   - `http://localhost:3004/api/oauth/github/callback` (development)
+   - `https://your-domain.com/api/oauth/github/callback` (production)
 
 ### 4. Database Migration
 
@@ -62,15 +62,74 @@ npx prisma generate
 
 ## API Endpoints
 
-### OAuth Authentication
+### OAuth Authentication (Separate OAuth Router)
 
 #### Google OAuth
-- **GET** `/api/auth/google` - Initiate Google OAuth
-- **GET** `/api/auth/google/callback` - Google OAuth callback
+- **GET** `/api/oauth/google` - Initiate Google OAuth
+- **GET** `/api/oauth/google/callback` - Google OAuth callback
 
 #### GitHub OAuth
-- **GET** `/api/auth/github` - Initiate GitHub OAuth
-- **GET** `/api/auth/github/callback` - GitHub OAuth callback
+- **GET** `/api/oauth/github` - Initiate GitHub OAuth
+- **GET** `/api/oauth/github/callback` - GitHub OAuth callback
+
+#### OAuth Status
+- **GET** `/api/oauth/status` - Check available OAuth providers
+
+### OAuth Account Management (Auth Router)
+- **POST** `/api/auth/oauth/link` - Link OAuth account to existing user
+- **DELETE** `/api/auth/oauth/unlink` - Unlink OAuth account
+
+### Enhanced Features
+
+#### Configuration-Based Provider Availability
+The OAuth router automatically detects available providers based on environment variables:
+- If `GITHUB_CLIENT_ID` and `GITHUB_CLIENT_SECRET` are set, GitHub OAuth is available
+- If `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` are set, Google OAuth is available
+- Missing credentials result in helpful error messages instead of crashes
+
+#### OAuth Status Endpoint
+```javascript
+// GET /api/oauth/status
+{
+  "success": true,
+  "data": {
+    "availableProviders": ["github", "google"],
+    "endpoints": {
+      "github": "/api/oauth/github",
+      "google": "/api/oauth/google"
+    }
+  }
+}
+```
+
+## Architecture
+
+### Routing Structure
+
+The OAuth implementation uses a clean separation of concerns:
+
+1. **OAuth Router** (`/api/oauth/*`):
+   - Handles OAuth provider initiation and callbacks
+   - Manages provider availability detection
+   - Provides status endpoint for frontend integration
+
+2. **Auth Router** (`/api/auth/*`):
+   - Handles traditional authentication (login, register, etc.)
+   - Manages OAuth account linking/unlinking for authenticated users
+   - Contains user profile and account management
+
+3. **Passport Configuration** (`config/passport.ts`):
+   - Defines OAuth strategies for Google and GitHub
+   - Handles user serialization/deserialization
+   - Integrates with AuthService for user management
+
+### Benefits of Separated Routing
+
+- **Clear API Structure**: OAuth flows are separate from regular auth
+- **Better Error Handling**: Provider-specific error messages and fallbacks
+- **Conditional Availability**: Only show OAuth options when properly configured
+- **Maintainability**: Easy to add new OAuth providers without cluttering auth routes
+- **Security**: Separate rate limiting and middleware for OAuth vs regular auth
 
 ## Frontend Integration
 
@@ -79,12 +138,30 @@ npx prisma generate
 ```javascript
 // Google OAuth login
 const loginWithGoogle = () => {
-  window.location.href = `${API_BASE_URL}/api/auth/google`;
+  window.location.href = `${API_BASE_URL}/api/oauth/google`;
 };
 
 // GitHub OAuth login
 const loginWithGitHub = () => {
-  window.location.href = `${API_BASE_URL}/api/auth/github`;
+  window.location.href = `${API_BASE_URL}/api/oauth/github`;
+};
+
+// Check available providers first
+const checkOAuthProviders = async () => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/oauth/status`);
+    const data = await response.json();
+    
+    if (data.success) {
+      const { availableProviders } = data.data;
+      
+      // Show only available OAuth buttons
+      setGoogleAvailable(availableProviders.includes('google'));
+      setGitHubAvailable(availableProviders.includes('github'));
+    }
+  } catch (error) {
+    console.error('Failed to check OAuth providers:', error);
+  }
 };
 ```
 
