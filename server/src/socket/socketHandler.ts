@@ -1,6 +1,7 @@
-import type { AuthenticatedSocket, ConnectionResponse, CursorMovePayload, CursorPosition, JoinProjectPayload, LiveComment, ProjectCommentPayload, ProjectUsersResponse, StatusUpdatePayload, UserJoinedProjectResponse, UserLeftProjectResponse, UserPresence } from "../types";
+import type { AuthenticatedSocket, ConnectionResponse, CursorMovePayload, CursorPosition, JoinProjectPayload, LiveComment, ProjectCommentPayload, ProjectUsersResponse, SocketStatus, StatusUpdatePayload, UserJoinedProjectResponse, UserLeftProjectResponse, UserPresence } from "../types";
 import { Server as SocketIoServer } from "socket.io";
 import { logger, verifyAccessToken } from "../utils";
+import { eventService } from "../services";
 
 class SocketManager {
     private io: SocketIoServer;
@@ -244,4 +245,56 @@ class SocketManager {
         this.connectedUsers.delete(user.userId);
 
     }
+
+   // Integrate with existing event service for progress updates
+    private setupEventServiceIntegration() {
+        // Listen for analysis progress and broadcast to relevant project rooms
+        eventService.on('analysis:progress', (event) => {
+            this.io.to(`project-${event.projectId}`).emit('analysis:progress', event);
+        });
+
+        // Listen for diagram generation progress
+        eventService.on('diagram:progress', (event) => {
+            this.io.to(`project-${event.projectId}`).emit('diagram:progress', event);
+        });
+
+        // Listen for project updates
+        eventService.on('project:update', (event) => {
+            this.io.to(`project-${event.projectId}`).emit('project:update', event);
+        });
+
+        logger.info('✅ Socket.IO integrated with event service');
+    }
+
+    /**
+     * Get connected users stats
+     */
+    getStats(): SocketStatus {
+        return {
+            connectedUsers: this.connectedUsers.size,
+            activeProjects: this.projectRooms.size,
+            totalRooms: this.io.sockets.adapter.rooms.size,
+        };
+    }
+}
+
+// Socket.IO setup function
+export function setupSocketIO(io: SocketIoServer) {
+    const socketManager = new SocketManager(io);
+
+    logger.info('🔄 Socket.IO server initialized');
+    logger.info('📡 Real-time features enabled:');
+    logger.info('  - Live collaboration');
+    logger.info('  - Progress tracking');
+    logger.info('  - Real-time comments');
+    logger.info('  - User presence');
+
+    // Add stats endpoint (optional)
+    setInterval(() => {
+        const stats = socketManager.getStats();
+        logger.debug('Socket.IO Stats', stats);
+    }, 30000); // Log stats every 30 seconds
+
+    return socketManager;
+
 }
