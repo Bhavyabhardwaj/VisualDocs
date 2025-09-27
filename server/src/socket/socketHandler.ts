@@ -1,4 +1,4 @@
-import type { AuthenticatedSocket, ConnectionResponse, CursorMovePayload, JoinProjectPayload, LiveComment, ProjectCommentPayload, ProjectUsersResponse, StatusUpdatePayload, UserJoinedProjectResponse, UserLeftProjectResponse, UserPresence } from "../types";
+import type { AuthenticatedSocket, ConnectionResponse, CursorMovePayload, CursorPosition, JoinProjectPayload, LiveComment, ProjectCommentPayload, ProjectUsersResponse, StatusUpdatePayload, UserJoinedProjectResponse, UserLeftProjectResponse, UserPresence } from "../types";
 import { Server as SocketIoServer } from "socket.io";
 import { logger, verifyAccessToken } from "../utils";
 
@@ -40,7 +40,6 @@ class SocketManager {
         })
         this.setupEventServiceIntegration();
     }
-
     // handle new connections 
     private handleConnection(socket: AuthenticatedSocket) {
         const user = socket.user;
@@ -96,7 +95,6 @@ class SocketManager {
             this.handleDisconnection(socket, reason);
         });
     }
-
     // handle user joining a project room
     private handleJoinProject(socket: AuthenticatedSocket, projectId: string) {
         const user = socket.user!;
@@ -135,7 +133,6 @@ class SocketManager {
         }
         socket.emit('project-users', userResponse);
     }
-
     // handle user leaving project rooom
     private handleLeaveProject(socket: AuthenticatedSocket, projectId: string) {
         const user = socket.user!;
@@ -161,7 +158,6 @@ class SocketManager {
         }
         socket.to(`project-${projectId}`).emit('user-left', leftResponse);
     }
-
     // handle user status updates
     private handleStatusUpdate(socket: AuthenticatedSocket, data: StatusUpdatePayload) {
         const user = socket.user!;
@@ -181,7 +177,6 @@ class SocketManager {
         }
         logger.debug('User status updated', { userId: user.userId, status, projectId });
     }
-
     // project comments
     private handleProjectComment(socket: AuthenticatedSocket, data: ProjectCommentPayload) {
         const user = socket.user!;
@@ -202,5 +197,51 @@ class SocketManager {
             projectId,
             commentId: comment.id
         });
+    }
+    // cursor position sharing
+    private handleCursorPosition(socket: AuthenticatedSocket, data: CursorMovePayload) {
+        const user = socket.user!;
+        const { projectId, cursor } = data;
+
+        const cursorUpdate: CursorPosition = {
+            userId: user.userId,
+            userName: user.name,
+            file: cursor.file || '',
+            x: cursor.x,
+            y: cursor.y,
+            timestamp: new Date().toISOString()
+        }
+        // broadcast to others in the project room
+        socket.to(`project-${projectId}`).emit('cursor-updated', cursorUpdate);
+    }
+    // handle user disconnection
+    private handleDisconnection(socket: AuthenticatedSocket, reason: string) {
+        const user = socket.user;
+        if (!user) {
+            logger.error("Disconnected socket without user info");
+            return;
+        }
+        logger.info('User disconnected from Socket.IO', {
+            userId: user.userId,
+            socketId: socket.id,
+            reason
+        });
+        const userPresence = this.connectedUsers.get(user.userId);
+        if (userPresence?.projectId) {
+            // Notify project members
+            const leftResponse: UserLeftProjectResponse = {
+                userId: user.userId,
+                userName: user.name,
+                projectId: userPresence.projectId,
+                timestamp: new Date().toISOString(),
+            };
+            socket.to(`project-${userPresence.projectId}`).emit('user-left-project', leftResponse);
+
+            // Remove from project room
+            this.projectRooms.get(userPresence.projectId)?.delete(user.userId);
+        }
+        // Remove from connected users
+        this.connectedUsers.delete(user.userId);
+
     }
 }
