@@ -96,8 +96,8 @@ export interface CursorMovePayload {
 
 // socket response types
 export interface ConnectionResponse {
+    userId: string;
     message: string;
-    socketId: string;
     timestamp: string;
 }
 
