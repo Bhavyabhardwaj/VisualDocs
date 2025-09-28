@@ -7,11 +7,12 @@ import morgan from 'morgan';
 import type { Request, Response } from 'express';
 import { corsOptions, errorHandler, initializePassport, notFoundHandler, requestId, requestLogger } from './middleware';
 import { createServer } from 'http';
-import { Socket } from 'socket.io';
+import { Server as SocketIoServer, Socket } from 'socket.io';
 import { transport, transports } from 'winston';
 import { logger, morganStream } from './utils';
 import router from './routes';
 import config from './config';
+import { setupSocketIO } from './socket/socketHandler';
 
 dotenv.config();
 
@@ -54,7 +55,7 @@ app.use(notFoundHandler);
 app.use(errorHandler);
 
 // setup socket io
-setupSocketIo(io);
+setupSocketIO(io);
 
 // Graceful shutdown handling
 process.on('SIGTERM', async () => {

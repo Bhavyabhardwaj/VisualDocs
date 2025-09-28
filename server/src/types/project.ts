@@ -53,6 +53,11 @@ export interface GitHubImportRequest {
     includeTests?: boolean; // default: false
     maxFileSizeMB?: number; // default: 5MB
     fileExtensions?: string[]; // default: common code file extensions
+    
+    // Project details for the imported project
+    projectName?: string; // If not provided, will use repo name
+    projectDescription?: string;
+    visibility?: 'PRIVATE' | 'PUBLIC' | 'TEAM'; // default: 'PRIVATE'
 }
 
 export interface GitHubRepository {

@@ -522,13 +522,18 @@ export class ProjectService {
 
             // Create project with GitHub metadata
             const projectName = importRequest.projectName || repository.name;
+            const detectedFrameworks = githubService.detectFrameworks(files);
             const projectData: CreateProjectRequest = {
                 name: projectName,
                 description: importRequest.projectDescription || repository.description || `Imported from ${repository.fullName}`,
                 language: githubService.mapGitHubLanguage(repository.language),
-                framework: githubService.detectFrameworks(files).join(', ') || undefined,
                 visibility: importRequest.visibility || 'PRIVATE'
             };
+            
+            // Add framework if detected
+            if (detectedFrameworks.length > 0) {
+                projectData.framework = detectedFrameworks.join(', ');
+            }
 
             // Check for existing project with same name
             const existingProject = await prisma.project.findFirst({
