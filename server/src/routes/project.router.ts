@@ -5,13 +5,17 @@ import {
   createProjectSchema, 
   updateProjectSchema,
   getProjectSchema,
-  paginationSchema
+  paginationSchema,
+  githubImportSchema,
+  githubValidationSchema,
+  githubRepoInfoSchema
 } from '../validations';
 import { 
   generalLimiter,
   uploadLimiter,
   multipleFilesUpload,
-  handleUploadError
+  handleUploadError,
+  aiLimiter
 } from '../middleware';
 
 const router = Router();
@@ -75,6 +79,24 @@ router.get('/:id/files',
 router.get('/:id/collaborators', 
   validate(getProjectSchema),
   projectController.getCollaborators
+);
+
+// GitHub integration routes
+router.post('/import/github', 
+  generalLimiter,
+  validate(githubImportSchema),
+  projectController.importFromGitHub
+);
+
+router.post('/validate/github', 
+  generalLimiter,
+  validate(githubValidationSchema),
+  projectController.validateGitHubRepository
+);
+
+router.get('/github/info', 
+  validate(githubRepoInfoSchema),
+  projectController.getGitHubRepositoryInfo
 );
 
 export default router;

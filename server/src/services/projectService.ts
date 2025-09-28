@@ -488,4 +488,198 @@ export class ProjectService {
             throw new BadRequestError("Failed to get project statistics");
         }
     }
+
+    // GitHub repository import
+    async importFromGitHub(
+        userId: string,
+        importRequest: import('../types').GitHubImportRequest
+    ): Promise<import('../types').GitHubImportResult> {
+        const { githubService } = await import('./index');
+        
+        try {
+            logger.info('Starting GitHub repository import', {
+                userId,
+                githubUrl: importRequest.githubUrl,
+                branch: importRequest.branch
+            });
+
+            // Validate repository and get basic info
+            const { owner, repo, repository } = await githubService.validateRepository(importRequest.githubUrl);
+            
+            // Get file tree
+            const branch = importRequest.branch || repository.defaultBranch;
+            const files = await githubService.getFileTree(
+                owner,
+                repo,
+                branch,
+                importRequest.includeTests,
+                importRequest.fileExtensions
+            );
+
+            if (files.length === 0) {
+                throw new BadRequestError('No code files found in the repository');
+            }
+
+            // Create project with GitHub metadata
+            const projectName = importRequest.projectName || repository.name;
+            const projectData: CreateProjectRequest = {
+                name: projectName,
+                description: importRequest.projectDescription || repository.description || `Imported from ${repository.fullName}`,
+                language: githubService.mapGitHubLanguage(repository.language),
+                framework: githubService.detectFrameworks(files).join(', ') || undefined,
+                visibility: importRequest.visibility || 'PRIVATE'
+            };
+
+            // Check for existing project with same name
+            const existingProject = await prisma.project.findFirst({
+                where: { 
+                    name: projectName, 
+                    userId, 
+                    status: { not: "DELETED" } 
+                },
+            });
+
+            if (existingProject) {
+                throw new ConflictError(`Project "${projectName}" already exists. Please choose a different name.`);
+            }
+
+            // Create project with GitHub fields
+            const createData: any = {
+                ...projectData,
+                userId,
+                settings: {
+                    autoAnalysis: true,
+                    diagramStyle: "MODERN",
+                    exportFormats: ["png", "svg"],
+                    importSource: "github",
+                    importedAt: new Date().toISOString()
+                },
+                // GitHub integration fields
+                githubUrl: repository.htmlUrl,
+                githubRepo: repository.fullName,
+                githubBranch: branch,
+                importedFromGitHub: true,
+                githubImportedAt: new Date(),
+                githubStars: repository.stargazersCount,
+                githubForks: repository.forksCount,
+                githubLanguage: repository.language
+            };
+
+            const project = await prisma.project.create({
+                data: createData,
+                include: {
+                    user: {
+                        select: {
+                            id: true,
+                            email: true,
+                            name: true,
+                        },
+                    },
+                },
+            });
+
+            // Process files in batches to avoid overwhelming the system
+            const batchSize = 10;
+            let importedFiles = 0;
+            let skippedFiles = 0;
+            let totalSize = 0;
+            const errors: string[] = [];
+
+            for (let i = 0; i < files.length; i += batchSize) {
+                const batch = files.slice(i, i + batchSize);
+                
+                await Promise.all(batch.map(async (file) => {
+                    try {
+                        // Skip if file is too large
+                        const maxSizeBytes = (importRequest.maxFileSizeMB || 5) * 1024 * 1024;
+                        if (file.size && file.size > maxSizeBytes) {
+                            skippedFiles++;
+                            errors.push(`File ${file.path} skipped: size ${(file.size / 1024 / 1024).toFixed(2)}MB exceeds limit`);
+                            return;
+                        }
+
+                        // Get file content
+                        const fileContent = await githubService.getFileContent(owner, repo, file.path, branch);
+                        
+                        // Create code file record
+                        await prisma.codeFile.create({
+                            data: {
+                                name: file.path.split('/').pop() || file.path,
+                                path: file.path,
+                                content: fileContent.content,
+                                language: githubService.detectLanguageFromExtension(file.path),
+                                size: fileContent.size,
+                                hash: require('crypto').createHash('sha256').update(fileContent.content).digest('hex'),
+                                encoding: fileContent.encoding || 'utf-8',
+                                projectId: project.id,
+                                metadata: {
+                                    importedFromGitHub: true,
+                                    githubPath: file.path,
+                                    githubSha: file.sha,
+                                    importedAt: new Date().toISOString()
+                                }
+                            }
+                        });
+
+                        importedFiles++;
+                        totalSize += fileContent.size;
+                        
+                        logger.debug('File imported successfully', {
+                            projectId: project.id,
+                            filePath: file.path,
+                            size: fileContent.size
+                        });
+                        
+                    } catch (error) {
+                        skippedFiles++;
+                        const errorMsg = `Failed to import ${file.path}: ${error instanceof Error ? error.message : 'Unknown error'}`;
+                        errors.push(errorMsg);
+                        logger.warn('File import failed', {
+                            projectId: project.id,
+                            filePath: file.path,
+                            error: errorMsg
+                        });
+                    }
+                }));
+
+                // Small delay between batches to avoid rate limiting
+                if (i + batchSize < files.length) {
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                }
+            }
+
+            logger.info('GitHub import completed', {
+                projectId: project.id,
+                userId,
+                importedFiles,
+                skippedFiles,
+                totalSize,
+                errorCount: errors.length
+            });
+
+            return {
+                project,
+                importedFiles,
+                skippedFiles,
+                totalSize,
+                errors
+            };
+
+        } catch (error) {
+            logger.error('GitHub import failed', {
+                userId,
+                githubUrl: importRequest.githubUrl,
+                error: error instanceof Error ? error.message : 'Unknown error'
+            });
+
+            if (error instanceof BadRequestError || 
+                error instanceof NotFoundError || 
+                error instanceof UnauthorizedError ||
+                error instanceof ConflictError) {
+                throw error;
+            }
+
+            throw new BadRequestError('Failed to import GitHub repository');
+        }
+    }
 }

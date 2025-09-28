@@ -563,4 +563,141 @@ export class ProjectController {
             next(error);
         }
     }
+
+    // GitHub repository import
+    async importFromGitHub(req: Request, res: Response, next: NextFunction) {
+        try {
+            const userId = req.user!.userId;
+            const importRequest = req.body;
+
+            logger.info('GitHub import request received', {
+                userId,
+                githubUrl: importRequest.githubUrl,
+                branch: importRequest.branch
+            });
+
+            const result = await projectService.importFromGitHub(userId, importRequest);
+
+            return successResponse(
+                res,
+                {
+                    project: result.project,
+                    importStats: {
+                        importedFiles: result.importedFiles,
+                        skippedFiles: result.skippedFiles,
+                        totalSize: result.totalSize,
+                        errors: result.errors
+                    }
+                },
+                `Project imported successfully from GitHub. ${result.importedFiles} files imported, ${result.skippedFiles} files skipped.`,
+                201
+            );
+        } catch (error) {
+            logger.error('GitHub import failed', {
+                userId: req.user?.userId,
+                githubUrl: req.body?.githubUrl,
+                error: error instanceof Error ? error.message : 'Unknown error'
+            });
+            next(error);
+        }
+    }
+
+    // Validate GitHub repository (check if accessible)
+    async validateGitHubRepository(req: Request, res: Response, next: NextFunction) {
+        try {
+            const { githubUrl } = req.body;
+            const { githubService } = await import('../services');
+
+            const { owner, repo, repository } = await githubService.validateRepository(githubUrl);
+
+            return successResponse(
+                res,
+                {
+                    repository: {
+                        owner,
+                        repo,
+                        name: repository.name,
+                        fullName: repository.fullName,
+                        description: repository.description,
+                        language: repository.language,
+                        defaultBranch: repository.defaultBranch,
+                        stars: repository.stargazersCount,
+                        forks: repository.forksCount,
+                        size: repository.size,
+                        private: repository.private,
+                        archived: repository.archived,
+                        lastUpdated: repository.updatedAt
+                    }
+                },
+                'Repository validated successfully'
+            );
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    // Get repository information and file preview
+    async getGitHubRepositoryInfo(req: Request, res: Response, next: NextFunction) {
+        try {
+            const { url, branch } = req.query as { url: string; branch?: string };
+            const { githubService } = await import('../services');
+
+            const { owner, repo, repository } = await githubService.validateRepository(url);
+            const targetBranch = branch || repository.defaultBranch;
+            
+            // Get file tree preview (limit to 100 files for preview)
+            const files = await githubService.getFileTree(
+                owner,
+                repo,
+                targetBranch,
+                false, // Don't include tests in preview
+                undefined // Use default extensions
+            );
+
+            const filePreview = files.slice(0, 100).map(file => ({
+                path: file.path,
+                size: file.size,
+                type: githubService.detectLanguageFromExtension(file.path)
+            }));
+
+            const frameworks = githubService.detectFrameworks(files);
+            const languageStats = files.reduce((acc, file) => {
+                const lang = githubService.detectLanguageFromExtension(file.path);
+                acc[lang] = (acc[lang] || 0) + 1;
+                return acc;
+            }, {} as Record<string, number>);
+
+            return successResponse(
+                res,
+                {
+                    repository: {
+                        owner,
+                        repo,
+                        name: repository.name,
+                        fullName: repository.fullName,
+                        description: repository.description,
+                        language: repository.language,
+                        defaultBranch: repository.defaultBranch,
+                        branch: targetBranch,
+                        stars: repository.stargazersCount,
+                        forks: repository.forksCount,
+                        size: repository.size,
+                        private: repository.private,
+                        archived: repository.archived,
+                        lastUpdated: repository.updatedAt
+                    },
+                    analysis: {
+                        totalFiles: files.length,
+                        filePreview,
+                        detectedFrameworks: frameworks,
+                        languageDistribution: languageStats,
+                        estimatedImportTime: Math.ceil(files.length / 10) // seconds
+                    }
+                },
+                'Repository information retrieved successfully'
+            );
+        } catch (error) {
+            next(error);
+        }
+    }
 }

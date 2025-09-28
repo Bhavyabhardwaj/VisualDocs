@@ -1,26 +1,28 @@
 import { AuthService } from "./authService";
 import { ProjectService } from "./projectService";
-import { EventService } from "./eventService";
+import { eventService } from "./eventService";
 import { AnalysisService } from "./analysisService";
 import { DiagramService } from "./diagramService";
+import { GitHubService } from "./githubService";
 
 export const authService = new AuthService();
 export const projectService = new ProjectService();
-export const eventService = new EventService();
+export { eventService };
 export const analysisService = new AnalysisService();
 export const diagramService = new DiagramService();
+export const githubService = new GitHubService();
 
 
 export { AuthService } from './authService';
 export { ProjectService } from './projectService';
-export { EventService } from './eventService';
 export { AnalysisService } from './analysisService';
 export { DiagramService } from './diagramService';
+export { GitHubService } from './githubService';
 
 export default {
     auth: authService,
     project: projectService,
-    event: eventService,
     analysis: analysisService,
     diagram: diagramService,
+    github: githubService,
 };

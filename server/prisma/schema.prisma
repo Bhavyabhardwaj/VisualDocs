@@ -55,6 +55,16 @@ model Project {
   visibility  ProjectVisibility @default(PRIVATE)
   settings    Json?
   
+  // GitHub integration fields
+  githubUrl          String?   // Full GitHub repository URL
+  githubRepo         String?   // owner/repo format
+  githubBranch       String?   // imported branch (default: main)
+  importedFromGitHub Boolean   @default(false)
+  githubImportedAt   DateTime? // When it was imported from GitHub
+  githubStars        Int?      // Repository star count
+  githubForks        Int?      // Repository fork count
+  githubLanguage     String?   // Primary language from GitHub
+  
   // Foreign keys
   userId      String
   

@@ -1,6 +1,7 @@
 export * from './authValidation';
 export * from './projectValidation';
 export * from './oauthValidation';
+export * from './githubValidation';
 
 import type { Request, Response, NextFunction } from 'express';
 import { ZodObject, ZodError } from 'zod';
