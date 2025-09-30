@@ -37,22 +37,26 @@ router.use('/api/projects/:projectId/diagrams', isAuthenticated, projectDiagramR
 // Keep the root public router for root endpoints 
 router.use('/', publicRouter);
 
-// 404 handler for API routes
-router.use('/api/*', (req, res) => {
-  return res.status(404).json({
-    success: false,
-    error: `API route ${req.method} ${req.originalUrl} not found`,
-    timestamp: new Date().toISOString(),
-    availableRoutes: {
-      auth: '/api/auth/*',
-      projects: '/api/projects/*',
-      analysis: '/api/analysis/*',
-      diagrams: '/api/diagrams/*',
-      public: '/api/public/*',
-      health: '/health',
-      status: '/status',
-    }
-  });
+// 404 handler for unmatched API routes
+router.use((req, res, next) => {
+  // Check if it's an API route that wasn't matched
+  if (req.path.startsWith('/api')) {
+    return res.status(404).json({
+      success: false,
+      error: `API route ${req.method} ${req.originalUrl} not found`,
+      timestamp: new Date().toISOString(),
+      availableRoutes: {
+        auth: '/api/auth/*',
+        projects: '/api/projects/*',
+        analysis: '/api/analysis/*',
+        diagrams: '/api/diagrams/*',
+        public: '/api/public/*',
+        health: '/health',
+        status: '/status',
+      }
+    });
+  }
+  next();
 });
 
 export default router;

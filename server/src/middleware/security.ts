@@ -1,6 +1,5 @@
 import helmet from 'helmet';
 import cors from 'cors';
-import compression from 'compression';
 import type { Request } from 'express';
 
 // CORS configuration
@@ -44,13 +43,16 @@ export const helmetConfig = helmet({
 });
 
 // Compression configuration
-export const compressionConfig = compression({
-  level: 6,
-  threshold: 1024,
-  filter: (req: Request, res: any) => {
-    if (req.headers['x-no-compression']) {
-      return false;
-    }
-    return compression.filter(req, res);
-  },
-});
+export const compressionConfig = () => {
+  const compressionModule = require('compression');
+  return compressionModule({
+    level: 6,
+    threshold: 1024,
+    filter: (req: Request, res: any) => {
+      if (req.headers['x-no-compression']) {
+        return false;
+      }
+      return compressionModule.filter(req, res);
+    },
+  });
+};

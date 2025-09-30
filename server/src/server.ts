@@ -1,7 +1,6 @@
 import dotenv from 'dotenv'
 import express from 'express';
 import helmet from 'helmet';
-import compression from 'compression';
 import cors from 'cors';
 import morgan from 'morgan';
 import type { Request, Response } from 'express';
@@ -33,7 +32,7 @@ app.set('trust proxy', 1); // trust first proxy
 const PORT = process.env.PORT || 3004;
 
 app.use(helmet());  // secure the application
-app.use(compression());  // compress response bodies
+app.use(require('compression')());  // compress response bodies
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cors(corsOptions));  // enable CORS
