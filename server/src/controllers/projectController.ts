@@ -3,9 +3,32 @@ import { projectService } from "../services";
 import type { CreateProjectRequest, PaginationOptions } from "../types";
 import { paginatedResponse, successResponse, logger } from "../utils";
 import { promises as fs } from 'fs';
-import path from 'path';
-import crypto from 'crypto';
+import * as path from 'path';
+import * as crypto from 'crypto';
 import prisma from "../config/db";
+
+// Extend Express Request interface to include multer files
+declare global {
+    namespace Express {
+        namespace Multer {
+            interface File {
+                fieldname: string;
+                originalname: string;
+                encoding: string;
+                mimetype: string;
+                size: number;
+                destination: string;
+                filename: string;
+                path: string;
+                buffer: Buffer;
+            }
+        }
+        interface Request {
+            files?: Multer.File[] | { [fieldname: string]: Multer.File[] };
+            file?: Multer.File;
+        }
+    }
+}
 
 export class ProjectController {
     // create new project
@@ -181,7 +204,7 @@ export class ProjectController {
             await projectService.getProjectById(userId, projectId);
 
             // Get uploaded files from multer middleware
-            const uploadedFiles = req.files as Express.Multer.File[] || [];
+            const uploadedFiles = (req.files as Express.Multer.File[]) || [];
 
             if (!uploadedFiles.length) {
                 return successResponse(

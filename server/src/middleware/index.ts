@@ -4,7 +4,6 @@ export * from './rateLimiter';
 export * from './errorHandler';
 export * from './requestLogger';
 export * from './security';
-export * from './upload';
 export * from './oauthMiddleware';
 
 // Export grouped middleware for easy import
@@ -13,7 +12,6 @@ export { generalLimiter, authLimiter, fileUploadLimiter, aiLimiter, createRateLi
 export { errorHandler, asyncHandler, notFoundHandler } from './errorHandler';
 export { requestId, requestLogger } from './requestLogger';
 export { corsOptions, helmetConfig, compressionConfig } from './security';
-export { singleFileUpload, multipleFilesUpload, fieldsUpload, handleUploadError } from './upload';
 export { 
   initializePassport, 
   authenticateGoogle, 
