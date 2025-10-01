@@ -19,6 +19,7 @@ model User {
   id            String   @id @default(uuid())
   email         String   @unique
   name          String
+  bio           String?
   password      String?  // Make password optional for OAuth users
   avatar        String?
   role          Role     @default(USER)
