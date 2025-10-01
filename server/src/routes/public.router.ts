@@ -2,23 +2,42 @@ import { Router } from 'express';
 import { successResponse } from '../utils/response';
 import { logger } from '../utils/logger';
 import { eventService } from '../services';
+import { dbMonitor } from '../utils/databaseMonitor';
 
 const router = Router();
 
-// Health check endpoint
-router.get('/health', (req, res) => {
-  const eventStats = eventService.getStats();
-  return successResponse(
-    res,
-    {
-      status: 'OK',
+// Health check endpoint with database status
+router.get('/health', async (req, res) => {
+  try {
+    const eventStats = eventService.getStats();
+    const dbStatus = await dbMonitor.getConnectionStatus();
+    
+    return successResponse(
+      res,
+      {
+        status: dbStatus.isConnected ? 'OK' : 'DEGRADED',
+        timestamp: new Date().toISOString(),
+        version: '1.0.0',
+        uptime: process.uptime(),
+        environment: process.env.NODE_ENV || 'development',
+        database: {
+          connected: dbStatus.isConnected,
+          responseTime: dbStatus.responseTime,
+          error: dbStatus.error
+        },
+        eventService: eventStats
+      },
+      dbStatus.isConnected ? 'Service is healthy' : 'Service is degraded - database connection issues'
+    );
+  } catch (error) {
+    logger.error('Health check failed:', error);
+    return res.status(503).json({
+      success: false,
+      status: 'ERROR',
       timestamp: new Date().toISOString(),
-      version: '1.0.0',
-      uptime: process.uptime(),
-      environment: process.env.NODE_ENV || 'development',
-    },
-    'Service is healthy'
-  );
+      error: 'Health check failed'
+    });
+  }
 });
 
 // API status endpoint

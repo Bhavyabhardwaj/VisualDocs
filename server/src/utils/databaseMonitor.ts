@@ -6,7 +6,7 @@ import { logger } from '../utils';
  */
 export class DatabaseMonitor {
   private static instance: DatabaseMonitor;
-  private healthCheckInterval?: NodeJS.Timeout;
+  private healthCheckInterval: NodeJS.Timeout | null = null;
   
   private constructor() {}
   
@@ -50,7 +50,7 @@ export class DatabaseMonitor {
   stopHealthCheck() {
     if (this.healthCheckInterval) {
       clearInterval(this.healthCheckInterval);
-      this.healthCheckInterval = undefined;
+      this.healthCheckInterval = null;
     }
   }
   
