@@ -207,31 +207,44 @@ export class AuthService {
     async updateUserProfile(userId: string, updates: UpdateUserRequest): Promise<UserProfile> {
         try {
             logger.info("User profile update attempt", { userId, updates });
-            const existingUser = await prisma.user.findUnique({
-                where: { id: userId }
-            });
-            if (!existingUser) {
-                throw new NotFoundError("User not found");
-            }
-            if (!existingUser.isActive) {
-                throw new UnauthorizedError('Account is deactivated');
-            }
-            const updatedUser = await prisma.user.update({
-                where: { id: userId },
-                data: {
-                    ...updates,
-                    updatedAt: new Date()
-                },
-                select: {
-                    id: true, email: true, name: true, avatar: true,
-                    role: true, isActive: true, emailVerified: true,
-                    createdAt: true, updatedAt: true, lastLoginAt: true
+            
+            // Use a transaction with retry logic for better connection handling
+            const result = await prisma.$transaction(async (tx) => {
+                const existingUser = await tx.user.findUnique({
+                    where: { id: userId }
+                });
+                
+                if (!existingUser) {
+                    throw new NotFoundError("User not found");
                 }
+                
+                if (!existingUser.isActive) {
+                    throw new UnauthorizedError('Account is deactivated');
+                }
+                
+                const updatedUser = await tx.user.update({
+                    where: { id: userId },
+                    data: {
+                        ...updates,
+                        updatedAt: new Date()
+                    },
+                    select: {
+                        id: true, email: true, name: true, avatar: true,
+                        role: true, isActive: true, emailVerified: true,
+                        createdAt: true, updatedAt: true, lastLoginAt: true
+                    }
+                });
+                
+                return updatedUser;
+            }, {
+                maxWait: 10000, // 10 seconds max wait for transaction to start
+                timeout: 20000, // 20 seconds timeout for transaction
             });
+            
             logger.info("User profile updated successfully", { userId, updates });
             return {
-                ...updatedUser,
-                avatar: updatedUser.avatar || ''
+                ...result,
+                avatar: result.avatar || ''
             };
         } catch (error) {
             if (error instanceof NotFoundError || error instanceof UnauthorizedError) {

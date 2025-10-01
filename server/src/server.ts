@@ -42,6 +42,10 @@ app.use(requestId);
 app.use(morgan('combined', { stream: morganStream }));  // log all requests
 app.use(requestLogger);
 
+// database connection management
+const { manageConnectionPool } = require('./middleware/database');
+app.use(manageConnectionPool);
+
 
 // Initialize Passport
 app.use(initializePassport);

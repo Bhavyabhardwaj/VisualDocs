@@ -5,6 +5,7 @@ export * from './errorHandler';
 export * from './requestLogger';
 export * from './security';
 export * from './oauthMiddleware';
+export * from './database';
 
 // Export grouped middleware for easy import
 export { isAuthenticated, requireRole, requireAdmin, requireSuperAdmin, optionalAuth } from './authMiddleware';
