@@ -6,7 +6,7 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   error?: string;
   helper?: string;
   icon?: React.ReactNode;
-  brutalist?: boolean;
+  fullWidth?: boolean;
 }
 
 export const Input: React.FC<InputProps> = ({
@@ -15,47 +15,56 @@ export const Input: React.FC<InputProps> = ({
   helper,
   icon,
   className,
-  brutalist = true,
+  fullWidth = true,
   ...props
 }) => {
+  const inputId = React.useId();
+
   const inputClasses = clsx(
-    brutalist ? 'input-brutalist' : 'border border-gray-300 rounded-md px-3 py-2',
-    'w-full focus:outline-none',
+    'bg-white border-2 border-black font-medium transition-all duration-150',
+    'focus:outline-none focus:border-emerald-500 focus:shadow-[0_0_0_2px_rgba(0,200,150,0.2)]',
+    'disabled:opacity-50 disabled:cursor-not-allowed',
     {
-      'border-red-500': error,
+      'w-full': fullWidth,
+      'border-red-500 focus:border-red-500': error,
+      'pl-12': icon,
+      'px-4 py-3': true,
     },
     className
   );
 
+  const labelClasses = 'block text-sm font-bold text-black mb-2';
+  const helperClasses = 'mt-1 text-sm text-gray-600';
+  const errorClasses = 'mt-1 text-sm font-medium text-red-600';
+
   return (
-    <div className="w-full">
+    <div className={fullWidth ? 'w-full' : 'inline-block'}>
       {label && (
-        <label className="block text-sm font-semibold text-black mb-2">
+        <label htmlFor={inputId} className={labelClasses}>
           {label}
         </label>
       )}
       
       <div className="relative">
         {icon && (
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-500">
             {icon}
           </div>
         )}
         
         <input
-          className={clsx(inputClasses, {
-            'pl-10': icon,
-          })}
+          id={inputId}
+          className={inputClasses}
           {...props}
         />
       </div>
 
       {error && (
-        <p className="mt-1 text-sm text-red-600 font-medium">{error}</p>
+        <p className={errorClasses}>{error}</p>
       )}
       
       {helper && !error && (
-        <p className="mt-1 text-sm text-gray-600">{helper}</p>
+        <p className={helperClasses}>{helper}</p>
       )}
     </div>
   );
