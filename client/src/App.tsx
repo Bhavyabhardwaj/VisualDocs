@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider } from '@/components/providers/ThemeProvider';
+import { AuthProvider } from '@/contexts/AuthContext';
 import { ErrorBoundary } from '@/components/app/ErrorBoundary';
 import { ProtectedRoute } from '@/components/app/ProtectedRoute';
 import { AppLayout } from '@/components/app/AppLayout';
@@ -20,7 +21,8 @@ function App() {
   return (
     <ErrorBoundary>
       <ThemeProvider defaultTheme="system">
-        <Router>
+        <AuthProvider>
+          <Router>
           <Routes>
             {/* Public Routes */}
             <Route path="/" element={<LandingPage />} />
@@ -47,6 +49,7 @@ function App() {
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Router>
+        </AuthProvider>
       </ThemeProvider>
     </ErrorBoundary>
   );
