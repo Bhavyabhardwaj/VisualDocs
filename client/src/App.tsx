@@ -9,6 +9,8 @@ import { LandingPage } from '@/pages/LandingPage';
 import { Dashboard } from '@/pages/app/Dashboard';
 import { Projects } from '@/pages/app/Projects';
 import { ProjectDetail } from '@/pages/app/ProjectDetail';
+import { Analysis } from '@/pages/app/Analysis';
+import { Diagrams } from '@/pages/app/Diagrams';
 
 function App() {
   return (
@@ -28,6 +30,8 @@ function App() {
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="projects" element={<Projects />} />
             <Route path="projects/:id" element={<ProjectDetail />} />
+            <Route path="analysis" element={<Analysis />} />
+            <Route path="diagrams" element={<Diagrams />} />
           </Route>
           
           {/* Catch all */}
