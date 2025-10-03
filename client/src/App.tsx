@@ -1,11 +1,13 @@
-import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Toaster } from '@/components/ui/sonner';
 import { ThemeProvider } from '@/components/providers/ThemeProvider';
 import { ProtectedRoute } from '@/components/app/ProtectedRoute';
 import { AppLayout } from '@/components/app/AppLayout';
 
 // Pages
 import { LandingPage } from '@/pages/LandingPage';
+import { Login } from '@/pages/auth/Login';
+import { Register } from '@/pages/auth/Register';
 import { Dashboard } from '@/pages/app/Dashboard';
 import { Projects } from '@/pages/app/Projects';
 import { ProjectDetail } from '@/pages/app/ProjectDetail';
@@ -14,11 +16,14 @@ import { Diagrams } from '@/pages/app/Diagrams';
 
 function App() {
   return (
-    <ThemeProvider defaultTheme="system">
+    <ThemeProvider defaultTheme="light">
+      <Toaster position="top-right" />
       <Router>
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<LandingPage />} />
+          <Route path="/auth/login" element={<Login />} />
+          <Route path="/auth/register" element={<Register />} />
           
           {/* App Routes */}
           <Route path="/app" element={
