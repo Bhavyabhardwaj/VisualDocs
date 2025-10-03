@@ -9,7 +9,8 @@ import {
   BarChart3,
   Shield,
   Globe,
-  Code2
+  Code2,
+  Sparkles
 } from 'lucide-react';
 
 const features = [
