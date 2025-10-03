@@ -1,5 +1,5 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { 
@@ -11,12 +11,15 @@ import {
   Users,
   BarChart3,
   Sparkles,
-  Zap
+  Zap,
+  Code2,
+  FileText,
+  Rocket
 } from 'lucide-react';
 
-export const HeroSection: React.FC = () => {
+export const HeroSection = () => {
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-marketing-dark via-purple-950 to-marketing-dark">
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-gray-900 via-purple-950 to-gray-900">
       {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
         {/* Gradient Orbs */}
