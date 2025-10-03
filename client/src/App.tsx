@@ -1,4 +1,3 @@
-import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider } from '@/components/providers/ThemeProvider';
 import { AuthProvider } from '@/contexts/AuthContext';
@@ -9,7 +8,7 @@ import { CollaborationProvider } from '@/components/collaboration/CollaborationP
 import { LiveCursors } from '@/components/collaboration/UserPresence';
 
 // Pages
-import { LandingPage } from '@/pages/LandingPage';
+import { NewLandingPage } from '@/pages/NewLandingPage';
 import { Dashboard } from '@/pages/app/Dashboard';
 import { Projects } from '@/pages/app/Projects';
 import { ProjectDetail } from '@/pages/app/ProjectDetail';
@@ -25,7 +24,7 @@ function App() {
           <Router>
           <Routes>
             {/* Public Routes */}
-            <Route path="/" element={<LandingPage />} />
+            <Route path="/" element={<NewLandingPage />} />
             
             {/* App Routes */}
             <Route path="/app" element={

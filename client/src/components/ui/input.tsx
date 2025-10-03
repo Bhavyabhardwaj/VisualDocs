@@ -24,18 +24,19 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
     ...props 
   }, ref) => {
     const [showPassword, setShowPassword] = React.useState(false);
-    const [focused, setFocused] = React.useState(false);
     const inputId = React.useId();
     
     const isPassword = type === 'password';
     const inputType = isPassword && showPassword ? 'text' : type;
 
     const inputClasses = clsx(
-      // Base styles
-      'flex h-10 w-full rounded-md bg-white dark:bg-dark-bg-secondary border app-border px-3 py-2 text-sm transition-theme',
+      // Base styles - Premium feel
+      'flex h-10 w-full rounded-lg bg-white dark:bg-dark-bg-secondary border border-light-border dark:border-dark-border px-3 py-2 text-sm transition-all duration-200',
       'placeholder:text-light-text-tertiary dark:placeholder:text-dark-text-tertiary',
-      'focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-0 focus:border-primary-500',
-      'disabled:cursor-not-allowed disabled:opacity-50',
+      'focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500',
+      'hover:border-light-border-secondary dark:hover:border-dark-border-secondary',
+      'disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-light-bg-tertiary dark:disabled:bg-dark-bg-tertiary',
+      'shadow-sm focus:shadow-md',
       
       // Icon padding
       {
@@ -43,8 +44,8 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
         'pr-10': (icon && iconPosition === 'right') || isPassword,
       },
       
-      // Error state
-      error && 'border-error-500 focus:ring-error-500 focus:border-error-500',
+      // Error state - Red border with glow
+      error && 'border-error-500 focus:ring-error-500/20 focus:border-error-500',
       
       // Custom className
       className
@@ -83,8 +84,6 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             ref={ref}
             type={inputType}
             className={inputClasses}
-            onFocus={() => setFocused(true)}
-            onBlur={() => setFocused(false)}
             {...props}
           />
           
