@@ -8,7 +8,7 @@ import { CollaborationProvider } from '@/components/collaboration/CollaborationP
 import { LiveCursors } from '@/components/collaboration/UserPresence';
 
 // Marketing Pages
-import { NewLandingPage } from './pages/NewLandingPageFinal';
+import PremiumLanding from './pages/PremiumLanding';
 import { Login } from './pages/Login';
 import { Register } from './pages/Register';
 import { ForgotPassword } from './pages/ForgotPassword';
@@ -28,7 +28,7 @@ function App() {
           <Router>
           <Routes>
             {/* Public Routes */}
-            <Route path="/" element={<NewLandingPage />} />
+            <Route path="/" element={<PremiumLanding />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
