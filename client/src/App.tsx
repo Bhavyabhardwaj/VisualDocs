@@ -8,7 +8,7 @@ import { CollaborationProvider } from '@/components/collaboration/CollaborationP
 import { LiveCursors } from '@/components/collaboration/UserPresence';
 
 // Marketing Pages
-import { NewLandingPage } from './pages/NewLandingPage2';
+import { NewLandingPage } from './pages/NewLandingPageFinal';
 import { Login } from './pages/Login';
 import { Register } from './pages/Register';
 import { ForgotPassword } from './pages/ForgotPassword';
