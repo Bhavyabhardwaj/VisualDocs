@@ -15,7 +15,7 @@ import { ForgotPassword } from './pages/ForgotPassword';
 
 // App Pages
 import DashboardNew from '@/pages/app/DashboardNew';
-import { Projects } from '@/pages/app/Projects';
+import ProjectsNew from '@/pages/app/ProjectsNew';
 import { ProjectDetail } from '@/pages/app/ProjectDetail';
 import { Diagrams } from './pages/Diagrams';
 import { Settings } from './pages/Settings';
@@ -47,7 +47,7 @@ function App() {
               </ProtectedRoute>
             }>
               <Route index element={<Navigate to="/app/dashboard" replace />} />
-              <Route path="projects" element={<Projects />} />
+              <Route path="projects" element={<ProjectsNew />} />
               <Route path="projects/:id" element={
                 <CollaborationProvider projectId="default">
                   <LiveCursors />

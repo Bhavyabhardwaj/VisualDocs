@@ -1,7 +1,6 @@
 import { apiClient } from '@/lib/api-client';
 import type {
   Analysis,
-  AnalysisResults,
   Recommendation,
   ApiResponse,
   ExportFormat,

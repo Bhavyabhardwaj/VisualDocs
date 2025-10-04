@@ -2,22 +2,32 @@ import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { Mail, Lock, ArrowRight, Sparkles, Code2 } from 'lucide-react';
+import { authService } from '@/services';
 
 export default function LoginNew() {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setError('');
     
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      const response = await authService.login({ email, password });
+      if (response.success) {
+        navigate('/app/dashboard');
+      } else {
+        setError(response.error || 'Login failed');
+      }
+    } catch {
+      setError('Invalid email or password');
+    } finally {
       setIsLoading(false);
-      navigate('/app/dashboard');
-    }, 1500);
+    }
   };
 
   return (
@@ -67,6 +77,13 @@ export default function LoginNew() {
 
             {/* Form */}
             <form onSubmit={handleSubmit} className="space-y-5">
+              {/* Error Message */}
+              {error && (
+                <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl">
+                  <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+                </div>
+              )}
+
               {/* Email Field */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">

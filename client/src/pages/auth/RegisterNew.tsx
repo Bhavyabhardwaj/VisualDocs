@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { Mail, Lock, User, ArrowRight, Code2, Check } from 'lucide-react';
+import { authService } from '@/services';
 
 export default function RegisterNew() {
   const navigate = useNavigate();
@@ -12,16 +13,36 @@ export default function RegisterNew() {
     confirmPassword: '',
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
     
-    // Simulate API call
-    setTimeout(() => {
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+
+    setIsLoading(true);
+    setError('');
+    
+    try {
+      const response = await authService.register({
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+      });
+      
+      if (response.success) {
+        navigate('/app/dashboard');
+      } else {
+        setError(response.error || 'Registration failed');
+      }
+    } catch {
+      setError('Failed to create account. Please try again.');
+    } finally {
       setIsLoading(false);
-      navigate('/app/dashboard');
-    }, 1500);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -75,6 +96,13 @@ export default function RegisterNew() {
 
             {/* Form */}
             <form onSubmit={handleSubmit} className="space-y-5">
+              {/* Error Message */}
+              {error && (
+                <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl">
+                  <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+                </div>
+              )}
+
               {/* Name Field */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
