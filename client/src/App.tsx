@@ -9,12 +9,12 @@ import { LiveCursors } from '@/components/collaboration/UserPresence';
 
 // Marketing Pages
 import PremiumLanding from './pages/PremiumLanding';
-import { Login } from './pages/Login';
-import { Register } from './pages/Register';
+import LoginNew from './pages/auth/LoginNew';
+import RegisterNew from './pages/auth/RegisterNew';
 import { ForgotPassword } from './pages/ForgotPassword';
 
 // App Pages
-import { Dashboard } from '@/pages/app/Dashboard';
+import DashboardNew from '@/pages/app/DashboardNew';
 import { Projects } from '@/pages/app/Projects';
 import { ProjectDetail } from '@/pages/app/ProjectDetail';
 import { Diagrams } from './pages/Diagrams';
@@ -29,9 +29,16 @@ function App() {
           <Routes>
             {/* Public Routes */}
             <Route path="/" element={<PremiumLanding />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
+            <Route path="/login" element={<LoginNew />} />
+            <Route path="/register" element={<RegisterNew />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
+            
+            {/* Dashboard - Standalone with its own layout */}
+            <Route path="/app/dashboard" element={
+              <ProtectedRoute>
+                <DashboardNew />
+              </ProtectedRoute>
+            } />
             
             {/* Protected App Routes with Layout */}
             <Route path="/app" element={
@@ -40,7 +47,6 @@ function App() {
               </ProtectedRoute>
             }>
               <Route index element={<Navigate to="/app/dashboard" replace />} />
-              <Route path="dashboard" element={<Dashboard />} />
               <Route path="projects" element={<Projects />} />
               <Route path="projects/:id" element={
                 <CollaborationProvider projectId="default">
