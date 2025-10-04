@@ -8,13 +8,13 @@ import { CollaborationProvider } from '@/components/collaboration/CollaborationP
 import { LiveCursors } from '@/components/collaboration/UserPresence';
 
 // Marketing Pages
-import { NewLandingPage } from '@/pages/NewLandingPage';
+import { NewLandingPage } from './pages/NewLandingPage2';
 import { Login } from './pages/Login';
 import { Register } from './pages/Register';
 import { ForgotPassword } from './pages/ForgotPassword';
 
 // App Pages
-import { Dashboard } from './pages/Dashboard';
+import { Dashboard } from '@/pages/app/Dashboard';
 import { Projects } from '@/pages/app/Projects';
 import { ProjectDetail } from '@/pages/app/ProjectDetail';
 import { Diagrams } from './pages/Diagrams';
