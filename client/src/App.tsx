@@ -15,6 +15,7 @@ import { ForgotPassword } from './pages/ForgotPassword';
 
 // App Pages
 import DashboardNew from '@/pages/app/DashboardNew';
+import CompleteDashboard from '@/pages/app/CompleteDashboard';
 import ProjectsNew from '@/pages/app/ProjectsNew';
 import { ProjectDetail } from '@/pages/app/ProjectDetail';
 import { Diagrams } from './pages/Diagrams';
@@ -36,7 +37,7 @@ function App() {
             {/* Dashboard - Standalone with its own layout */}
             <Route path="/app/dashboard" element={
               <ProtectedRoute>
-                <DashboardNew />
+                <CompleteDashboard />
               </ProtectedRoute>
             } />
             
