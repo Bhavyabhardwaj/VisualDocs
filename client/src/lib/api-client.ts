@@ -36,6 +36,16 @@ class ApiClient {
           localStorage.removeItem('auth_token');
           window.location.href = '/login';
         }
+        
+        // Extract error message from response
+        const errorMessage = error.response?.data?.error 
+          || error.response?.data?.message 
+          || error.message 
+          || 'An unexpected error occurred';
+        
+        // Attach formatted error for easier handling
+        error.userMessage = errorMessage;
+        
         return Promise.reject(error);
       }
     );

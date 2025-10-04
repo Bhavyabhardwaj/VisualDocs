@@ -23,6 +23,13 @@ export default function RegisterNew() {
       return;
     }
 
+    // Validate password strength
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/;
+    if (!passwordRegex.test(formData.password)) {
+      setError('Password must be at least 8 characters with uppercase, lowercase, number, and special character (@$!%*?&)');
+      return;
+    }
+
     setIsLoading(true);
     setError('');
     
@@ -38,8 +45,16 @@ export default function RegisterNew() {
       } else {
         setError(response.error || 'Registration failed');
       }
-    } catch {
-      setError('Failed to create account. Please try again.');
+    } catch (err: unknown) {
+      // Extract error message from API response
+      if (err && typeof err === 'object' && 'userMessage' in err) {
+        setError(err.userMessage as string);
+      } else if (err && typeof err === 'object' && 'response' in err) {
+        const axiosError = err as { response?: { data?: { error?: string; message?: string } } };
+        setError(axiosError.response?.data?.error || axiosError.response?.data?.message || 'Failed to create account');
+      } else {
+        setError('Failed to create account. Please try again.');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -158,6 +173,9 @@ export default function RegisterNew() {
                     className="w-full pl-12 pr-4 py-3.5 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
                   />
                 </div>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  Must be 8+ characters with uppercase, lowercase, number, and special character (@$!%*?&)
+                </p>
               </div>
 
               {/* Confirm Password Field */}

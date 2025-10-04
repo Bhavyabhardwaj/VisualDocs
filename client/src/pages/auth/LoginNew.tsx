@@ -23,8 +23,16 @@ export default function LoginNew() {
       } else {
         setError(response.error || 'Login failed');
       }
-    } catch {
-      setError('Invalid email or password');
+    } catch (err: unknown) {
+      // Extract error message from API response
+      if (err && typeof err === 'object' && 'userMessage' in err) {
+        setError(err.userMessage as string);
+      } else if (err && typeof err === 'object' && 'response' in err) {
+        const axiosError = err as { response?: { data?: { error?: string; message?: string } } };
+        setError(axiosError.response?.data?.error || axiosError.response?.data?.message || 'Invalid email or password');
+      } else {
+        setError('Invalid email or password');
+      }
     } finally {
       setIsLoading(false);
     }
