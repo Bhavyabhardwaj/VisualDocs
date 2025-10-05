@@ -84,9 +84,22 @@ export default function CompleteDashboard() {
         authService.getUserStats(),
         projectService.getProjects({ page: 1, limit: 12 })
       ]);
+      
+      console.log('📊 Dashboard Data:', { userData, statsResponse, projectsData });
+      
       setUser(userData);
       setStats(statsResponse.data || null);
-      setProjects(projectsData.data || []);
+      
+      // Ensure projects is always an array
+      if (Array.isArray(projectsData.data)) {
+        setProjects(projectsData.data);
+      } else if (projectsData.data && Array.isArray(projectsData.data.projects)) {
+        // Backend might return { projects: [], total: X, page: Y }
+        setProjects(projectsData.data.projects);
+      } else {
+        console.warn('⚠️ Projects data is not an array:', projectsData);
+        setProjects([]);
+      }
     } catch (error) {
       console.error('Failed to load dashboard data:', error);
       // If we get a 401, the interceptor will handle redirect
@@ -537,14 +550,20 @@ function ProjectsSection({
             : 'space-y-4'
         }
       >
-        {projects.map((project) => (
-          <ProjectCard
-            key={project.id}
-            project={project}
-            viewMode={viewMode}
-            onClick={() => onProjectClick(project)}
-          />
-        ))}
+        {Array.isArray(projects) && projects.length > 0 ? (
+          projects.map((project) => (
+            <ProjectCard
+              key={project.id}
+              project={project}
+              viewMode={viewMode}
+              onClick={() => onProjectClick(project)}
+            />
+          ))
+        ) : (
+          <div className="col-span-full text-center py-12">
+            <p className="text-gray-500">No projects yet. Create your first project to get started!</p>
+          </div>
+        )}
       </div>
     </div>
   );
