@@ -5,7 +5,7 @@ import {
   Bell, Search, Settings, LogOut, Plus, Grid, List, GitBranch,
   Eye, Trash2, Archive, Clock, Activity, BarChart3, Zap,
   Download, Share2, ChevronRight, Sparkles, Brain, Code2,
-  Loader2, Check, AlertCircle
+  Loader2, Check, AlertCircle, AlertTriangle
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { authService, projectService, analysisService } from '../../services';
@@ -89,6 +89,19 @@ export default function CompleteDashboard() {
       setProjects(projectsData.data || []);
     } catch (error) {
       console.error('Failed to load dashboard data:', error);
+      // If we get a 401, the interceptor will handle redirect
+      // For other errors, show a notification
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as { response?: { status?: number } };
+        if (axiosError.response?.status !== 401) {
+          addNotification({
+            type: 'error',
+            title: 'Error Loading Data',
+            message: 'Failed to load dashboard data. Please refresh the page.',
+            icon: AlertTriangle,
+          });
+        }
+      }
     } finally {
       setLoading(false);
     }

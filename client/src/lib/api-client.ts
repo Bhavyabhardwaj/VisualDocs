@@ -33,8 +33,12 @@ class ApiClient {
       (error) => {
         if (error.response?.status === 401) {
           // Unauthorized - clear token and redirect to login
-          localStorage.removeItem('token');
-          window.location.href = '/login';
+          // But only if we're not already on login/register pages
+          const currentPath = window.location.pathname;
+          if (!currentPath.includes('/login') && !currentPath.includes('/register')) {
+            localStorage.removeItem('token');
+            window.location.href = '/login';
+          }
         }
         
         // Extract error message from response

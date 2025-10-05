@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { PageLoading } from './LoadingStates';
 
@@ -8,13 +8,18 @@ interface ProtectedRouteProps {
 
 export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   const location = useLocation();
-  
-  // Check if user has a valid token
-  const token = localStorage.getItem('token');
-  const isAuthenticated = !!token;
-  const isLoading = false;
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
 
-  if (isLoading) {
+  useEffect(() => {
+    // Check for token on mount and when location changes
+    const token = localStorage.getItem('token');
+    console.log('🔒 ProtectedRoute checking token:', token);
+    console.log('🔒 Current path:', location.pathname);
+    setIsAuthenticated(!!token);
+  }, [location.pathname]);
+
+  // Still loading/checking
+  if (isAuthenticated === null) {
     return <PageLoading message="Checking authentication..." />;
   }
 

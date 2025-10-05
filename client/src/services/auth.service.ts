@@ -12,19 +12,40 @@ import type {
 export const authService = {
   // Authentication
   async login(data: LoginInput): Promise<ApiResponse<{ user: User; token: string }>> {
-    const response = await apiClient.post<ApiResponse<{ user: User; token: string }>>('/api/auth/login', data);
-    if (response.success && response.data?.token) {
-      localStorage.setItem('token', response.data.token);
+    const response = await apiClient.post<ApiResponse<{ user: User; token: any }>>('/api/auth/login', data);
+    console.log('🔐 Login Response:', response);
+    
+    // Backend returns token as an object: { accessToken, refreshToken, expiresIn }
+    const tokenData = response.data?.token;
+    if (tokenData) {
+      const accessToken = typeof tokenData === 'string' ? tokenData : tokenData.accessToken;
+      if (accessToken) {
+        console.log('✅ Saving accessToken to localStorage:', accessToken);
+        localStorage.setItem('token', accessToken);
+        console.log('✅ Token saved. Verifying:', localStorage.getItem('token'));
+      } else {
+        console.error('❌ No accessToken found in response!', tokenData);
+      }
+    } else {
+      console.error('❌ No token in response!');
     }
-    return response;
+    return response as any;
   },
 
   async register(data: RegisterInput): Promise<ApiResponse<{ user: User; token: string }>> {
-    const response = await apiClient.post<ApiResponse<{ user: User; token: string }>>('/api/auth/register', data);
-    if (response.success && response.data?.token) {
-      localStorage.setItem('token', response.data.token);
+    const response = await apiClient.post<ApiResponse<{ user: User; token: any }>>('/api/auth/register', data);
+    console.log('🔐 Register Response:', response);
+    
+    // Backend returns token as an object: { accessToken, refreshToken, expiresIn }
+    const tokenData = response.data?.token;
+    if (tokenData) {
+      const accessToken = typeof tokenData === 'string' ? tokenData : tokenData.accessToken;
+      if (accessToken) {
+        console.log('✅ Saving accessToken to localStorage:', accessToken);
+        localStorage.setItem('token', accessToken);
+      }
     }
-    return response;
+    return response as any;
   },
 
   async logout(): Promise<ApiResponse> {
