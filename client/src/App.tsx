@@ -10,7 +10,9 @@ import { LiveCursors } from '@/components/collaboration/UserPresence';
 // Marketing Pages
 import PremiumLanding from './pages/PremiumLanding';
 import LoginNew from './pages/auth/LoginNew';
+import SplitLogin from './pages/auth/SplitLogin';
 import RegisterNew from './pages/auth/RegisterNew';
+import SplitRegister from './pages/auth/SplitRegister';
 import { ForgotPassword } from './pages/ForgotPassword';
 
 // App Pages
@@ -30,8 +32,8 @@ function App() {
           <Routes>
             {/* Public Routes */}
             <Route path="/" element={<PremiumLanding />} />
-            <Route path="/login" element={<LoginNew />} />
-            <Route path="/register" element={<RegisterNew />} />
+            <Route path="/login" element={<SplitLogin />} />
+            <Route path="/register" element={<SplitRegister />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             
             {/* Dashboard - Standalone with its own layout */}
