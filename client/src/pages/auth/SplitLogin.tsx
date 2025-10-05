@@ -1,11 +1,10 @@
 import { motion } from 'framer-motion';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useState } from 'react';
 import { Mail, Lock, ArrowRight, Code2, Github, Chrome, Zap, Sparkles, Star } from 'lucide-react';
 import { authService } from '@/services';
 
 export default function SplitLogin() {
-  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
@@ -20,9 +19,11 @@ export default function SplitLogin() {
     try {
       const response = await authService.login({ email, password });
       if (response.success) {
-        navigate('/app/dashboard');
+        // Force a full page reload to ensure token is properly loaded
+        window.location.replace('/app/dashboard');
       } else {
         setError(response.error || 'Login failed');
+        setIsLoading(false);
       }
     } catch (err: unknown) {
       if (err && typeof err === 'object' && 'userMessage' in err) {
@@ -33,7 +34,6 @@ export default function SplitLogin() {
       } else {
         setError('Invalid email or password');
       }
-    } finally {
       setIsLoading(false);
     }
   };

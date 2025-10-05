@@ -18,7 +18,7 @@ class ApiClient {
     // Request interceptor - Add auth token
     this.client.interceptors.request.use(
       (config) => {
-        const token = localStorage.getItem('auth_token');
+        const token = localStorage.getItem('token');
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
         }
@@ -33,7 +33,7 @@ class ApiClient {
       (error) => {
         if (error.response?.status === 401) {
           // Unauthorized - clear token and redirect to login
-          localStorage.removeItem('auth_token');
+          localStorage.removeItem('token');
           window.location.href = '/login';
         }
         

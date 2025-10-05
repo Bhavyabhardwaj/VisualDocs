@@ -1,11 +1,10 @@
 import { motion } from 'framer-motion';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useState } from 'react';
 import { Mail, Lock, User, ArrowRight, Code2, Github, Chrome, Zap, Sparkles, Star, CheckCircle } from 'lucide-react';
 import { authService } from '@/services';
 
 export default function SplitRegister() {
-  const navigate = useNavigate();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -36,9 +35,11 @@ export default function SplitRegister() {
     try {
       const response = await authService.register({ name, email, password });
       if (response.success) {
-        navigate('/app/dashboard');
+        // Force a full page reload to ensure token is properly loaded
+        window.location.replace('/app/dashboard');
       } else {
         setError(response.error || 'Registration failed');
+        setIsLoading(false);
       }
     } catch (err: unknown) {
       if (err && typeof err === 'object' && 'userMessage' in err) {
@@ -49,7 +50,6 @@ export default function SplitRegister() {
       } else {
         setError('Registration failed. Please try again.');
       }
-    } finally {
       setIsLoading(false);
     }
   };

@@ -14,7 +14,7 @@ export const authService = {
   async login(data: LoginInput): Promise<ApiResponse<{ user: User; token: string }>> {
     const response = await apiClient.post<ApiResponse<{ user: User; token: string }>>('/api/auth/login', data);
     if (response.success && response.data?.token) {
-      localStorage.setItem('auth_token', response.data.token);
+      localStorage.setItem('token', response.data.token);
     }
     return response;
   },
@@ -22,14 +22,14 @@ export const authService = {
   async register(data: RegisterInput): Promise<ApiResponse<{ user: User; token: string }>> {
     const response = await apiClient.post<ApiResponse<{ user: User; token: string }>>('/api/auth/register', data);
     if (response.success && response.data?.token) {
-      localStorage.setItem('auth_token', response.data.token);
+      localStorage.setItem('token', response.data.token);
     }
     return response;
   },
 
   async logout(): Promise<ApiResponse> {
     const response = await apiClient.post<ApiResponse>('/api/auth/logout');
-    localStorage.removeItem('auth_token');
+    localStorage.removeItem('token');
     return response;
   },
 
