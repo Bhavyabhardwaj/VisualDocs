@@ -298,6 +298,7 @@ function ProjectListItem({ project }: { project: Project }) {
 function UploadModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: () => void }) {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
+  const [language, setLanguage] = useState('javascript');
   const [files, setFiles] = useState<FileList | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -307,7 +308,7 @@ function UploadModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: (
 
     try {
       setLoading(true);
-      const projectResponse = await projectService.createProject({ name, description });
+      const projectResponse = await projectService.createProject({ name, description, language });
       
       if (files && files.length > 0 && projectResponse.data) {
         const filesArray = Array.from(files);
@@ -356,6 +357,31 @@ function UploadModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: (
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-gray-900 bg-white placeholder-gray-400"
               placeholder="What's this project about?"
             />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-900 mb-2">
+              Programming Language *
+            </label>
+            <select
+              value={language}
+              onChange={(e) => setLanguage(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+              required
+            >
+              <option value="javascript">JavaScript</option>
+              <option value="typescript">TypeScript</option>
+              <option value="python">Python</option>
+              <option value="java">Java</option>
+              <option value="csharp">C#</option>
+              <option value="cpp">C++</option>
+              <option value="go">Go</option>
+              <option value="rust">Rust</option>
+              <option value="php">PHP</option>
+              <option value="ruby">Ruby</option>
+              <option value="kotlin">Kotlin</option>
+              <option value="swift">Swift</option>
+            </select>
           </div>
 
           <div>
