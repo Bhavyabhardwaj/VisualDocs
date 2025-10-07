@@ -9,16 +9,12 @@ import { LiveCursors } from '@/components/collaboration/UserPresence';
 
 // Marketing Pages
 import PremiumLanding from './pages/PremiumLanding';
-import LoginNew from './pages/auth/LoginNew';
 import SplitLogin from './pages/auth/SplitLogin';
-import RegisterNew from './pages/auth/RegisterNew';
 import SplitRegister from './pages/auth/SplitRegister';
 import { ForgotPassword } from './pages/ForgotPassword';
 
 // App Pages
-import DashboardNew from '@/pages/app/DashboardNew';
-import CompleteDashboard from '@/pages/app/CompleteDashboard';
-import CleanDashboard from '@/pages/app/CleanDashboard';
+import Dashboard from '@/pages/app/Dashboard';
 import ProjectsNew from '@/pages/app/ProjectsNew';
 import { ProjectDetail } from '@/pages/app/ProjectDetail';
 import { Diagrams } from './pages/Diagrams';
@@ -40,7 +36,7 @@ function App() {
             {/* Dashboard - Standalone with its own layout */}
             <Route path="/app/dashboard" element={
               <ProtectedRoute>
-                <CleanDashboard />
+                <Dashboard />
               </ProtectedRoute>
             } />
             
