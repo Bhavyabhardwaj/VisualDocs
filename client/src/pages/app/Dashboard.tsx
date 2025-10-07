@@ -6,9 +6,9 @@ import {
   MoreHorizontal, Star, LayoutDashboard, X, Eye, Trash2,
   Activity, BarChart3, Brain
 } from 'lucide-react';
-import { authService, projectService, analysisService } from '@/services';
-import { useSocket } from '@/hooks/useSocket';
-import type { Project, UserStats } from '@/types/api';
+// import { authService, projectService, analysisService } from '@/services';
+// import { useSocket } from '@/hooks/useSocket';
+// import type { Project, UserStats } from '@/types/api';
 import { cn } from '@/lib/utils';
 
 // Navigation Item Component
@@ -385,34 +385,111 @@ const GitHubModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpe
   );
 };
 
+// Types for demo data
+interface Project {
+  id: string;
+  name: string;
+  description: string;
+  language: string;
+  stars?: number;
+  status: 'analyzing' | 'completed';
+  updatedAt: string;
+}
+
+interface UserStats {
+  totalProjects: number;
+  projectsThisMonth: number;
+  totalLinesOfCode?: number;
+  linesAddedThisWeek?: number;
+  averageQualityScore?: number;
+  qualityTrend?: string;
+}
+
+interface User {
+  name: string;
+  email: string;
+}
+
+interface Notification {
+  id: string;
+  message: string;
+  time: string;
+}
+
+interface OnlineUser {
+  id: number;
+  name: string;
+}
+
 // Main Dashboard Component
 export default function Dashboard() {
   const navigate = useNavigate();
-  const socket = useSocket();
-  const [user, setUser] = useState<any>(null);
+  // const socket = useSocket(); // Commented out until socket service is implemented
+  const [user] = useState<User>({
+    name: 'John Doe',
+    email: 'john@example.com'
+  });
   const [projects, setProjects] = useState<Project[]>([]);
-  const [stats, setStats] = useState<UserStats | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [stats] = useState<UserStats | null>({
+    totalProjects: 12,
+    projectsThisMonth: 3,
+    totalLinesOfCode: 25430,
+    linesAddedThisWeek: 1240,
+    averageQualityScore: 94,
+    qualityTrend: '+2 points'
+  });
+  const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [showGitHubModal, setShowGitHubModal] = useState(false);
-  const [notifications, setNotifications] = useState<any[]>([]);
-  const [onlineUsers, setOnlineUsers] = useState<any[]>([]);
+  const [notifications] = useState<Notification[]>([]);
+  const [onlineUsers] = useState<OnlineUser[]>([
+    { id: 1, name: 'Alice' },
+    { id: 2, name: 'Bob' },
+    { id: 3, name: 'Charlie' }
+  ]);
 
-  // Load initial data
+  // Load initial data (using mock data for now)
   useEffect(() => {
     const loadData = async () => {
       try {
         setLoading(true);
-        const [userResponse, projectsResponse, statsResponse] = await Promise.all([
-          authService.getCurrentUser(),
-          projectService.getProjects(),
-          analysisService.getUserStats()
-        ]);
+        
+        // Mock data - replace with real API calls when services are available
+        const mockProjects: Project[] = [
+          {
+            id: '1',
+            name: 'VisualDocs Frontend',
+            description: 'React TypeScript frontend application',
+            language: 'TypeScript',
+            stars: 42,
+            status: 'analyzing',
+            updatedAt: '2 hours ago'
+          },
+          {
+            id: '2',
+            name: 'API Gateway Service',
+            description: 'Node.js REST API with Express',
+            language: 'JavaScript',
+            stars: 28,
+            status: 'completed',
+            updatedAt: '1 day ago'
+          },
+          {
+            id: '3',
+            name: 'Mobile App',
+            description: 'React Native mobile application',
+            language: 'TypeScript',
+            stars: 15,
+            status: 'completed',
+            updatedAt: '3 days ago'
+          }
+        ];
 
-        setUser(userResponse.data);
-        setProjects(projectsResponse.data);
-        setStats(statsResponse.data);
+        // Simulate API delay
+        await new Promise(resolve => setTimeout(resolve, 800));
+        
+        setProjects(mockProjects);
       } catch (error) {
         console.error('Failed to load dashboard data:', error);
       } finally {
@@ -423,35 +500,35 @@ export default function Dashboard() {
     loadData();
   }, []);
 
-  // Socket event handlers
-  useEffect(() => {
-    if (!socket) return;
+  // Socket event handlers (commented out until socket service is implemented)
+  // useEffect(() => {
+  //   if (!socket) return;
 
-    socket.on('notification', (notification) => {
-      setNotifications(prev => [notification, ...prev.slice(0, 9)]);
-    });
+  //   socket.on('notification', (notification) => {
+  //     setNotifications(prev => [notification, ...prev.slice(0, 9)]);
+  //   });
 
-    socket.on('userOnline', (users) => {
-      setOnlineUsers(users);
-    });
+  //   socket.on('userOnline', (users) => {
+  //     setOnlineUsers(users);
+  //   });
 
-    socket.on('projectUpdated', (updatedProject) => {
-      setProjects(prev => prev.map(p => 
-        p.id === updatedProject.id ? updatedProject : p
-      ));
-    });
+  //   socket.on('projectUpdated', (updatedProject) => {
+  //     setProjects(prev => prev.map(p => 
+  //       p.id === updatedProject.id ? updatedProject : p
+  //     ));
+  //   });
 
-    return () => {
-      socket.off('notification');
-      socket.off('userOnline');
-      socket.off('projectUpdated');
-    };
-  }, [socket]);
+  //   return () => {
+  //     socket.off('notification');
+  //     socket.off('userOnline');
+  //     socket.off('projectUpdated');
+  //   };
+  // }, [socket]);
 
   const handleLogout = async () => {
     try {
-      await authService.logout();
-      navigate('/auth/login');
+      // await authService.logout(); // Uncomment when auth service is available
+      navigate('/login');
     } catch (error) {
       console.error('Logout failed:', error);
     }
@@ -459,7 +536,7 @@ export default function Dashboard() {
 
   const handleDeleteProject = async (projectId: string) => {
     try {
-      await projectService.deleteProject(projectId);
+      // await projectService.deleteProject(projectId); // Uncomment when project service is available
       setProjects(prev => prev.filter(p => p.id !== projectId));
     } catch (error) {
       console.error('Failed to delete project:', error);
