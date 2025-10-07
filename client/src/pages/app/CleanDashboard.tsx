@@ -138,35 +138,39 @@ export default function CleanDashboard() {
                 className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
               >
                 <Plus className="w-4 h-4" />
-                New Project
-              </button>
-            </div>
-          </div>
-        </header>
-
-        {/* Content area */}
+                return (
+                  <div className="flex h-screen bg-neutral-50">
+                    {/* Sidebar - Premium Notion/Cal.com style */}
+                    <aside className="w-64 flex flex-col bg-white border-r border-neutral-200 shadow-sm">
+                      {/* Logo */}
+                      <div className="px-6 py-5 border-b border-neutral-200">
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-lg bg-neutral-100 flex items-center justify-center shadow-sm">
+                            <FileCode className="w-5 h-5 text-blue-600" />
+                          </div>
+                          <span className="font-bold text-lg tracking-tight text-neutral-900">VisualDocs</span>
         <div className="flex-1 overflow-y-auto p-8 bg-gray-50">
           {loading ? (
             <div className="flex items-center justify-center h-64">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            </div>
-          ) : filteredProjects.length === 0 ? (
-            <EmptyState onCreateProject={() => setShowUploadModal(true)} />
-          ) : (
-            <ProjectsGrid projects={filteredProjects} viewMode={viewMode} />
-          )}
-        </div>
-      </main>
+                      {/* Navigation */}
+                      <nav className="flex-1 px-3 py-6 space-y-1">
+                        <NavItem icon={LayoutGrid} label="Projects" active />
+                        <NavItem icon={Users} label="Collaboration" />
+                        <NavItem icon={Clock} label="Recent" />
+                        <NavItem icon={Settings} label="Settings" />
+                      </nav>
 
-      {/* Upload Modal */}
-      {showUploadModal && (
-        <UploadModal
-          onClose={() => setShowUploadModal(false)}
-          onSuccess={loadDashboard}
-        />
-      )}
-    </div>
-  );
+                      {/* User section */}
+                      <div className="px-6 py-4 border-t border-neutral-200">
+                        <button
+                          onClick={handleLogout}
+                          className="w-full flex items-center gap-2 px-3 py-2 text-sm text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors font-medium"
+                        >
+                          <LogOut className="w-4 h-4" />
+                          <span>Logout</span>
+                        </button>
+                      </div>
+                    </aside>
 }
 
 // Navigation Item Component
