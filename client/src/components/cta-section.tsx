@@ -24,12 +24,12 @@ export default function CTASection() {
         <div className="w-full max-w-[586px] px-6 py-5 md:py-8 overflow-hidden rounded-lg flex flex-col justify-start items-center gap-6 relative z-20">
           <div className="self-stretch flex flex-col justify-start items-start gap-3">
             <div className="self-stretch text-center flex justify-center flex-col text-[#49423D] text-3xl md:text-5xl font-semibold leading-tight md:leading-[56px] font-sans tracking-tight">
-              Ready to transform your business?
+              Ready to automate your docs?
             </div>
             <div className="self-stretch text-center text-[#605A57] text-base leading-7 font-sans font-medium">
-              Join thousands of businesses streamlining their operations,
+              Join developers and teams who have automated their documentation workflow.
               <br />
-              managing schedules, and growing with data-driven insights.
+              Generate beautiful docs, diagrams, and insights in seconds.
             </div>
           </div>
           <div className="w-full max-w-[497px] flex flex-col justify-center items-center gap-12">
