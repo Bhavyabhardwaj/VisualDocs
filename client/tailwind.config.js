@@ -79,6 +79,15 @@ export default {
           'Roboto',
           'sans-serif'
         ],
+        serif: [
+          'Instrument Serif',
+          'ui-serif',
+          'Georgia',
+          'Cambria',
+          'Times New Roman',
+          'Times',
+          'serif'
+        ],
         mono: [
           'JetBrains Mono',
           'SF Mono',
