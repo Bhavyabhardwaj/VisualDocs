@@ -1,75 +1,60 @@
-import React from 'react';
-import { clsx } from 'clsx';
-import { Loader2 } from 'lucide-react';
-import { cva, type VariantProps } from 'class-variance-authority';
+import * as React from "react"
+import { Slot } from "@radix-ui/react-slot"
+import { cva, type VariantProps } from "class-variance-authority"
+
+import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  // Base styles - Premium feel
-  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-medium ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 cursor-pointer select-none',
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-neutral-950 focus-visible:ring-neutral-950/50 focus-visible:ring-[3px] aria-invalid:ring-red-500/20 dark:aria-invalid:ring-red-500/40 aria-invalid:border-red-500 dark:focus-visible:border-neutral-300 dark:focus-visible:ring-neutral-300/50 dark:aria-invalid:ring-red-900/20 dark:dark:aria-invalid:ring-red-900/40 dark:aria-invalid:border-red-900",
   {
     variants: {
       variant: {
-        // Marketing variants (for landing page) - Stunning effects
-        'marketing-primary': 'bg-gradient-to-r from-marketing-primary via-marketing-secondary to-marketing-accent text-white font-semibold marketing-glow-sm hover:marketing-glow hover:scale-105 active:scale-100 shadow-lg',
-        'marketing-secondary': 'glass-effect-strong text-white border border-white/20 hover:bg-white/15 hover:border-white/30 backdrop-blur-xl',
-        'marketing-ghost': 'text-marketing-primary hover:bg-white/5 hover:text-marketing-secondary',
-        
-        // App variants (for interior) - Clean & professional
-        'primary': 'bg-primary-500 text-white hover:bg-primary-600 active:bg-primary-700 shadow-sm hover:shadow-md active:shadow-sm font-medium',
-        'secondary': 'bg-white dark:bg-dark-bg-secondary text-light-text dark:text-dark-text border border-light-border dark:border-dark-border hover:bg-light-bg-secondary dark:hover:bg-dark-bg-tertiary shadow-sm hover:shadow',
-        'ghost': 'text-light-text-secondary dark:text-dark-text-secondary hover:bg-light-bg-secondary dark:hover:bg-dark-bg-secondary hover:text-light-text dark:hover:text-dark-text',
-        'outline': 'border border-light-border dark:border-dark-border bg-transparent hover:bg-light-bg-secondary dark:hover:bg-dark-bg-secondary text-light-text dark:text-dark-text',
-        'link': 'text-primary-500 underline-offset-4 hover:underline',
-        
-        // Utility variants
-        'success': 'bg-success-500 text-white hover:bg-success-600 active:bg-success-700 shadow-sm',
-        'warning': 'bg-warning-500 text-white hover:bg-warning-600 active:bg-warning-700 shadow-sm',
-        'error': 'bg-error-500 text-white hover:bg-error-600 active:bg-error-700 shadow-sm',
-        'info': 'bg-primary-100 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 hover:bg-primary-200 dark:hover:bg-primary-900/30',
+        default: "bg-neutral-900 text-neutral-50 hover:bg-neutral-900/90 dark:bg-neutral-50 dark:text-neutral-900 dark:hover:bg-neutral-50/90",
+        destructive:
+          "bg-red-500 text-white hover:bg-red-500/90 focus-visible:ring-red-500/20 dark:focus-visible:ring-red-500/40 dark:bg-red-500/60 dark:bg-red-900 dark:hover:bg-red-900/90 dark:focus-visible:ring-red-900/20 dark:dark:focus-visible:ring-red-900/40 dark:dark:bg-red-900/60",
+        outline:
+          "border bg-white shadow-xs hover:bg-neutral-100 hover:text-neutral-900 dark:bg-neutral-200/30 dark:border-neutral-200 dark:hover:bg-neutral-200/50 dark:bg-neutral-950 dark:hover:bg-neutral-800 dark:hover:text-neutral-50 dark:dark:bg-neutral-800/30 dark:dark:border-neutral-800 dark:dark:hover:bg-neutral-800/50",
+        secondary:
+          "bg-neutral-100 text-neutral-900 hover:bg-neutral-100/80 dark:bg-neutral-800 dark:text-neutral-50 dark:hover:bg-neutral-800/80",
+        ghost:
+          "hover:bg-neutral-100 hover:text-neutral-900 dark:hover:bg-neutral-100/50 dark:hover:bg-neutral-800 dark:hover:text-neutral-50 dark:dark:hover:bg-neutral-800/50",
+        link: "text-neutral-900 underline-offset-4 hover:underline dark:text-neutral-50",
       },
       size: {
-        sm: 'h-8 px-3 text-xs rounded-md',
-        md: 'h-9 px-4 text-sm rounded-lg',
-        lg: 'h-11 px-6 text-base rounded-lg',
-        xl: 'h-13 px-8 text-lg rounded-xl',
-        icon: 'h-9 w-9 p-0',
+        default: "h-9 px-4 py-2 has-[>svg]:px-3",
+        sm: "h-8 rounded-md gap-1.5 px-3 has-[>svg]:px-2.5",
+        lg: "h-10 rounded-md px-6 has-[>svg]:px-4",
+        icon: "size-9",
+        "icon-sm": "size-8",
+        "icon-lg": "size-10",
       },
     },
     defaultVariants: {
-      variant: 'primary',
-      size: 'md',
+      variant: "default",
+      size: "default",
     },
   }
-);
+)
 
-interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {
-  loading?: boolean;
-  icon?: React.ReactNode;
-  iconPosition?: 'left' | 'right';
+function Button({
+  className,
+  variant,
+  size,
+  asChild = false,
+  ...props
+}: React.ComponentProps<"button"> &
+  VariantProps<typeof buttonVariants> & {
+    asChild?: boolean
+  }) {
+  const Comp = asChild ? Slot : "button"
+
+  return (
+    <Comp
+      data-slot="button"
+      className={cn(buttonVariants({ variant, size, className }))}
+      {...props}
+    />
+  )
 }
 
-export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, loading, disabled, icon, iconPosition = 'left', children, ...props }, ref) => {
-    return (
-      <button
-        className={clsx(buttonVariants({ variant, size, className }), 'interactive-press')}
-        disabled={loading || disabled}
-        ref={ref}
-        {...props}
-      >
-        {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-        {!loading && icon && iconPosition === 'left' && (
-          <span className="flex-shrink-0">{icon}</span>
-        )}
-        {children}
-        {!loading && icon && iconPosition === 'right' && (
-          <span className="flex-shrink-0">{icon}</span>
-        )}
-      </button>
-    );
-  }
-);
-
-Button.displayName = 'Button';
+export { Button, buttonVariants }
