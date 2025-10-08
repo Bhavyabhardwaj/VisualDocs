@@ -22,7 +22,7 @@ export default function TestimonialsSection() {
   const testimonials = [
     {
       quote:
-        "In just a few minutes, we transformed our data into actionable insights. The process was seamless and incredibly efficient!",
+        "VisualDocs transformed our documentation workflow completely. What used to take days now happens in minutes with AI-powered automation!",
       name: "Jamie Marshall",
       company: "Co-founder, Exponent",
       image:
@@ -30,17 +30,17 @@ export default function TestimonialsSection() {
     },
     {
       quote:
-        "Brillance has revolutionized how we handle custom contracts. The automation saves us hours every week and eliminates errors completely.",
+        "VisualDocs has revolutionized how we maintain documentation. The AI-generated docs are comprehensive, accurate, and always up-to-date with our codebase.",
       name: "Sarah Chen",
-      company: "VP Operations, TechFlow",
+      company: "VP Engineering, TechFlow",
       image:
         "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/ChatGPT%20Image%20Sep%2011%2C%202025%2C%2010_54_18%20AM-nbiecp92QNdTudmCrHr97uekrIPzCP.png",
     },
     {
       quote:
-        "The billing automation is a game-changer. What used to take our team days now happens automatically with perfect accuracy.",
+        "The automated documentation is a game-changer. Our team can now focus on building features instead of writing docs. Perfect accuracy every time.",
       name: "Marcus Rodriguez",
-      company: "Finance Director, InnovateCorp",
+      company: "Tech Lead, InnovateCorp",
       image:
         "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/ChatGPT%20Image%20Sep%2011%2C%202025%2C%2011_01_05%20AM-TBOe92trRxKn4G5So1m9D2h7LRH4PG.png",
     },

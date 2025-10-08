@@ -7,19 +7,19 @@ interface FAQItem {
 
 const faqData: FAQItem[] = [
   {
-    question: "What is Brillance and who it for?",
+    question: "What is VisualDocs and who is it for?",
     answer:
-      "Brillance is a comprehensive billing automation platform designed for businesses that need custom contract management. It's perfect SaaS companies, service providers, and enterprises looking to streamline their processes.",
+      "VisualDocs is an AI-powered documentation automation platform designed for developers and teams who want to streamline their documentation workflow. It's perfect for software teams, open-source maintainers, and enterprises looking to maintain comprehensive, up-to-date documentation.",
   },
   {
-    question: "How does the custom contract billing work?",
+    question: "How does the automated documentation work?",
     answer:
-      "Our platform automatically processes your custom contracts, calculates billing amounts based on specific terms, and generates invoices. You can set up complex pricing structures, usage-based billing, cycles.",
+      "Our platform analyzes your codebase using AI, extracts meaningful insights, and generates comprehensive documentation including API docs, architecture diagrams, and code explanations. You can customize the output format and structure to match your needs.",
   },
   {
-    question: "Can I integrate Brillance with my existing tools?",
+    question: "Can I integrate VisualDocs with my existing tools?",
     answer:
-      "Yes! Brillance integrates seamlessly with popular CRM systems, accounting software, and payment processors. We support APIs webhooks for custom integrations your existing workflow.",
+      "Yes! VisualDocs integrates seamlessly with GitHub, GitLab, Bitbucket, and popular CI/CD pipelines. We support APIs and webhooks for custom integrations into your existing development workflow.",
   },
   {
     question: "What kind of support do you provide?",
@@ -27,14 +27,14 @@ const faqData: FAQItem[] = [
       "We offer 24/7 customer support, dedicated account managers for enterprise clients, comprehensive documentation, and onboarding assistance to help you get started quickly.",
   },
   {
-    question: "Is my data secure with Brillance?",
+    question: "Is my code secure with VisualDocs?",
     answer:
-      "Absolutely. We use enterprise-grade security measures including end-to-end encryption, SOC 2 compliance, and regular audits. Your data is stored in secure, redundant centers.",
+      "Absolutely. We use enterprise-grade security measures including end-to-end encryption, SOC 2 compliance, and regular security audits. Your code is processed securely and stored in encrypted, redundant data centers.",
   },
   {
-    question: "How do I get started with Brillance?",
+    question: "How do I get started with VisualDocs?",
     answer:
-      "Getting started is simple! Sign up for our free trial, connect your existing systems, and onboarding team will help you set first custom billing workflow within 24 hours.",
+      "Getting started is simple! Sign up for our free trial, connect your repository, and our AI will analyze your code and generate your first documentation within minutes. Our onboarding team is here to help you every step of the way.",
   },
 ]
 
