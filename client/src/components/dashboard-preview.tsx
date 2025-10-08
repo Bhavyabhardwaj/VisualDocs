@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/Button"
+import { Button } from "src/components/ui/button"
 export function DashboardPreview() {
   return (
     <section className="relative pb-16">
@@ -8,7 +8,7 @@ export function DashboardPreview() {
           {/* Dashboard Header */}
           <div className="flex items-center justify-between p-4 border-b border-[#e0dedb]">
             <div className="flex items-center gap-3">
-              <div className="text-[#37322f] font-semibold">VisualDocs</div>
+              <div className="text-[#37322f] font-semibold">Brillance</div>
               <div className="w-2 h-2 bg-green-500 rounded-full"></div>
               <span className="text-sm text-[#605a57]">Account</span>
             </div>
