@@ -1,15 +1,105 @@
+import { useState, useEffect, useRef } from 'react';
 import SmartSimpleBrilliant from '@/components/smart-simple-brilliant';
 import YourWorkInSync from '@/components/your-work-in-sync';
 import EffortlessIntegration from '@/components/effortless-integration-updated';
 import NumbersThatSpeak from '@/components/numbers-that-speak';
-import { FeatureCards } from '@/components/feature-cards';
 import TestimonialsSection from '@/components/testimonials-section';
 import FaqSection from '@/components/faq-section';
 import PricingSection from '@/components/pricing-section';
 import CtaSection from '@/components/cta-section';
 import FooterSection from '@/components/footer-section';
 
+// Reusable Badge Component
+function Badge({ icon, text }: { icon: React.ReactNode; text: string }) {
+  return (
+    <div className="px-[14px] py-[6px] bg-white shadow-[0px_0px_0px_4px_rgba(55,50,47,0.05)] overflow-hidden rounded-[90px] flex justify-start items-center gap-[8px] border border-[rgba(2,6,23,0.08)] shadow-xs">
+      <div className="w-[14px] h-[14px] relative overflow-hidden flex items-center justify-center">{icon}</div>
+      <div className="text-center flex justify-center flex-col text-[#37322F] text-xs font-medium leading-3 font-sans">
+        {text}
+      </div>
+    </div>
+  );
+}
+
+// FeatureCard component with animations
+function FeatureCard({
+  title,
+  description,
+  isActive,
+  progress,
+  onClick,
+}: {
+  title: string;
+  description: string;
+  isActive: boolean;
+  progress: number;
+  onClick: () => void;
+}) {
+  return (
+    <div
+      className={`w-full md:flex-1 self-stretch px-6 py-5 overflow-hidden flex flex-col justify-start items-start gap-2 cursor-pointer relative border-b md:border-b-0 last:border-b-0 ${
+        isActive
+          ? "bg-white shadow-[0px_0px_0px_0.75px_#E0DEDB_inset]"
+          : "border-l-0 border-r-0 md:border border-[#E0DEDB]/80"
+      }`}
+      onClick={onClick}
+    >
+      {isActive && (
+        <div className="absolute top-0 left-0 w-full h-0.5 bg-[rgba(50,45,43,0.08)]">
+          <div
+            className="h-full bg-[#322D2B] transition-all duration-100 ease-linear"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+      )}
+
+      <div className="self-stretch flex justify-center flex-col text-[#49423D] text-sm md:text-sm font-semibold leading-6 md:leading-6 font-sans">
+        {title}
+      </div>
+      <div className="self-stretch text-[#605A57] text-[13px] md:text-[13px] font-normal leading-[22px] md:leading-[22px] font-sans">
+        {description}
+      </div>
+    </div>
+  );
+}
+
 export default function NewLanding() {
+  const [activeCard, setActiveCard] = useState(0);
+  const [progress, setProgress] = useState(0);
+  const mountedRef = useRef(true);
+
+  useEffect(() => {
+    const progressInterval = setInterval(() => {
+      if (!mountedRef.current) return;
+
+      setProgress((prev) => {
+        if (prev >= 100) {
+          if (mountedRef.current) {
+            setActiveCard((current) => (current + 1) % 3);
+          }
+          return 0;
+        }
+        return prev + 2; // 2% every 100ms = 5 seconds total
+      });
+    }, 100);
+
+    return () => {
+      clearInterval(progressInterval);
+      mountedRef.current = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
+
+  const handleCardClick = (index: number) => {
+    if (!mountedRef.current) return;
+    setActiveCard(index);
+    setProgress(0);
+  };
   return (
     <div className="w-full min-h-screen relative bg-[#F7F5F3] overflow-x-hidden flex flex-col justify-start items-center">
       <div className="relative flex flex-col justify-start items-center w-full">
@@ -102,19 +192,255 @@ export default function NewLanding() {
                 />
               </div>
             </div>
-          </div>
 
-          {/* Content Sections */}
-          <div className="self-stretch flex flex-col justify-start items-center relative z-10">
-            <SmartSimpleBrilliant />
-            <FeatureCards />
-            <NumbersThatSpeak />
-            <YourWorkInSync />
-            <EffortlessIntegration />
-            <TestimonialsSection />
-            <PricingSection />
-            <FaqSection />
-            <CtaSection />
+            {/* Animated Dashboard Preview Section */}
+            <div className="self-stretch flex flex-col justify-start items-center gap-6 relative z-10">
+              <div className="self-stretch flex flex-col justify-start items-center gap-4 sm:gap-6">
+                <div className="w-full max-w-[842px] px-4 flex flex-col justify-start items-center gap-4 sm:gap-6">
+                  <div className="w-full max-w-[670.56px] text-center text-[#49423D] text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-semibold leading-tight md:leading-[60px] font-sans tracking-tight">
+                    Everything you need to streamline your workflow
+                  </div>
+                  <div className="self-stretch text-center text-[#605A57] text-sm sm:text-base font-normal leading-6 sm:leading-7 font-sans">
+                    Powerful features that help teams collaborate effortlessly and deliver faster results
+                  </div>
+                </div>
+
+                <div className="self-stretch flex flex-col justify-start items-center gap-0 relative">
+                  <div className="self-stretch flex justify-center items-start gap-0">
+                    {/* Dashboard Preview with Animated Images */}
+                    <div className="w-full px-4 sm:px-6 md:px-8 lg:px-12 py-8 sm:py-10 md:py-12 flex flex-col justify-start items-center gap-6">
+                      <div className="w-full max-w-[842px] flex flex-col justify-center items-center">
+                        <div className="w-full h-[300px] sm:h-[400px] md:h-[500px] lg:h-[600px] relative rounded-lg overflow-hidden shadow-lg bg-white/50">
+                          {/* Product Image 1 - Scheduling */}
+                          <div
+                            className={`absolute inset-0 transition-all duration-500 ease-in-out ${
+                              activeCard === 0 ? "opacity-100 scale-100 blur-0" : "opacity-0 scale-95 blur-sm"
+                            }`}
+                          >
+                            <img
+                              src="/calendar-scheduling-interface-with-event-details.jpg"
+                              alt="Calendar Scheduling Interface"
+                              className="w-full h-full object-contain"
+                            />
+                          </div>
+
+                          {/* Product Image 2 - Analytics */}
+                          <div
+                            className={`absolute inset-0 transition-all duration-500 ease-in-out ${
+                              activeCard === 1 ? "opacity-100 scale-100 blur-0" : "opacity-0 scale-95 blur-sm"
+                            }`}
+                          >
+                            <img
+                              src="/analytics-dashboard-with-revenue-metrics-and-gro.jpg"
+                              alt="Analytics Dashboard"
+                              className="w-full h-full object-contain"
+                            />
+                          </div>
+
+                          {/* Product Image 3 - Data visualization */}
+                          <div
+                            className={`absolute inset-0 transition-all duration-500 ease-in-out ${
+                              activeCard === 2 ? "opacity-100 scale-100 blur-0" : "opacity-0 scale-95 blur-sm"
+                            }`}
+                          >
+                            <img
+                              src="/data-visualization-dashboard-with-interactive-char.jpg"
+                              alt="Data Visualization Dashboard"
+                              className="w-full h-full object-contain"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="self-stretch border-t border-[#E0DEDB] border-b border-[#E0DEDB] flex justify-center items-start">
+                <div className="w-4 sm:w-6 md:w-8 lg:w-12 self-stretch relative overflow-hidden">
+                  {/* Left decorative pattern */}
+                  <div className="w-[120px] sm:w-[140px] md:w-[162px] left-[-40px] sm:left-[-50px] md:left-[-58px] top-[-120px] absolute flex flex-col justify-start items-start">
+                    {Array.from({ length: 50 }).map((_, i) => (
+                      <div
+                        key={i}
+                        className="self-stretch h-3 sm:h-4 rotate-[-45deg] origin-top-left outline outline-[0.5px] outline-[rgba(3,7,18,0.08)] outline-offset-[-0.25px]"
+                      ></div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex-1 px-0 sm:px-2 md:px-0 flex flex-col md:flex-row justify-center items-stretch gap-0">
+                  {/* Feature Cards with Progress Animation */}
+                  <FeatureCard
+                    title="Plan your schedules"
+                    description="Streamline documentation generation with automated scheduling tools."
+                    isActive={activeCard === 0}
+                    progress={activeCard === 0 ? progress : 0}
+                    onClick={() => handleCardClick(0)}
+                  />
+                  <FeatureCard
+                    title="Analytics & insights"
+                    description="Transform your code data into actionable insights with real-time analytics."
+                    isActive={activeCard === 1}
+                    progress={activeCard === 1 ? progress : 0}
+                    onClick={() => handleCardClick(1)}
+                  />
+                  <FeatureCard
+                    title="Collaborate seamlessly"
+                    description="Keep your team aligned with shared documentation and collaborative workflows."
+                    isActive={activeCard === 2}
+                    progress={activeCard === 2 ? progress : 0}
+                    onClick={() => handleCardClick(2)}
+                  />
+                </div>
+
+                <div className="w-4 sm:w-6 md:w-8 lg:w-12 self-stretch relative overflow-hidden">
+                  {/* Right decorative pattern */}
+                  <div className="w-[120px] sm:w-[140px] md:w-[162px] left-[-40px] sm:left-[-50px] md:left-[-58px] top-[-120px] absolute flex flex-col justify-start items-start">
+                    {Array.from({ length: 50 }).map((_, i) => (
+                      <div
+                        key={i}
+                        className="self-stretch h-3 sm:h-4 rotate-[-45deg] origin-top-left outline outline-[0.5px] outline-[rgba(3,7,18,0.08)] outline-offset-[-0.25px]"
+                      ></div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Bento Grid Section */}
+              <div className="self-stretch border-b border-[rgba(55,50,47,0.12)] flex flex-col justify-center items-center gap-8 sm:gap-12">
+                <div className="w-full px-4 sm:px-6 md:px-8 py-8 sm:py-12 flex flex-col justify-center items-center gap-4">
+                  <Badge
+                    icon={
+                      <svg width="12" height="10" viewBox="0 0 12 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="1" y="3" width="4" height="6" stroke="#37322F" strokeWidth="1" fill="none" />
+                        <rect x="7" y="1" width="4" height="8" stroke="#37322F" strokeWidth="1" fill="none" />
+                      </svg>
+                    }
+                    text="Features"
+                  />
+                  <div className="text-center text-[#49423D] text-3xl sm:text-4xl md:text-5xl font-semibold leading-tight font-sans tracking-tight">
+                    Built for modern teams
+                  </div>
+                </div>
+
+                {/* Bento Grid Content */}
+                <div className="self-stretch flex justify-center items-start">
+                  <div className="w-4 sm:w-6 md:w-8 lg:w-12 self-stretch relative overflow-hidden">
+                    {/* Left decorative pattern */}
+                    <div className="w-[120px] sm:w-[140px] md:w-[162px] left-[-40px] sm:left-[-50px] md:left-[-58px] top-[-120px] absolute flex flex-col justify-start items-start">
+                      {Array.from({ length: 200 }).map((_, i) => (
+                        <div
+                          key={i}
+                          className="self-stretch h-3 sm:h-4 rotate-[-45deg] origin-top-left outline outline-[0.5px] outline-[rgba(3,7,18,0.08)] outline-offset-[-0.25px]"
+                        />
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-0 border-l border-r border-[rgba(55,50,47,0.12)]">
+                    {/* Top Left - Smart. Simple. Brilliant. */}
+                    <div className="border-b border-r-0 md:border-r border-[rgba(55,50,47,0.12)] p-4 sm:p-6 md:p-8 lg:p-12 flex flex-col justify-start items-start gap-4 sm:gap-6">
+                      <div className="flex flex-col gap-2">
+                        <h3 className="text-[#37322F] text-lg sm:text-xl font-semibold leading-tight font-sans">
+                          Smart. Simple. Brilliant.
+                        </h3>
+                        <p className="text-[#605A57] text-sm md:text-base font-normal leading-relaxed font-sans">
+                          Your code is beautifully organized so you see everything clearly without the clutter.
+                        </p>
+                      </div>
+                      <div className="w-full h-[200px] sm:h-[250px] md:h-[300px] rounded-lg flex items-center justify-center overflow-hidden">
+                        <SmartSimpleBrilliant
+                          width="100%"
+                          height="100%"
+                          theme="light"
+                          className="scale-50 sm:scale-65 md:scale-75 lg:scale-90"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Top Right - Your work, in sync */}
+                    <div className="border-b border-[rgba(55,50,47,0.12)] p-4 sm:p-6 md:p-8 lg:p-12 flex flex-col justify-start items-start gap-4 sm:gap-6">
+                      <div className="flex flex-col gap-2">
+                        <h3 className="text-[#37322F] font-semibold leading-tight font-sans text-lg sm:text-xl">
+                          Your work, in sync
+                        </h3>
+                        <p className="text-[#605A57] text-sm md:text-base font-normal leading-relaxed font-sans">
+                          Every update flows instantly across your team and keeps collaboration effortless and fast.
+                        </p>
+                      </div>
+                      <div className="w-full h-[200px] sm:h-[250px] md:h-[300px] rounded-lg flex overflow-hidden text-right items-center justify-center">
+                        <YourWorkInSync
+                          width="400"
+                          height="250"
+                          theme="light"
+                          className="scale-60 sm:scale-75 md:scale-90"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Bottom Left - Effortless integration */}
+                    <div className="border-r-0 md:border-r border-[rgba(55,50,47,0.12)] p-4 sm:p-6 md:p-8 lg:p-12 flex flex-col justify-start items-start gap-4 sm:gap-6 bg-transparent">
+                      <div className="flex flex-col gap-2">
+                        <h3 className="text-[#37322F] text-lg sm:text-xl font-semibold leading-tight font-sans">
+                          Effortless integration
+                        </h3>
+                        <p className="text-[#605A57] text-sm md:text-base font-normal leading-relaxed font-sans">
+                          All your favorite tools connect in one place and work together seamlessly by design.
+                        </p>
+                      </div>
+                      <div className="w-full h-[200px] sm:h-[250px] md:h-[300px] rounded-lg flex overflow-hidden justify-center items-center relative bg-transparent">
+                        <div className="w-full h-full flex items-center justify-center bg-transparent">
+                          <EffortlessIntegration width={400} height={250} className="max-w-full max-h-full" />
+                        </div>
+                        <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-[#F7F5F3] to-transparent pointer-events-none"></div>
+                      </div>
+                    </div>
+
+                    {/* Bottom Right - Numbers that speak */}
+                    <div className="p-4 sm:p-6 md:p-8 lg:p-12 flex flex-col justify-start items-start gap-4 sm:gap-6">
+                      <div className="flex flex-col gap-2">
+                        <h3 className="text-[#37322F] text-lg sm:text-xl font-semibold leading-tight font-sans">
+                          Numbers that speak
+                        </h3>
+                        <p className="text-[#605A57] text-sm md:text-base font-normal leading-relaxed font-sans">
+                          Track growth with precision and turn raw data into confident decisions you can trust.
+                        </p>
+                      </div>
+                      <div className="w-full h-[200px] sm:h-[250px] md:h-[300px] rounded-lg flex overflow-hidden items-center justify-center relative">
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <NumbersThatSpeak
+                            width="100%"
+                            height="100%"
+                            theme="light"
+                            className="w-full h-full object-contain"
+                          />
+                        </div>
+                        <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-[#F7F5F3] to-transparent pointer-events-none"></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="w-4 sm:w-6 md:w-8 lg:w-12 self-stretch relative overflow-hidden">
+                    {/* Right decorative pattern */}
+                    <div className="w-[120px] sm:w-[140px] md:w-[162px] left-[-40px] sm:left-[-50px] md:left-[-58px] top-[-120px] absolute flex flex-col justify-start items-start">
+                      {Array.from({ length: 200 }).map((_, i) => (
+                        <div
+                          key={i}
+                          className="self-stretch h-3 sm:h-4 rotate-[-45deg] origin-top-left outline outline-[0.5px] outline-[rgba(3,7,18,0.08)] outline-offset-[-0.25px]"
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Other Sections */}
+              <TestimonialsSection />
+              <PricingSection />
+              <FaqSection />
+              <CtaSection />
+            </div>
           </div>
 
           <FooterSection />
