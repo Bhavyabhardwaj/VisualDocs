@@ -8,7 +8,6 @@ import { CollaborationProvider } from '@/components/collaboration/CollaborationP
 import { LiveCursors } from '@/components/collaboration/UserPresence';
 
 // Marketing Pages
-import PremiumLanding from './pages/PremiumLanding';
 import NewLanding from './pages/NewLanding';
 import SplitLogin from './pages/auth/SplitLogin';
 import SplitRegister from './pages/auth/SplitRegister';
@@ -29,7 +28,6 @@ function App() {
           <Routes>
             {/* Public Routes */}
             <Route path="/" element={<NewLanding />} />
-            <Route path="/old" element={<PremiumLanding />} />
             <Route path="/login" element={<SplitLogin />} />
             <Route path="/register" element={<SplitRegister />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
