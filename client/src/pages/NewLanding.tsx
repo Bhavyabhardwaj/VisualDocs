@@ -193,136 +193,126 @@ export default function NewLanding() {
               </div>
             </div>
 
-            {/* Animated Dashboard Preview Section */}
-            <div className="self-stretch flex flex-col justify-start items-center gap-6 relative z-10">
-              <div className="self-stretch flex flex-col justify-start items-center gap-4 sm:gap-6">
-                <div className="w-full max-w-[842px] px-4 flex flex-col justify-start items-center gap-4 sm:gap-6">
-                  <div className="w-full max-w-[670.56px] text-center text-[#49423D] text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-semibold leading-tight md:leading-[60px] font-sans tracking-tight">
-                    Everything you need to streamline your workflow
-                  </div>
-                  <div className="self-stretch text-center text-[#605A57] text-sm sm:text-base font-normal leading-6 sm:leading-7 font-sans">
-                    Powerful features that help teams collaborate effortlessly and deliver faster results
-                  </div>
-                </div>
+            {/* Dashboard Preview Section - Right after Hero */}
+            <div className="w-full max-w-[960px] lg:w-[960px] pt-2 sm:pt-4 pb-6 sm:pb-8 md:pb-10 px-2 sm:px-4 md:px-6 lg:px-11 flex flex-col justify-center items-center gap-2 relative z-5 my-8 sm:my-12 md:my-16 lg:my-16 mb-0 lg:pb-0">
+              <div className="w-full max-w-[960px] lg:w-[960px] h-[200px] sm:h-[280px] md:h-[450px] lg:h-[695.55px] bg-white shadow-[0px_0px_0px_0.9056603908538818px_rgba(0,0,0,0.08)] overflow-hidden rounded-[6px] sm:rounded-[8px] lg:rounded-[9.06px] flex flex-col justify-start items-start">
+                {/* Dashboard Content */}
+                <div className="self-stretch flex-1 flex justify-start items-start">
+                  {/* Main Content */}
+                  <div className="w-full h-full flex items-center justify-center">
+                    <div className="relative w-full h-full overflow-hidden">
+                      {/* Product Image 1 - Plan your schedules */}
+                      <div
+                        className={`absolute inset-0 transition-all duration-500 ease-in-out ${
+                          activeCard === 0 ? "opacity-100 scale-100 blur-0" : "opacity-0 scale-95 blur-sm"
+                        }`}
+                      >
+                        <img
+                          src="/calendar-scheduling-interface-with-event-details.jpg"
+                          alt="Schedules Dashboard - Documentation Management"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
 
-                <div className="self-stretch flex flex-col justify-start items-center gap-0 relative">
-                  <div className="self-stretch flex justify-center items-start gap-0">
-                    {/* Dashboard Preview with Animated Images */}
-                    <div className="w-full px-4 sm:px-6 md:px-8 lg:px-12 py-8 sm:py-10 md:py-12 flex flex-col justify-start items-center gap-6">
-                      <div className="w-full max-w-[842px] flex flex-col justify-center items-center">
-                        <div className="w-full h-[300px] sm:h-[400px] md:h-[500px] lg:h-[600px] relative rounded-lg overflow-hidden shadow-lg bg-white/50">
-                          {/* Product Image 1 - Scheduling */}
-                          <div
-                            className={`absolute inset-0 transition-all duration-500 ease-in-out ${
-                              activeCard === 0 ? "opacity-100 scale-100 blur-0" : "opacity-0 scale-95 blur-sm"
-                            }`}
-                          >
-                            <img
-                              src="/calendar-scheduling-interface-with-event-details.jpg"
-                              alt="Calendar Scheduling Interface"
-                              className="w-full h-full object-contain"
-                            />
-                          </div>
+                      {/* Product Image 2 - Data to insights */}
+                      <div
+                        className={`absolute inset-0 transition-all duration-500 ease-in-out ${
+                          activeCard === 1 ? "opacity-100 scale-100 blur-0" : "opacity-0 scale-95 blur-sm"
+                        }`}
+                      >
+                        <img
+                          src="/analytics-dashboard-with-revenue-metrics-and-gro.jpg"
+                          alt="Analytics Dashboard"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
 
-                          {/* Product Image 2 - Analytics */}
-                          <div
-                            className={`absolute inset-0 transition-all duration-500 ease-in-out ${
-                              activeCard === 1 ? "opacity-100 scale-100 blur-0" : "opacity-0 scale-95 blur-sm"
-                            }`}
-                          >
-                            <img
-                              src="/analytics-dashboard-with-revenue-metrics-and-gro.jpg"
-                              alt="Analytics Dashboard"
-                              className="w-full h-full object-contain"
-                            />
-                          </div>
-
-                          {/* Product Image 3 - Data visualization */}
-                          <div
-                            className={`absolute inset-0 transition-all duration-500 ease-in-out ${
-                              activeCard === 2 ? "opacity-100 scale-100 blur-0" : "opacity-0 scale-95 blur-sm"
-                            }`}
-                          >
-                            <img
-                              src="/data-visualization-dashboard-with-interactive-char.jpg"
-                              alt="Data Visualization Dashboard"
-                              className="w-full h-full object-contain"
-                            />
-                          </div>
-                        </div>
+                      {/* Product Image 3 - Data visualization */}
+                      <div
+                        className={`absolute inset-0 transition-all duration-500 ease-in-out ${
+                          activeCard === 2 ? "opacity-100 scale-100 blur-0" : "opacity-0 scale-95 blur-sm"
+                        }`}
+                      >
+                        <img
+                          src="/data-visualization-dashboard-with-interactive-char.jpg"
+                          alt="Data Visualization Dashboard"
+                          className="w-full h-full object-contain"
+                        />
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
+            </div>
 
-              <div className="self-stretch border-t border-[#E0DEDB] border-b border-[#E0DEDB] flex justify-center items-start">
-                <div className="w-4 sm:w-6 md:w-8 lg:w-12 self-stretch relative overflow-hidden">
-                  {/* Left decorative pattern */}
-                  <div className="w-[120px] sm:w-[140px] md:w-[162px] left-[-40px] sm:left-[-50px] md:left-[-58px] top-[-120px] absolute flex flex-col justify-start items-start">
-                    {Array.from({ length: 50 }).map((_, i) => (
-                      <div
-                        key={i}
-                        className="self-stretch h-3 sm:h-4 rotate-[-45deg] origin-top-left outline outline-[0.5px] outline-[rgba(3,7,18,0.08)] outline-offset-[-0.25px]"
-                      ></div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="flex-1 px-0 sm:px-2 md:px-0 flex flex-col md:flex-row justify-center items-stretch gap-0">
-                  {/* Feature Cards with Progress Animation */}
-                  <FeatureCard
-                    title="Plan your schedules"
-                    description="Streamline documentation generation with automated scheduling tools."
-                    isActive={activeCard === 0}
-                    progress={activeCard === 0 ? progress : 0}
-                    onClick={() => handleCardClick(0)}
-                  />
-                  <FeatureCard
-                    title="Analytics & insights"
-                    description="Transform your code data into actionable insights with real-time analytics."
-                    isActive={activeCard === 1}
-                    progress={activeCard === 1 ? progress : 0}
-                    onClick={() => handleCardClick(1)}
-                  />
-                  <FeatureCard
-                    title="Collaborate seamlessly"
-                    description="Keep your team aligned with shared documentation and collaborative workflows."
-                    isActive={activeCard === 2}
-                    progress={activeCard === 2 ? progress : 0}
-                    onClick={() => handleCardClick(2)}
-                  />
-                </div>
-
-                <div className="w-4 sm:w-6 md:w-8 lg:w-12 self-stretch relative overflow-hidden">
-                  {/* Right decorative pattern */}
-                  <div className="w-[120px] sm:w-[140px] md:w-[162px] left-[-40px] sm:left-[-50px] md:left-[-58px] top-[-120px] absolute flex flex-col justify-start items-start">
-                    {Array.from({ length: 50 }).map((_, i) => (
-                      <div
-                        key={i}
-                        className="self-stretch h-3 sm:h-4 rotate-[-45deg] origin-top-left outline outline-[0.5px] outline-[rgba(3,7,18,0.08)] outline-offset-[-0.25px]"
-                      ></div>
-                    ))}
-                  </div>
+            {/* Feature Cards Section with Diagonal Lines */}
+            <div className="self-stretch border-t border-[#E0DEDB] border-b border-[#E0DEDB] flex justify-center items-start">
+              <div className="w-4 sm:w-6 md:w-8 lg:w-12 self-stretch relative overflow-hidden">
+                {/* Left decorative pattern */}
+                <div className="w-[120px] sm:w-[140px] md:w-[162px] left-[-40px] sm:left-[-50px] md:left-[-58px] top-[-120px] absolute flex flex-col justify-start items-start">
+                  {Array.from({ length: 50 }).map((_, i) => (
+                    <div
+                      key={i}
+                      className="self-stretch h-3 sm:h-4 rotate-[-45deg] origin-top-left outline outline-[0.5px] outline-[rgba(3,7,18,0.08)] outline-offset-[-0.25px]"
+                    ></div>
+                  ))}
                 </div>
               </div>
 
-              {/* Bento Grid Section */}
-              <div className="self-stretch border-b border-[rgba(55,50,47,0.12)] flex flex-col justify-center items-center gap-8 sm:gap-12">
-                <div className="w-full px-4 sm:px-6 md:px-8 py-8 sm:py-12 flex flex-col justify-center items-center gap-4">
-                  <Badge
-                    icon={
-                      <svg width="12" height="10" viewBox="0 0 12 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <rect x="1" y="3" width="4" height="6" stroke="#37322F" strokeWidth="1" fill="none" />
-                        <rect x="7" y="1" width="4" height="8" stroke="#37322F" strokeWidth="1" fill="none" />
-                      </svg>
-                    }
-                    text="Features"
-                  />
-                  <div className="text-center text-[#49423D] text-3xl sm:text-4xl md:text-5xl font-semibold leading-tight font-sans tracking-tight">
-                    Built for modern teams
-                  </div>
+              <div className="flex-1 px-0 sm:px-2 md:px-0 flex flex-col md:flex-row justify-center items-stretch gap-0">
+                {/* Feature Cards */}
+                <FeatureCard
+                  title="Plan your schedules"
+                  description="Streamline documentation generation with automated scheduling tools."
+                  isActive={activeCard === 0}
+                  progress={activeCard === 0 ? progress : 0}
+                  onClick={() => handleCardClick(0)}
+                />
+                <FeatureCard
+                  title="Analytics & insights"
+                  description="Transform your code data into actionable insights with real-time analytics."
+                  isActive={activeCard === 1}
+                  progress={activeCard === 1 ? progress : 0}
+                  onClick={() => handleCardClick(1)}
+                />
+                <FeatureCard
+                  title="Collaborate seamlessly"
+                  description="Keep your team aligned with shared documentation and collaborative workflows."
+                  isActive={activeCard === 2}
+                  progress={activeCard === 2 ? progress : 0}
+                  onClick={() => handleCardClick(2)}
+                />
+              </div>
+
+              <div className="w-4 sm:w-6 md:w-8 lg:w-12 self-stretch relative overflow-hidden">
+                {/* Right decorative pattern */}
+                <div className="w-[120px] sm:w-[140px] md:w-[162px] left-[-40px] sm:left-[-50px] md:left-[-58px] top-[-120px] absolute flex flex-col justify-start items-start">
+                  {Array.from({ length: 50 }).map((_, i) => (
+                    <div
+                      key={i}
+                      className="self-stretch h-3 sm:h-4 rotate-[-45deg] origin-top-left outline outline-[0.5px] outline-[rgba(3,7,18,0.08)] outline-offset-[-0.25px]"
+                    ></div>
+                  ))}
                 </div>
+              </div>
+            </div>
+
+            {/* Bento Grid Section */}
+            <div className="self-stretch border-b border-[rgba(55,50,47,0.12)] flex flex-col justify-center items-center gap-8 sm:gap-12">
+              <div className="w-full px-4 sm:px-6 md:px-8 py-8 sm:py-12 flex flex-col justify-center items-center gap-4">
+                <Badge
+                  icon={
+                    <svg width="12" height="10" viewBox="0 0 12 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <rect x="1" y="3" width="4" height="6" stroke="#37322F" strokeWidth="1" fill="none" />
+                      <rect x="7" y="1" width="4" height="8" stroke="#37322F" strokeWidth="1" fill="none" />
+                    </svg>
+                  }
+                  text="Features"
+                />
+                <div className="text-center text-[#49423D] text-3xl sm:text-4xl md:text-5xl font-semibold leading-tight font-sans tracking-tight">
+                  Built for modern teams
+                </div>
+              </div>
 
                 {/* Bento Grid Content */}
                 <div className="self-stretch flex justify-center items-start">
@@ -441,7 +431,6 @@ export default function NewLanding() {
               <FaqSection />
               <CtaSection />
             </div>
-          </div>
 
           <FooterSection />
         </div>
