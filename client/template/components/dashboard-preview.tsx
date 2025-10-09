@@ -1,14 +1,14 @@
-import { Button } from "@/components/ui/Button"
+import { Button } from "@/components/ui/button"
 export function DashboardPreview() {
   return (
     <section className="relative pb-16">
       <div className="max-w-[1060px] mx-auto px-4">
         {/* Dashboard Interface Mockup */}
-        <div className="relative bg-white rounded-lg shadow-lg border border-neutral-200 border-[#e0dedb] overflow-hidden dark:border-neutral-800">
+        <div className="relative bg-white rounded-lg shadow-lg border border-[#e0dedb] overflow-hidden">
           {/* Dashboard Header */}
           <div className="flex items-center justify-between p-4 border-b border-[#e0dedb]">
             <div className="flex items-center gap-3">
-              <div className="text-[#37322f] font-semibold">VisualDocs</div>
+              <div className="text-[#37322f] font-semibold">Brillance</div>
               <div className="w-2 h-2 bg-green-500 rounded-full"></div>
               <span className="text-sm text-[#605a57]">Account</span>
             </div>
@@ -39,7 +39,7 @@ export function DashboardPreview() {
               </div>
 
               {/* Table Mockup */}
-              <div className="bg-white border border-neutral-200 border-[#e0dedb] rounded-lg overflow-hidden dark:border-neutral-800">
+              <div className="bg-white border border-[#e0dedb] rounded-lg overflow-hidden">
                 <div className="grid grid-cols-6 gap-4 p-4 bg-[#fbfaf9] border-b border-[#e0dedb] text-sm font-medium text-[#605a57]">
                   <div>Customer</div>
                   <div>Status</div>
