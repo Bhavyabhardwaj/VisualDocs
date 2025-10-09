@@ -2,26 +2,23 @@ export function FeatureCards() {
   const features = [
     {
       title: "Plan your schedules",
-      description: "Explore your data, build dashboard,\
-bring team together.",
+      description: "Explore your data, build your dashboard,\nbring your team together.",
       highlighted: true,
     },
     {
       title: "Data to insights in the minutes",
-      description: "Explore your data, build dashboard,\
-bring team together.",
+      description: "Explore your data, build your dashboard,\nbring your team together.",
       highlighted: false,
     },
     {
       title: "Data to insights in the minutes",
-      description: "Explore your data, build dashboard,\
-bring team together.",
+      description: "Explore your data, build your dashboard,\nbring your team together.",
       highlighted: false,
     },
   ]
 
   return (
-    <section className="border-t border-[#e0dedb] border-b">
+    <section className="border-t border-[#e0dedb] border-b border-[#e0dedb]">
       <div className="max-w-[1060px] mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 py-8">
           {features.map((feature, index) => (
@@ -29,7 +26,7 @@ bring team together.",
               key={index}
               className={`p-6 flex flex-col gap-2 ${
                 // Updated feature card borders to 1px
-                feature.highlighted ? "bg-white border border-neutral-200 border-[#e0dedb] shadow-sm dark:border-neutral-800" : "border border-[#e0dedb]/80"
+                feature.highlighted ? "bg-white border border-[#e0dedb] shadow-sm" : "border border-[#e0dedb]/80"
               }`}
             >
               {feature.highlighted && (

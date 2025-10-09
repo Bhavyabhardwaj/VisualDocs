@@ -97,7 +97,7 @@ const NumbersThatSpeak: React.FC<NumbersThatSpeakProps> = ({
                 background: "var(--nts-surface)",
                 borderRadius: "4.696px",
                 boxShadow:
-                  "0px 0.587px rgba(47,48,55,0.12), 1.174px 2.348px -0.587px rgba(47,48,55,0.06), 1.761px 3.522px -0.88px rgba(47,48,55,0.06)",
+                  "0px 0px 0px 0.587px rgba(47,48,55,0.12), 0px 1.174px 2.348px -0.587px rgba(47,48,55,0.06), 0px 1.761px 3.522px -0.88px rgba(47,48,55,0.06)",
                 maskImage: `url('${imgSchedule}')`,
                 maskPosition: "-81.766px -1.312px",
                 maskSize: "430.746px 270.521px",
@@ -136,7 +136,7 @@ const NumbersThatSpeak: React.FC<NumbersThatSpeakProps> = ({
                 background: "var(--nts-surface)",
                 borderRadius: "5.739px",
                 boxShadow:
-                  "0px 0.717px rgba(47,48,55,0.12), 1.435px 2.87px -0.717px rgba(47,48,55,0.06), 2.152px 4.304px -1.076px rgba(47,48,55,0.06)",
+                  "0px 0px 0px 0.717px rgba(47,48,55,0.12), 0px 1.435px 2.87px -0.717px rgba(47,48,55,0.06), 0px 2.152px 4.304px -1.076px rgba(47,48,55,0.06)",
                 maskImage: `url('${imgSchedule}')`,
                 maskPosition: "-51.766px -11.138px",
                 maskSize: "430.746px 270.521px",
@@ -175,7 +175,7 @@ const NumbersThatSpeak: React.FC<NumbersThatSpeakProps> = ({
                 background: "var(--nts-surface)",
                 borderRadius: "6.261px",
                 boxShadow:
-                  "0px 0.783px rgba(47,48,55,0.12), 1.565px 3.13px -0.783px rgba(47,48,55,0.06), 2.348px 4.696px -1.174px rgba(47,48,55,0.06)",
+                  "0px 0px 0px 0.783px rgba(47,48,55,0.12), 0px 1.565px 3.13px -0.783px rgba(47,48,55,0.06), 0px 2.348px 4.696px -1.174px rgba(47,48,55,0.06)",
                 maskImage: `url('${imgSchedule}')`,
                 maskPosition: "-36.766px -21.051px",
                 maskSize: "430.746px 270.521px",

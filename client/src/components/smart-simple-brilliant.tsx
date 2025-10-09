@@ -81,7 +81,7 @@ const SmartSimpleBrilliant: React.FC<SmartSimpleBrilliantProps> = ({
                 background: "#ffffff",
                 borderRadius: "9px",
                 padding: "6px",
-                boxShadow: "0px 1px rgba(0,0,0,0.08), 2px 4px rgba(0,0,0,0.07)",
+                boxShadow: "0px 0px 0px 1px rgba(0,0,0,0.08), 0px 2px 4px rgba(0,0,0,0.07)",
               }}
             >
               {/* Amber event */}
@@ -113,7 +113,7 @@ const SmartSimpleBrilliant: React.FC<SmartSimpleBrilliantProps> = ({
                         <img
                           src={img || "/placeholder.svg"}
                           alt="video"
-                          style={{ position: "absolute", inset: "20% 10%" }}
+                          style={{ position: "absolute", inset: "20% 10% 20% 10%" }}
                         />
                       </div>
                     </div>
@@ -154,7 +154,7 @@ const SmartSimpleBrilliant: React.FC<SmartSimpleBrilliantProps> = ({
                         <img
                           src={img1 || "/placeholder.svg"}
                           alt="video"
-                          style={{ position: "absolute", inset: "20% 10%" }}
+                          style={{ position: "absolute", inset: "20% 10% 20% 10%" }}
                         />
                       </div>
                     </div>
@@ -210,7 +210,7 @@ const SmartSimpleBrilliant: React.FC<SmartSimpleBrilliantProps> = ({
                 borderRadius: "9px",
                 padding: "6px",
                 boxShadow:
-                  "-8px 6px 11.3px rgba(0,0,0,0.12), 0px 1px rgba(0,0,0,0.08), 2px 4px rgba(0,0,0,0.06)",
+                  "-8px 6px 11.3px rgba(0,0,0,0.12), 0px 0px 0px 1px rgba(0,0,0,0.08), 0px 2px 4px rgba(0,0,0,0.06)",
               }}
             >
               {/* Violet event */}
@@ -242,7 +242,7 @@ const SmartSimpleBrilliant: React.FC<SmartSimpleBrilliantProps> = ({
                         <img
                           src={img2 || "/placeholder.svg"}
                           alt="video"
-                          style={{ position: "absolute", inset: "20% 10%" }}
+                          style={{ position: "absolute", inset: "20% 10% 20% 10%" }}
                         />
                       </div>
                     </div>
@@ -283,7 +283,7 @@ const SmartSimpleBrilliant: React.FC<SmartSimpleBrilliantProps> = ({
                         <img
                           src={img3 || "/placeholder.svg"}
                           alt="video"
-                          style={{ position: "absolute", inset: "20% 10%" }}
+                          style={{ position: "absolute", inset: "20% 10% 20% 10%" }}
                         />
                       </div>
                     </div>

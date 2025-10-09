@@ -6,7 +6,7 @@ import type React from "react"
 // Badge component for consistency
 function Badge({ icon, text }: { icon: React.ReactNode; text: string }) {
   return (
-    <div className="px-[14px] py-[6px] bg-white shadow-[0px_0px_0px_4px_rgba(55,50,47,0.05)] overflow-hidden rounded-[90px] flex justify-start items-center gap-[8px] border border-neutral-200 border-[rgba(2,6,23,0.08)] shadow-xs dark:border-neutral-800">
+    <div className="px-[14px] py-[6px] bg-white shadow-[0px_0px_0px_4px_rgba(55,50,47,0.05)] overflow-hidden rounded-[90px] flex justify-start items-center gap-[8px] border border-[rgba(2,6,23,0.08)] shadow-xs">
       <div className="w-[14px] h-[14px] relative overflow-hidden flex items-center justify-center">{icon}</div>
       <div className="text-center flex justify-center flex-col text-[#37322F] text-xs font-medium leading-3 font-sans">
         {text}
@@ -22,7 +22,7 @@ export default function TestimonialsSection() {
   const testimonials = [
     {
       quote:
-        "VisualDocs transformed our documentation workflow completely. What used to take days now happens in minutes with AI-powered automation!",
+        "In just a few minutes, we transformed our data into actionable insights. The process was seamless and incredibly efficient!",
       name: "Jamie Marshall",
       company: "Co-founder, Exponent",
       image:
@@ -30,17 +30,17 @@ export default function TestimonialsSection() {
     },
     {
       quote:
-        "VisualDocs has revolutionized how we maintain documentation. The AI-generated docs are comprehensive, accurate, and always up-to-date with our codebase.",
+        "Brillance has revolutionized how we handle custom contracts. The automation saves us hours every week and eliminates errors completely.",
       name: "Sarah Chen",
-      company: "VP Engineering, TechFlow",
+      company: "VP Operations, TechFlow",
       image:
         "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/ChatGPT%20Image%20Sep%2011%2C%202025%2C%2010_54_18%20AM-nbiecp92QNdTudmCrHr97uekrIPzCP.png",
     },
     {
       quote:
-        "The automated documentation is a game-changer. Our team can now focus on building features instead of writing docs. Perfect accuracy every time.",
+        "The billing automation is a game-changer. What used to take our team days now happens automatically with perfect accuracy.",
       name: "Marcus Rodriguez",
-      company: "Tech Lead, InnovateCorp",
+      company: "Finance Director, InnovateCorp",
       image:
         "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/ChatGPT%20Image%20Sep%2011%2C%202025%2C%2011_01_05%20AM-TBOe92trRxKn4G5So1m9D2h7LRH4PG.png",
     },
@@ -75,7 +75,7 @@ export default function TestimonialsSection() {
       {/* Header Section */}
 
       {/* Testimonial Content */}
-      <div className="self-stretch px-2 overflow-hidden flex justify-start items-center bg-white border border-neutral-200 border-b border-l-0 border-r-0 border-t-0 dark:bg-neutral-950 dark:border-neutral-800">
+      <div className="self-stretch px-2 overflow-hidden flex justify-start items-center bg-background border border-b border-l-0 border-r-0 border-t-0">
         <div className="flex-1 py-16 md:py-17 flex flex-col md:flex-row justify-center items-end gap-6">
           <div className="self-stretch px-3 md:px-12 justify-center items-start gap-4 flex flex-col md:flex-row">
             <img
@@ -83,7 +83,7 @@ export default function TestimonialsSection() {
               style={{
                 opacity: isTransitioning ? 0.6 : 1,
                 transform: isTransitioning ? "scale(0.95)" : "scale(1)",
-                transition: "opacity 0.7s ease-in-out, transform ease-in-out",
+                transition: "opacity 0.7s ease-in-out, transform 0.7s ease-in-out",
               }}
               src={testimonials[activeTestimonial].image || "/placeholder.svg"}
               alt={testimonials[activeTestimonial].name}
@@ -119,10 +119,10 @@ export default function TestimonialsSection() {
           <div className="pr-6 justify-start items-start gap-[14px] flex">
             <button
               onClick={() => handleNavigationClick((activeTestimonial - 1 + testimonials.length) % testimonials.length)}
-              className="w-9 h-9 shadow-[0px_1px_2px_rgba(0,0,0,0.08)] overflow-hidden rounded-full border border-neutral-200 border-[rgba(0,0,0,0.15)] justify-center items-center gap-2 flex hover:bg-gray-50 transition-colors dark:border-neutral-800"
+              className="w-9 h-9 shadow-[0px_1px_2px_rgba(0,0,0,0.08)] overflow-hidden rounded-full border border-[rgba(0,0,0,0.15)] justify-center items-center gap-2 flex hover:bg-gray-50 transition-colors"
             >
               <div className="w-6 h-6 relative overflow-hidden">
-                <svg width="24" height="24" viewBox="0 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path
                     d="M15 18L9 12L15 6"
                     stroke="#46413E"
@@ -135,10 +135,10 @@ export default function TestimonialsSection() {
             </button>
             <button
               onClick={() => handleNavigationClick((activeTestimonial + 1) % testimonials.length)}
-              className="w-9 h-9 shadow-[0px_1px_2px_rgba(0,0,0,0.08)] overflow-hidden rounded-full border border-neutral-200 border-[rgba(0,0,0,0.15)] justify-center items-center gap-2 flex hover:bg-gray-50 transition-colors dark:border-neutral-800"
+              className="w-9 h-9 shadow-[0px_1px_2px_rgba(0,0,0,0.08)] overflow-hidden rounded-full border border-[rgba(0,0,0,0.15)] justify-center items-center gap-2 flex hover:bg-gray-50 transition-colors"
             >
               <div className="w-6 h-6 relative overflow-hidden">
-                <svg width="24" height="24" viewBox="0 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path
                     d="M9 18L15 12L9 6"
                     stroke="#46413E"

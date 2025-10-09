@@ -1,10 +1,12 @@
+"use client"
+
 import { useState, useEffect } from "react"
 import type React from "react"
 
 // Badge component for consistency
 function Badge({ icon, text }: { icon: React.ReactNode; text: string }) {
   return (
-    <div className="px-[14px] py-[6px] bg-white shadow-[0px_0px_0px_4px_rgba(55,50,47,0.05)] overflow-hidden rounded-[90px] flex justify-start items-center gap-[8px] border border-neutral-200 border-[rgba(2,6,23,0.08)] shadow-xs dark:border-neutral-800">
+    <div className="px-[14px] py-[6px] bg-white shadow-[0px_0px_0px_4px_rgba(55,50,47,0.05)] overflow-hidden rounded-[90px] flex justify-start items-center gap-[8px] border border-[rgba(2,6,23,0.08)] shadow-xs">
       <div className="w-[14px] h-[14px] relative overflow-hidden flex items-center justify-center">{icon}</div>
       <div className="text-center flex justify-center flex-col text-[#37322F] text-xs font-medium leading-3 font-sans">
         {text}
@@ -20,8 +22,7 @@ export default function DocumentationSection() {
   const cards = [
     {
       title: "Plan your schedules",
-      description: "Explore your data, build dashboard,\
-bring team together.",
+      description: "Explore your data, build your dashboard,\nbring your team together.",
       image: "/modern-dashboard-interface-with-data-visualization.jpg",
     },
     {

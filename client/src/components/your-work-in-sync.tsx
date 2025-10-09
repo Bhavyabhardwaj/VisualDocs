@@ -264,7 +264,7 @@ const YourWorkInSync: React.FC<YourWorkInSyncProps> = ({
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                boxShadow: "0px 1px rgba(0,0,0,0.08), 2px -0.4px rgba(0,0,0,0.08)",
+                boxShadow: "0px 0px 0px 1px rgba(0,0,0,0.08), 0px 1px 2px -0.4px rgba(0,0,0,0.08)",
                 overflow: "hidden",
               }}
             >
@@ -291,7 +291,7 @@ const YourWorkInSync: React.FC<YourWorkInSyncProps> = ({
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                boxShadow: "0px 1px 2px rgba(0,0,0,0.08)",
+                boxShadow: "0px 1px 2px 0px rgba(0,0,0,0.08)",
                 cursor: "pointer",
                 flexShrink: 0,
               }}

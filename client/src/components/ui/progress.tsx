@@ -1,71 +1,31 @@
-import React from 'react';
-import { clsx } from 'clsx';
+'use client'
 
-interface ProgressProps {
-  value: number;
-  max?: number;
-  size?: 'sm' | 'md' | 'lg';
-  color?: 'emerald' | 'gray' | 'black';
-  label?: string;
-  showValue?: boolean;
-  showPercentage?: boolean;
+import * as React from 'react'
+import * as ProgressPrimitive from '@radix-ui/react-progress'
+
+import { cn } from '@/lib/utils'
+
+function Progress({
+  className,
+  value,
+  ...props
+}: React.ComponentProps<typeof ProgressPrimitive.Root>) {
+  return (
+    <ProgressPrimitive.Root
+      data-slot="progress"
+      className={cn(
+        'bg-primary/20 relative h-2 w-full overflow-hidden rounded-full',
+        className,
+      )}
+      {...props}
+    >
+      <ProgressPrimitive.Indicator
+        data-slot="progress-indicator"
+        className="bg-primary h-full w-full flex-1 transition-all"
+        style={{ transform: `translateX(-${100 - (value || 0)}%)` }}
+      />
+    </ProgressPrimitive.Root>
+  )
 }
 
-export const Progress: React.FC<ProgressProps> = ({
-  value,
-  max = 100,
-  size = 'md',
-  color = 'emerald',
-  label,
-  showValue = false,
-  showPercentage = false,
-}) => {
-  const percentage = Math.min((value / max) * 100, 100);
-
-  const containerClasses = clsx(
-    'w-full bg-gray-200 border-2 border-black',
-    {
-      'h-2': size === 'sm',
-      'h-4': size === 'md',
-      'h-6': size === 'lg',
-    }
-  );
-
-  const barClasses = clsx(
-    'h-full transition-all duration-300 ease-out',
-    {
-      'bg-emerald-500': color === 'emerald',
-      'bg-gray-500': color === 'gray',
-      'bg-black': color === 'black',
-    }
-  );
-
-  return (
-    <div className="w-full">
-      {(label || showValue || showPercentage) && (
-        <div className="flex justify-between items-center mb-2">
-          <div className="flex items-center gap-2">
-            {label && <span className="text-sm font-bold text-black">{label}</span>}
-            {showValue && (
-              <span className="text-sm font-mono text-gray-600">
-                {value}/{max}
-              </span>
-            )}
-          </div>
-          {showPercentage && (
-            <span className="text-sm font-mono font-bold text-black">
-              {Math.round(percentage)}%
-            </span>
-          )}
-        </div>
-      )}
-      
-      <div className={containerClasses}>
-        <div
-          className={barClasses}
-          style={{ width: `${percentage}%` }}
-        />
-      </div>
-    </div>
-  );
-};
+export { Progress }
