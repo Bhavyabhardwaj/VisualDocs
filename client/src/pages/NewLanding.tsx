@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import SmartSimpleBrilliant from '@/components/smart-simple-brilliant';
 import YourWorkInSync from '@/components/your-work-in-sync';
 import EffortlessIntegration from '@/components/effortless-integration-updated';
@@ -269,11 +270,22 @@ export default function NewLanding() {
                   </div>
                 </div>
                 <div className="h-6 sm:h-7 md:h-8 flex justify-start items-start gap-2 sm:gap-3">
-                  <div className="px-2 sm:px-3 md:px-[14px] py-1 sm:py-[6px] bg-white shadow-[0px_1px_2px_rgba(55,50,47,0.12)] overflow-hidden rounded-full flex justify-center items-center">
-                    <div className="flex flex-col justify-center text-[#37322F] text-xs md:text-[13px] font-medium leading-5 font-sans">
+                  <Link 
+                    to="/login" 
+                    className="px-2 sm:px-3 md:px-[14px] py-1 sm:py-[6px] bg-white shadow-[0px_1px_2px_rgba(55,50,47,0.12)] overflow-hidden rounded-full flex justify-center items-center hover:bg-[#F7F5F3] transition-colors duration-200 group"
+                  >
+                    <div className="flex flex-col justify-center text-[#37322F] text-xs md:text-[13px] font-medium leading-5 font-sans group-hover:text-[#2F3037]">
                       Log in
                     </div>
-                  </div>
+                  </Link>
+                  <Link 
+                    to="/register" 
+                    className="px-2 sm:px-3 md:px-[14px] py-1 sm:py-[6px] bg-[#37322F] shadow-[0px_1px_2px_rgba(55,50,47,0.12)] overflow-hidden rounded-full flex justify-center items-center hover:bg-[#2F3037] transition-colors duration-200 group"
+                  >
+                    <div className="flex flex-col justify-center text-white text-xs md:text-[13px] font-medium leading-5 font-sans">
+                      Sign up
+                    </div>
+                  </Link>
                 </div>
               </div>
             </div>
