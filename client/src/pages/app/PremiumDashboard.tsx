@@ -54,7 +54,8 @@ export default function PremiumDashboard() {
     try {
       setLoading(true);
       const response = await projectService.getProjects();
-      const projectsData = response.data || [];
+      // Backend paginatedResponse returns: { data: { items, pagination } }
+      const projectsData = response.data?.items || [];
       setProjects(projectsData);
       
       // Calculate stats
@@ -68,6 +69,8 @@ export default function PremiumDashboard() {
       });
     } catch (error) {
       console.error('Failed to load projects:', error);
+      // Set empty array on error to prevent filter errors
+      setProjects([]);
     } finally {
       setLoading(false);
     }
