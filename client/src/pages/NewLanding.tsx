@@ -408,7 +408,7 @@ export default function NewLanding() {
                       <div className="absolute bottom-4 right-4 px-3 py-1.5 bg-white/90 backdrop-blur-sm rounded-full shadow-lg flex items-center gap-2 z-20 animate-fade-in">
                         <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
                         <span className="text-xs font-medium text-gray-700">
-                          {activeCard === 0 ? 'Schedules' : activeCard === 1 ? 'Analytics' : 'Visualization'}
+                          {activeCard === 0 ? 'AI Analysis' : activeCard === 1 ? 'Collaboration' : 'Git Sync'}
                         </span>
                       </div>
 
@@ -458,22 +458,22 @@ export default function NewLanding() {
               <div className="flex-1 px-0 sm:px-2 md:px-0 flex flex-col md:flex-row justify-center items-stretch gap-0">
                 {/* Feature Cards */}
                 <FeatureCard
-                  title="Plan your schedules"
-                  description="Streamline documentation generation with automated scheduling tools."
+                  title="AI-Powered Analysis"
+                  description="Automatically analyze your codebase and generate comprehensive documentation with intelligent AI insights."
                   isActive={activeCard === 0}
                   progress={activeCard === 0 ? progress : 0}
                   onClick={() => handleCardClick(0)}
                 />
                 <FeatureCard
-                  title="Analytics & insights"
-                  description="Transform your code data into actionable insights with real-time analytics."
+                  title="Real-Time Collaboration"
+                  description="Work together seamlessly with your team. Share, review, and update documentation in real-time."
                   isActive={activeCard === 1}
                   progress={activeCard === 1 ? progress : 0}
                   onClick={() => handleCardClick(1)}
                 />
                 <FeatureCard
-                  title="Collaborate seamlessly"
-                  description="Keep your team aligned with shared documentation and collaborative workflows."
+                  title="Version Control Integration"
+                  description="Sync with Git repositories and automatically update docs when code changes. Stay always in sync."
                   isActive={activeCard === 2}
                   progress={activeCard === 2 ? progress : 0}
                   onClick={() => handleCardClick(2)}
@@ -517,33 +517,33 @@ export default function NewLanding() {
                     text="Social Proof"
                   />
                   <div className="w-full max-w-[472.55px] text-center flex justify-center flex-col text-[#49423D] text-xl sm:text-2xl md:text-3xl lg:text-5xl font-semibold leading-tight md:leading-[60px] font-sans tracking-tight animate-slide-up" style={{ animationDelay: '100ms', animationFillMode: 'both' }}>
-                    Confidence backed by results
+                    Trusted by developers worldwide
                   </div>
                   <div className="self-stretch text-center text-[#605A57] text-sm sm:text-base font-normal leading-6 sm:leading-7 font-sans animate-fade-in" style={{ animationDelay: '200ms', animationFillMode: 'both' }}>
-                    Our customers achieve more each day
+                    Join thousands of teams who've transformed their documentation workflow
                     <br className="hidden sm:block" />
-                    because their tools are simple, powerful, and clear.
+                    with VisualDocs intelligent automation and seamless collaboration.
                   </div>
                   
                   {/* Animated Stats Counter */}
                   <div className="w-full grid grid-cols-3 gap-4 sm:gap-6 md:gap-8 mt-8">
                     <div className="flex flex-col items-center gap-2 group cursor-default">
                       <div className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-[#322D2B] group-hover:scale-110 transition-transform">
-                        <AnimatedCounter end={10} suffix="K+" />
+                        <AnimatedCounter end={50} suffix="K+" />
                       </div>
-                      <div className="text-xs sm:text-sm text-[#605A57] text-center">Active Users</div>
+                      <div className="text-xs sm:text-sm text-[#605A57] text-center">Docs Generated</div>
                     </div>
                     <div className="flex flex-col items-center gap-2 group cursor-default">
                       <div className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-[#322D2B] group-hover:scale-110 transition-transform">
-                        <AnimatedCounter end={99} suffix="%" />
+                        <AnimatedCounter end={95} suffix="%" />
                       </div>
-                      <div className="text-xs sm:text-sm text-[#605A57] text-center">Satisfaction</div>
+                      <div className="text-xs sm:text-sm text-[#605A57] text-center">Time Saved</div>
                     </div>
                     <div className="flex flex-col items-center gap-2 group cursor-default">
                       <div className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-[#322D2B] group-hover:scale-110 transition-transform">
-                        <AnimatedCounter end={24} suffix="/7" />
+                        <AnimatedCounter end={1000} suffix="+" />
                       </div>
-                      <div className="text-xs sm:text-sm text-[#605A57] text-center">Support</div>
+                      <div className="text-xs sm:text-sm text-[#605A57] text-center">Happy Teams</div>
                     </div>
                   </div>
                 </div>
@@ -565,7 +565,7 @@ export default function NewLanding() {
 
                 <div className="flex-1 grid grid-cols-2 sm:grid-cols-4 md:grid-cols-4 gap-0 border-l border-r border-[rgba(55,50,47,0.12)]">
                   {/* Logo Grid - 8 company logos with staggered animation */}
-                  {Array.from({ length: 8 }).map((_, index) => {
+                  {['DevHub', 'CodeFlow', 'TechStart', 'BuildIt', 'DataSync', 'CloudNine', 'GitTeam', 'APIFirst'].map((companyName, index) => {
                     const isMobileFirstColumn = index % 2 === 0;
                     const isDesktopFirstColumn = index % 4 === 0;
                     const isDesktopLastColumn = index % 4 === 3;
@@ -603,11 +603,11 @@ export default function NewLanding() {
                           />
                         </div>
                         <div className="text-center flex justify-center flex-col text-[#37322F] text-sm xs:text-base sm:text-lg md:text-xl lg:text-2xl font-medium leading-tight md:leading-9 font-sans group-hover:text-[#2F3037] transition-colors duration-300">
-                          Acute
+                          {companyName}
                         </div>
                         {/* Tooltip on hover */}
                         <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1.5 bg-[#322D2B] text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap pointer-events-none shadow-lg">
-                          Trusted Partner
+                          Powered by VisualDocs
                           <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-[#322D2B]"></div>
                         </div>
                       </div>
@@ -669,14 +669,14 @@ export default function NewLanding() {
                     ))}
                   </div>
                 </div>                  <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-0 border-l border-r border-[rgba(55,50,47,0.12)]">
-                    {/* Top Left - Smart. Simple. Brilliant. */}
+                    {/* Top Left - AI-Powered Documentation */}
                     <div className="border-b border-r-0 md:border-r border-[rgba(55,50,47,0.12)] p-4 sm:p-6 md:p-8 lg:p-12 flex flex-col justify-start items-start gap-4 sm:gap-6 group hover:bg-white/30 transition-all duration-500 animate-fade-in">
                       <div className="flex flex-col gap-2">
                         <h3 className="text-[#37322F] text-lg sm:text-xl font-semibold leading-tight font-sans group-hover:text-[#2F3037] transition-colors duration-300">
-                          Smart. Simple. Brilliant.
+                          AI-Powered Documentation
                         </h3>
                         <p className="text-[#605A57] text-sm md:text-base font-normal leading-relaxed font-sans">
-                          Your code is beautifully organized so you see everything clearly without the clutter.
+                          Intelligent analysis transforms your codebase into comprehensive, beautiful documentation automatically.
                         </p>
                       </div>
                       <div className="w-full h-[200px] sm:h-[250px] md:h-[300px] rounded-lg flex items-center justify-center overflow-hidden transform group-hover:scale-105 transition-transform duration-500">
@@ -689,14 +689,14 @@ export default function NewLanding() {
                       </div>
                     </div>
 
-                    {/* Top Right - Your work, in sync */}
+                    {/* Top Right - Real-Time Collaboration */}
                     <div className="border-b border-[rgba(55,50,47,0.12)] p-4 sm:p-6 md:p-8 lg:p-12 flex flex-col justify-start items-start gap-4 sm:gap-6 group hover:bg-white/30 transition-all duration-500 animate-fade-in" style={{ animationDelay: '100ms' }}>
                       <div className="flex flex-col gap-2">
                         <h3 className="text-[#37322F] font-semibold leading-tight font-sans text-lg sm:text-xl group-hover:text-[#2F3037] transition-colors duration-300">
-                          Your work, in sync
+                          Real-Time Collaboration
                         </h3>
                         <p className="text-[#605A57] text-sm md:text-base font-normal leading-relaxed font-sans">
-                          Every update flows instantly across your team and keeps collaboration effortless and fast.
+                          Work together seamlessly with live updates and shared documentation across your entire team.
                         </p>
                       </div>
                       <div className="w-full h-[200px] sm:h-[250px] md:h-[300px] rounded-lg flex overflow-hidden text-right items-center justify-center transform group-hover:scale-105 transition-transform duration-500">
@@ -709,14 +709,14 @@ export default function NewLanding() {
                       </div>
                     </div>
 
-                    {/* Bottom Left - Effortless integration */}
+                    {/* Bottom Left - Version Control Integration */}
                     <div className="border-r-0 md:border-r border-[rgba(55,50,47,0.12)] p-4 sm:p-6 md:p-8 lg:p-12 flex flex-col justify-start items-start gap-4 sm:gap-6 bg-transparent group hover:bg-white/30 transition-all duration-500 animate-fade-in" style={{ animationDelay: '200ms' }}>
                       <div className="flex flex-col gap-2">
                         <h3 className="text-[#37322F] text-lg sm:text-xl font-semibold leading-tight font-sans group-hover:text-[#2F3037] transition-colors duration-300">
-                          Effortless integration
+                          Version Control Integration
                         </h3>
                         <p className="text-[#605A57] text-sm md:text-base font-normal leading-relaxed font-sans">
-                          All your favorite tools connect in one place and work together seamlessly by design.
+                          Seamlessly sync with Git repositories and keep documentation updated with every code change.
                         </p>
                       </div>
                       <div className="w-full h-[200px] sm:h-[250px] md:h-[300px] rounded-lg flex overflow-hidden justify-center items-center relative bg-transparent transform group-hover:scale-105 transition-transform duration-500">
@@ -727,14 +727,14 @@ export default function NewLanding() {
                       </div>
                     </div>
 
-                    {/* Bottom Right - Numbers that speak */}
+                    {/* Bottom Right - Visual Code Analysis */}
                     <div className="p-4 sm:p-6 md:p-8 lg:p-12 flex flex-col justify-start items-start gap-4 sm:gap-6 group hover:bg-white/30 transition-all duration-500 animate-fade-in" style={{ animationDelay: '300ms' }}>
                       <div className="flex flex-col gap-2">
                         <h3 className="text-[#37322F] text-lg sm:text-xl font-semibold leading-tight font-sans group-hover:text-[#2F3037] transition-colors duration-300">
-                          Numbers that speak
+                          Visual Code Analysis
                         </h3>
                         <p className="text-[#605A57] text-sm md:text-base font-normal leading-relaxed font-sans">
-                          Track growth with precision and turn raw data into confident decisions you can trust.
+                          Transform complex codebases into clear visual diagrams and interactive documentation.
                         </p>
                       </div>
                       <div className="w-full h-[200px] sm:h-[250px] md:h-[300px] rounded-lg flex overflow-hidden items-center justify-center relative transform group-hover:scale-105 transition-transform duration-500">
