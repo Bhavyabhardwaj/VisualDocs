@@ -34,40 +34,37 @@ export default function PremiumDashboard() {
     loadProjects();
   }, []);
 
-  // Socket listeners
+  // Socket listeners - using callback pattern from useSocket hook
   useEffect(() => {
     if (!socket) return;
 
-    socket.on('user-presence-update', (users: UserPresence[]) => {
-      setOnlineUsers(users);
+    // Listen for user presence updates
+    socket.onUserJoined((user: any) => {
+      setOnlineUsers(prev => [...prev, user]);
     });
 
-    socket.on('project-updated', (updatedProject: Project) => {
-      setProjects(prev => prev.map(p => 
-        p.id === updatedProject.id ? updatedProject : p
-      ));
+    socket.onUserLeft((userId: string) => {
+      setOnlineUsers(prev => prev.filter(u => u.id !== userId));
     });
 
-    return () => {
-      socket.off('user-presence-update');
-      socket.off('project-updated');
-    };
+    // Note: There's no cleanup needed as the hook manages this internally
   }, [socket]);
 
   const loadProjects = async () => {
     try {
       setLoading(true);
-      const data = await projectService.getAll();
-      setProjects(data.projects || []);
+      const response = await projectService.getProjects();
+      const projectsData = response.data || [];
+      setProjects(projectsData);
       
       // Calculate stats
       setStats({
-        totalProjects: data.projects?.length || 0,
-        activeToday: data.projects?.filter((p: Project) => 
+        totalProjects: projectsData.length,
+        activeToday: projectsData.filter((p: Project) => 
           new Date(p.updatedAt).toDateString() === new Date().toDateString()
-        ).length || 0,
-        linesOfCode: data.projects?.reduce((acc: number, p: Project) => acc + (p.linesOfCode || 0), 0) || 0,
-        trending: data.projects?.filter((p: Project) => p.starred).length || 0
+        ).length,
+        linesOfCode: projectsData.reduce((acc: number, p: Project) => acc + (p.linesOfCode || 0), 0),
+        trending: projectsData.filter((p: Project) => p.starred).length
       });
     } catch (error) {
       console.error('Failed to load projects:', error);

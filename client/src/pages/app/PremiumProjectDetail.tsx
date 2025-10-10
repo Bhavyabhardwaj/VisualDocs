@@ -37,50 +37,49 @@ export default function PremiumProjectDetail() {
   useEffect(() => {
     if (!socket || !id) return;
 
-    socket.emit('join-project', { projectId: id });
+    socket.joinProject(id);
 
     return () => {
-      socket.emit('leave-project', { projectId: id });
+      socket.leaveProject(id);
     };
   }, [socket, id]);
 
-  // Socket: Listen for events
+  // Socket: Listen for events using callback pattern
   useEffect(() => {
     if (!socket) return;
 
-    socket.on('project-users', (users: UserPresence[]) => {
+    // Listen for project users
+    socket.onProjectUsers((users: any[]) => {
       setActiveUsers(users.filter(u => u.status === 'online'));
     });
 
-    socket.on('new-comment', (comment: LiveComment) => {
+    // Listen for new comments
+    socket.onComment((comment: any) => {
       setComments(prev => [comment, ...prev]);
     });
 
-    socket.on('user-joined-project', (data: { user: UserPresence }) => {
+    // Listen for user joined
+    socket.onUserJoined((user: any) => {
       setActiveUsers(prev => {
-        const exists = prev.find(u => u.userId === data.user.userId);
+        const exists = prev.find(u => u.userId === user.userId);
         if (exists) return prev;
-        return [...prev, data.user];
+        return [...prev, user];
       });
     });
 
-    socket.on('user-left-project', (data: { userId: string }) => {
-      setActiveUsers(prev => prev.filter(u => u.userId !== data.userId));
+    // Listen for user left
+    socket.onUserLeft((userId: string) => {
+      setActiveUsers(prev => prev.filter(u => u.userId !== userId));
     });
 
-    return () => {
-      socket.off('project-users');
-      socket.off('new-comment');
-      socket.off('user-joined-project');
-      socket.off('user-left-project');
-    };
+    // No cleanup needed - hook manages it
   }, [socket]);
 
   const loadProject = async (projectId: string) => {
     try {
       setLoading(true);
-      const data = await projectService.getById(projectId);
-      setProject(data.project);
+      const response = await projectService.getProject(projectId);
+      setProject(response.data);
     } catch (error) {
       console.error('Failed to load project:', error);
       navigate('/app/dashboard');
@@ -92,11 +91,7 @@ export default function PremiumProjectDetail() {
   const handleSendComment = () => {
     if (!commentText.trim() || !socket || !id) return;
 
-    socket.emit('project-comment', {
-      projectId: id,
-      content: commentText,
-      position: selectedFile ? { file: selectedFile } : undefined
-    });
+    socket.sendComment(id, commentText, selectedFile);
 
     setCommentText('');
     commentInputRef.current?.focus();
