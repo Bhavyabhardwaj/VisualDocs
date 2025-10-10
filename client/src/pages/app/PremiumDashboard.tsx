@@ -189,55 +189,132 @@ export default function PremiumDashboard() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-white rounded-lg border border-neutral-200 p-4"
+              className="bg-white rounded-lg border border-neutral-200 p-5"
             >
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm text-neutral-600">Total Projects</span>
-                <LayoutDashboard className="w-4 h-4 text-neutral-400" />
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-sm font-medium text-neutral-600">Total Revenue</span>
+                <div className="flex items-center gap-1 text-xs font-medium text-green-600">
+                  <TrendingUp className="w-3 h-3" />
+                  +12.5%
+                </div>
               </div>
-              <div className="text-2xl font-semibold text-neutral-900">{stats.totalProjects}</div>
+              <div className="text-3xl font-semibold text-neutral-900 mb-1">$1,250.00</div>
+              <p className="text-xs text-neutral-500">
+                <span className="inline-flex items-center gap-1">
+                  <TrendingUp className="w-3 h-3" />
+                  Trending up this month
+                </span>
+              </p>
+              <p className="text-xs text-neutral-400 mt-1">Visitors for the last 6 months</p>
             </motion.div>
 
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="bg-white rounded-lg border border-neutral-200 p-4"
+              className="bg-white rounded-lg border border-neutral-200 p-5"
             >
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm text-neutral-600">Active Today</span>
-                <Activity className="w-4 h-4 text-neutral-400" />
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-sm font-medium text-neutral-600">New Customers</span>
+                <div className="flex items-center gap-1 text-xs font-medium text-red-600">
+                  <TrendingUp className="w-3 h-3 rotate-180" />
+                  -20%
+                </div>
               </div>
-              <div className="text-2xl font-semibold text-neutral-900">{stats.activeToday}</div>
+              <div className="text-3xl font-semibold text-neutral-900 mb-1">1,234</div>
+              <p className="text-xs text-neutral-500">
+                <span className="inline-flex items-center gap-1">
+                  <TrendingUp className="w-3 h-3 rotate-180" />
+                  Down 20% this period
+                </span>
+              </p>
+              <p className="text-xs text-neutral-400 mt-1">Acquisition needs attention</p>
             </motion.div>
 
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="bg-white rounded-lg border border-neutral-200 p-4"
+              className="bg-white rounded-lg border border-neutral-200 p-5"
             >
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm text-neutral-600">Lines of Code</span>
-                <FileCode className="w-4 h-4 text-neutral-400" />
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-sm font-medium text-neutral-600">Active Accounts</span>
+                <div className="flex items-center gap-1 text-xs font-medium text-green-600">
+                  <TrendingUp className="w-3 h-3" />
+                  +12.5%
+                </div>
               </div>
-              <div className="text-2xl font-semibold text-neutral-900">
-                {(stats.linesOfCode / 1000).toFixed(1)}k
-              </div>
+              <div className="text-3xl font-semibold text-neutral-900 mb-1">45,678</div>
+              <p className="text-xs text-neutral-500">
+                <span className="inline-flex items-center gap-1">
+                  <TrendingUp className="w-3 h-3" />
+                  Strong user retention
+                </span>
+              </p>
+              <p className="text-xs text-neutral-400 mt-1">Engagement exceed targets</p>
             </motion.div>
 
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="bg-white rounded-lg border border-neutral-200 p-4"
+              className="bg-white rounded-lg border border-neutral-200 p-5"
             >
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm text-neutral-600">Starred</span>
-                <Star className="w-4 h-4 text-neutral-400" />
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-sm font-medium text-neutral-600">Growth Rate</span>
+                <div className="flex items-center gap-1 text-xs font-medium text-green-600">
+                  <TrendingUp className="w-3 h-3" />
+                  +4.5%
+                </div>
               </div>
-              <div className="text-2xl font-semibold text-neutral-900">{stats.trending}</div>
+              <div className="text-3xl font-semibold text-neutral-900 mb-1">4.5%</div>
+              <p className="text-xs text-neutral-500">
+                <span className="inline-flex items-center gap-1">
+                  <TrendingUp className="w-3 h-3" />
+                  Steady performance increase
+                </span>
+              </p>
+              <p className="text-xs text-neutral-400 mt-1">Meets growth projections</p>
             </motion.div>
+          </div>
+
+          {/* Chart Section */}
+          <div className="bg-white rounded-lg border border-neutral-200 p-6 mb-8">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-base font-semibold text-neutral-900">Total Visitors</h2>
+                <p className="text-sm text-neutral-600">Total for the last 3 months</p>
+              </div>
+              <div className="flex items-center gap-2">
+                {['Last 3 months', 'Last 30 days', 'Last 7 days'].map((period, idx) => (
+                  <button
+                    key={period}
+                    className={cn(
+                      "px-3 py-1.5 text-xs font-medium rounded-md transition-colors",
+                      idx === 0
+                        ? "bg-neutral-100 text-neutral-900"
+                        : "text-neutral-600 hover:bg-neutral-50"
+                    )}
+                  >
+                    {period}
+                  </button>
+                ))}
+              </div>
+            </div>
+            
+            {/* Simple Area Chart */}
+            <div className="h-64 flex items-end gap-1">
+              {Array.from({ length: 90 }).map((_, i) => {
+                const height = Math.random() * 80 + 20;
+                return (
+                  <div
+                    key={i}
+                    className="flex-1 bg-gradient-to-t from-neutral-300 to-neutral-200 rounded-t-sm hover:from-neutral-400 hover:to-neutral-300 transition-colors cursor-pointer"
+                    style={{ height: `${height}%` }}
+                  />
+                );
+              })}
+            </div>
           </div>
 
           {/* Filters and Actions */}
