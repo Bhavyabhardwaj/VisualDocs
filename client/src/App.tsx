@@ -14,8 +14,10 @@ import LandingRegister from './pages/auth/LandingRegister';
 import { ForgotPassword } from './pages/ForgotPassword';
 
 // App Pages
-import Dashboard from '@/pages/app/Dashboard';
-import { ProjectDetail } from '@/pages/app/ProjectDetail';
+import PremiumDashboard from '@/pages/app/PremiumDashboard';
+import PremiumProjectDetail from '@/pages/app/PremiumProjectDetail';
+import AnalyticsDashboard from '@/pages/app/Analytics';
+import TeamManagement from '@/pages/app/Team';
 import { Diagrams } from './pages/Diagrams';
 import { Settings } from './pages/Settings';
 
@@ -35,7 +37,31 @@ function App() {
             {/* Dashboard - Standalone with its own layout */}
             <Route path="/app/dashboard" element={
               <ProtectedRoute>
-                <Dashboard />
+                <PremiumDashboard />
+              </ProtectedRoute>
+            } />
+            
+            {/* Project Detail - Standalone with collaboration */}
+            <Route path="/app/projects/:id" element={
+              <ProtectedRoute>
+                <CollaborationProvider projectId="default">
+                  <LiveCursors />
+                  <PremiumProjectDetail />
+                </CollaborationProvider>
+              </ProtectedRoute>
+            } />
+            
+            {/* Analytics */}
+            <Route path="/app/analytics" element={
+              <ProtectedRoute>
+                <AnalyticsDashboard />
+              </ProtectedRoute>
+            } />
+            
+            {/* Team */}
+            <Route path="/app/team" element={
+              <ProtectedRoute>
+                <TeamManagement />
               </ProtectedRoute>
             } />
             
@@ -47,12 +73,6 @@ function App() {
             }>
               <Route index element={<Navigate to="/app/dashboard" replace />} />
               <Route path="projects" element={<Navigate to="/app/dashboard" replace />} />
-              <Route path="projects/:id" element={
-                <CollaborationProvider projectId="default">
-                  <LiveCursors />
-                  <ProjectDetail />
-                </CollaborationProvider>
-              } />
               <Route path="diagrams" element={<Diagrams />} />
               <Route path="settings" element={<Settings />} />
             </Route>
