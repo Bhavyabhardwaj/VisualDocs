@@ -15,6 +15,7 @@ import { ForgotPassword } from './pages/ForgotPassword';
 
 // App Pages
 import PremiumDashboard from '@/pages/app/PremiumDashboard';
+import ModernDashboard from '@/pages/app/ModernDashboard';
 import PremiumProjectDetail from '@/pages/app/PremiumProjectDetail';
 import AnalyticsDashboard from '@/pages/app/Analytics';
 import TeamManagement from '@/pages/app/Team';
@@ -36,6 +37,13 @@ function App() {
             
             {/* Dashboard - Standalone with its own layout */}
             <Route path="/app/dashboard" element={
+              <ProtectedRoute>
+                <ModernDashboard />
+              </ProtectedRoute>
+            } />
+            
+            {/* Old Dashboard (keep for reference) */}
+            <Route path="/app/dashboard-old" element={
               <ProtectedRoute>
                 <PremiumDashboard />
               </ProtectedRoute>
