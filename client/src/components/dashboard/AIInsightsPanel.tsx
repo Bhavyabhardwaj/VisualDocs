@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { AIInsight } from '@/types/dashboard';
+import type { AIInsight } from '@/types/dashboard';
 import { AlertTriangle, Lightbulb, CheckCircle, Info, TrendingUp } from 'lucide-react';
 
 interface AIInsightsPanelProps {

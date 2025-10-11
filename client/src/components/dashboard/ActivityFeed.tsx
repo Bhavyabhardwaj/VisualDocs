@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { ActivityItem } from '@/types/dashboard';
+import type { ActivityItem } from '@/types/dashboard';
 import { FileText, Lightbulb, Users, Download, Clock } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 

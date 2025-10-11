@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { FileText, Github, Gitlab, Upload, Clock, TrendingUp, Users, Eye, RefreshCw, Share2, Settings, MoreVertical } from 'lucide-react';
-import { DashboardProject } from '@/types/dashboard';
+import type { DashboardProject } from '@/types/dashboard';
 import { formatDistanceToNow } from 'date-fns';
 import { useState } from 'react';
 
