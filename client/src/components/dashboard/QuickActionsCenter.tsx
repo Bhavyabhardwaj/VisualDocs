@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { Github, Upload, FileCode, Users, Clock } from 'lucide-react';
-import { ActivityItem } from '@/types/dashboard';
+import type { ActivityItem } from '@/types/dashboard';
 
 interface QuickActionsCenterProps {
   onImportGitHub?: () => void;

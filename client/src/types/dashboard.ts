@@ -1,75 +1,152 @@
-export type ProjectStatus = 'analyzing' | 'ready' | 'needs_update' | 'error';
+// Dashboard Type Definitionsexport type ProjectStatus = 'analyzing' | 'ready' | 'needs_update' | 'error';
 
-export type RepositoryProvider = 'github' | 'gitlab' | 'upload';
 
-export interface User {
+
+export type ProjectStatus = 'analyzing' | 'ready' | 'needs_update' | 'error';export type RepositoryProvider = 'github' | 'gitlab' | 'upload';
+
+
+
+export type RepositoryProvider = 'github' | 'gitlab' | 'upload';export interface User {
+
   id: string;
-  name: string;
-  email: string;
+
+export interface User {  name: string;
+
+  id: string;  email: string;
+
+  name: string;  avatar?: string;
+
+  email: string;}
+
   avatar?: string;
-}
 
-export interface AIInsight {
+}export interface AIInsight {
+
   id: string;
-  type: 'warning' | 'suggestion' | 'success' | 'info';
-  title: string;
-  description: string;
-  priority: 'high' | 'medium' | 'low';
-  createdAt: Date;
+
+export interface AIInsight {  type: 'warning' | 'suggestion' | 'success' | 'info';
+
+  id: string;  title: string;
+
+  type: 'warning' | 'suggestion' | 'success' | 'info';  description: string;
+
+  title: string;  priority: 'high' | 'medium' | 'low';
+
+  description: string;  createdAt: Date;
+
+  priority: 'high' | 'medium' | 'low';  actionable?: boolean;
+
+  createdAt: Date;}
+
   actionable?: boolean;
-}
 
-export interface Repository {
+}export interface Repository {
+
   provider: RepositoryProvider;
-  url?: string;
-  branch?: string;
+
+export interface Repository {  url?: string;
+
+  provider: RepositoryProvider;  branch?: string;
+
+  url?: string;  connected: boolean;
+
+  branch?: string;}
+
   connected: boolean;
-}
 
-export interface ProjectMetrics {
+}export interface ProjectMetrics {
+
   qualityScore: number; // 0-100
-  docsGenerated: number;
-  progress: number; // 0-100
-  insightsCount: number;
+
+export interface ProjectMetrics {  docsGenerated: number;
+
+  qualityScore: number;  progress: number; // 0-100
+
+  docsGenerated: number;  insightsCount: number;
+
+  progress: number;  linesOfCode?: number;
+
+  insightsCount: number;}
+
   linesOfCode?: number;
-}
 
-export interface DashboardProject {
+}export interface DashboardProject {
+
   id: string;
-  name: string;
-  description?: string;
-  status: ProjectStatus;
-  progress: number; // 0-100
-  qualityScore: number; // 0-100
-  docsGenerated: number;
-  lastUpdated: Date;
-  repository: Repository;
-  collaborators: User[];
-  insights: AIInsight[];
+
+export interface DashboardProject {  name: string;
+
+  id: string;  description?: string;
+
+  name: string;  status: ProjectStatus;
+
+  description?: string;  progress: number; // 0-100
+
+  status: ProjectStatus;  qualityScore: number; // 0-100
+
+  progress: number;  docsGenerated: number;
+
+  qualityScore: number;  lastUpdated: Date;
+
+  docsGenerated: number;  repository: Repository;
+
+  lastUpdated: Date;  collaborators: User[];
+
+  repository: Repository;  insights: AIInsight[];
+
+  collaborators: User[];  thumbnail?: string;
+
+  insights: AIInsight[];}
+
   thumbnail?: string;
-}
 
-export interface DashboardStats {
+}export interface DashboardStats {
+
   totalProjects: number;
-  docsGenerated: number;
-  aiInsights: number;
+
+export interface DashboardStats {  docsGenerated: number;
+
+  totalProjects: number;  aiInsights: number;
+
+  docsGenerated: number;  teamCollaborators: number;
+
+  aiInsights: number;}
+
   teamCollaborators: number;
-}
 
-export interface ActivityItem {
+}export interface ActivityItem {
+
   id: string;
-  type: 'generated' | 'insight' | 'collaboration' | 'export';
-  projectName?: string;
-  description: string;
-  message?: string;
-  timestamp: Date;
-  user?: User;
-  projectId?: string;
-  userId?: string;
-}
 
-export interface QualityTrend {
+export interface ActivityItem {  type: 'generated' | 'insight' | 'collaboration' | 'export';
+
+  id: string;  projectName?: string;
+
+  type: 'generated' | 'insight' | 'collaboration' | 'export';  description: string;
+
+  projectName?: string;  message?: string;
+
+  description: string;  timestamp: Date;
+
+  message?: string;  user?: User;
+
+  timestamp: Date;  projectId?: string;
+
+  user?: User;  userId?: string;
+
+  projectId?: string;}
+
+  userId?: string;
+
+}export interface QualityTrend {
+
   date: string;
-  score: number;
+
+export interface QualityTrend {  score: number;
+
+  date: string;  coverage: number;
+
+  score: number;}
+
   coverage: number;
 }

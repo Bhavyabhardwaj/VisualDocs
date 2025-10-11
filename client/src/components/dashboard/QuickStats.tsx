@@ -1,9 +1,9 @@
 import { motion } from 'framer-motion';
-import { LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import type { FC } from 'react';
 
 interface StatCardProps {
-  icon: LucideIcon;
+  icon: FC<{ className?: string }>;
   title: string;
   value: number | string;
   trend?: {
