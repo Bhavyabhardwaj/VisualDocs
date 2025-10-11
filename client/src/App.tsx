@@ -16,11 +16,12 @@ import { ForgotPassword } from './pages/ForgotPassword';
 // App Pages
 import PremiumDashboard from '@/pages/app/PremiumDashboard';
 import ModernDashboard from '@/pages/app/ModernDashboard';
+import { Dashboard as RedesignedDashboard } from '@/pages/app/RedesignedDashboard';
 import PremiumProjectDetail from '@/pages/app/PremiumProjectDetail';
 import AnalyticsDashboard from '@/pages/app/Analytics';
 import TeamManagement from '@/pages/app/Team';
 import { Diagrams } from './pages/Diagrams';
-import { Settings } from './pages/Settings';
+import { Settings } from '@/pages/app/Settings';
 
 function App() {
   return (
@@ -73,6 +74,18 @@ function App() {
               </ProtectedRoute>
             } />
             
+            {/* Settings - Standalone with its own layout */}
+            <Route path="/app/settings" element={
+              <ProtectedRoute>
+                <Settings />
+              </ProtectedRoute>
+            } />
+            <Route path="/app/settings/:section" element={
+              <ProtectedRoute>
+                <Settings />
+              </ProtectedRoute>
+            } />
+            
             {/* Protected App Routes with Layout */}
             <Route path="/app" element={
               <ProtectedRoute>
@@ -82,7 +95,6 @@ function App() {
               <Route index element={<Navigate to="/app/dashboard" replace />} />
               <Route path="projects" element={<Navigate to="/app/dashboard" replace />} />
               <Route path="diagrams" element={<Diagrams />} />
-              <Route path="settings" element={<Settings />} />
             </Route>
             
             {/* Legacy routes - redirect to /app */}
