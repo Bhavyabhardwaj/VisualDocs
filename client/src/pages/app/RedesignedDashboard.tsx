@@ -22,7 +22,7 @@ import { QuickStats } from '@/components/dashboard/QuickStats';
 import { AIInsightsPanel } from '@/components/dashboard/AIInsightsPanel';
 import { EmptyState } from '@/components/dashboard/EmptyState';
 import { QuickActionsCenter } from '@/components/dashboard/QuickActionsCenter';
-import { ProjectStatus, DashboardStats, AIInsight, ActivityItem, QualityTrend } from '@/types/dashboard';
+import type { DashboardProject, DashboardStats, AIInsight, ActivityItem } from '@/types/dashboard';
 import { cn } from '@/lib/utils';
 import { projectService } from '@/services/project.service';
 import { useSocket } from '@/hooks/useSocket';
@@ -32,7 +32,7 @@ export const Dashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState<'all' | 'ready' | 'analyzing' | 'needs_update'>('all');
-  const [projects, setProjects] = useState<ProjectStatus[]>([]);
+  const [projects, setProjects] = useState<DashboardProject[]>([]);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<DashboardStats>({
     totalProjects: 0,
@@ -41,20 +41,60 @@ export const Dashboard = () => {
     teamCollaborators: 0
   });
 
-  // Socket connection for real-time updates
-  const socket = useSocket({
-    onProjectUpdate: (data: any) => {
-      console.log('Project updated:', data);
-      loadProjects();
-    },
-    onAnalysisComplete: (data: any) => {
-      console.log('Analysis complete:', data);
-      loadProjects();
+  // Load projects from backend
+  const loadProjects = async () => {
+    try {
+      setLoading(true);
+      const response = await projectService.getProjects();
+      const projectData = response.data.items || [];
+      
+      // Map backend projects to dashboard format
+      const dashboardProjects: DashboardProject[] = projectData.map((p: any) => ({
+        id: p.id,
+        name: p.name,
+        description: p.description,
+        status: (p.analysisStatus || 'ready') as any,
+        progress: 100,
+        qualityScore: 85,
+        docsGenerated: Math.floor(Math.random() * 50) + 10,
+        lastUpdated: new Date(p.updatedAt || Date.now()),
+        repository: {
+          provider: 'github',
+          url: p.repositoryUrl,
+          branch: 'main',
+          connected: true
+        },
+        collaborators: [],
+        insights: []
+      }));
+      
+      setProjects(dashboardProjects);
+      setStats({
+        totalProjects: dashboardProjects.length,
+        docsGenerated: dashboardProjects.reduce((sum, p) => sum + p.docsGenerated, 0),
+        aiInsights: mockInsights.length,
+        teamCollaborators: 8
+      });
+    } catch (error) {
+      console.error('Failed to load projects:', error);
+      // Fallback to mock data
+      setProjects(mockProjects);
+      setStats({
+        totalProjects: mockProjects.length,
+        docsGenerated: mockProjects.reduce((sum, p) => sum + p.docsGenerated, 0),
+        aiInsights: mockInsights.length,
+        teamCollaborators: 8
+      });
+    } finally {
+      setLoading(false);
     }
-  });
+  };
+
+  // Socket connection for real-time updates
+  useSocket();
 
   // Mock data for demonstration
-  const mockProjects: ProjectStatus[] = [
+  const mockProjects: DashboardProject[] = [
     {
       id: '1',
       name: 'E-Commerce Platform',
@@ -166,6 +206,7 @@ export const Dashboard = () => {
     {
       id: '1',
       type: 'generated',
+      description: 'Generated architecture diagram for E-Commerce Platform',
       message: 'Generated architecture diagram for E-Commerce Platform',
       timestamp: new Date(Date.now() - 1000 * 60 * 15),
       projectId: '1'
@@ -173,6 +214,7 @@ export const Dashboard = () => {
     {
       id: '2',
       type: 'insight',
+      description: 'AI found 12 improvement suggestions in Mobile Banking App',
       message: 'AI found 12 improvement suggestions in Mobile Banking App',
       timestamp: new Date(Date.now() - 1000 * 60 * 45),
       projectId: '2'
@@ -180,6 +222,7 @@ export const Dashboard = () => {
     {
       id: '3',
       type: 'collaboration',
+      description: 'Team member added comments to API docs',
       message: 'Team member added comments to API docs',
       timestamp: new Date(Date.now() - 1000 * 60 * 120),
       userId: '2'
@@ -187,31 +230,16 @@ export const Dashboard = () => {
     {
       id: '4',
       type: 'export',
+      description: 'Documentation exported as PDF',
       message: 'Documentation exported as PDF',
       timestamp: new Date(Date.now() - 1000 * 60 * 180),
       projectId: '1'
     }
   ];
 
-  const mockQualityTrends: QualityTrend[] = [
-    { date: 'Mon', score: 75, coverage: 68 },
-    { date: 'Tue', score: 78, coverage: 72 },
-    { date: 'Wed', score: 82, coverage: 75 },
-    { date: 'Thu', score: 85, coverage: 78 },
-    { date: 'Fri', score: 88, coverage: 82 },
-    { date: 'Sat', score: 90, coverage: 85 },
-    { date: 'Sun', score: 92, coverage: 88 }
-  ];
-
   useEffect(() => {
-    // Load projects
-    setProjects(mockProjects);
-    setStats({
-      totalProjects: mockProjects.length,
-      docsGenerated: mockProjects.reduce((sum, p) => sum + p.docsGenerated, 0),
-      aiInsights: mockInsights.length,
-      teamCollaborators: 8
-    });
+    // Load projects from backend
+    loadProjects();
   }, []);
 
   const filteredProjects = projects.filter(project => {
@@ -284,7 +312,7 @@ export const Dashboard = () => {
         sidebarOpen ? "ml-72" : "ml-0"
       )}>
         {/* Header */}
-        <header className="sticky top-0 z-30 bg-white border-b border-slate-200 backdrop-blur-xl bg-white/80">
+        <header className="sticky top-0 z-30 border-b border-slate-200 backdrop-blur-xl bg-white/95">
           <div className="px-6 py-4">
             <div className="flex items-center gap-4">
               {/* Menu Toggle */}
@@ -352,8 +380,16 @@ export const Dashboard = () => {
             {/* Quick Stats */}
             <QuickStats stats={stats} />
 
-            {/* Main Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Loading State */}
+            {loading ? (
+              <div className="flex items-center justify-center py-20">
+                <div className="text-center">
+                  <div className="w-16 h-16 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mx-auto mb-4"></div>
+                  <p className="text-slate-600">Loading your projects...</p>
+                </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Left Column - Projects & Actions */}
               <div className="lg:col-span-2 space-y-6">
                 {/* Filter Tabs */}
@@ -383,18 +419,16 @@ export const Dashboard = () => {
                       <ProjectCard
                         key={project.id}
                         project={project}
-                        onView={(id) => navigate(`/app/projects/${id}`)}
-                        onRegenerate={(id) => console.log('Regenerate', id)}
-                        onShare={(id) => console.log('Share', id)}
-                        onExport={(id) => console.log('Export', id)}
+                        onViewDocs={(id: string) => navigate(`/app/projects/${id}`)}
+                        onRegenerate={(id: string) => console.log('Regenerate', id)}
+                        onShare={(id: string) => console.log('Share', id)}
                       />
                     ))}
                   </div>
                 ) : projects.length === 0 ? (
                   <EmptyState
-                    onImportGitHub={() => console.log('Import from GitHub')}
+                    onImportGithub={() => console.log('Import from GitHub')}
                     onUploadFiles={() => console.log('Upload files')}
-                    onUseTemplate={() => console.log('Use template')}
                   />
                 ) : (
                   <div className="text-center py-12">
@@ -417,11 +451,11 @@ export const Dashboard = () => {
               {/* Right Column - AI Insights */}
               <div className="lg:col-span-1">
                 <AIInsightsPanel 
-                  insights={mockInsights} 
-                  qualityTrends={mockQualityTrends}
+                  insights={mockInsights}
                 />
               </div>
             </div>
+            )}
           </div>
         </main>
       </div>

@@ -16,6 +16,7 @@ export interface AIInsight {
   description: string;
   priority: 'high' | 'medium' | 'low';
   createdAt: Date;
+  actionable?: boolean;
 }
 
 export interface Repository {
@@ -58,8 +59,17 @@ export interface DashboardStats {
 export interface ActivityItem {
   id: string;
   type: 'generated' | 'insight' | 'collaboration' | 'export';
-  projectName: string;
+  projectName?: string;
   description: string;
+  message?: string;
   timestamp: Date;
   user?: User;
+  projectId?: string;
+  userId?: string;
+}
+
+export interface QualityTrend {
+  date: string;
+  score: number;
+  coverage: number;
 }

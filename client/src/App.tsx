@@ -36,8 +36,15 @@ function App() {
             <Route path="/register" element={<LandingRegister />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             
-            {/* Dashboard - Standalone with its own layout */}
+            {/* Dashboard - New Redesigned Dashboard */}
             <Route path="/app/dashboard" element={
+              <ProtectedRoute>
+                <RedesignedDashboard />
+              </ProtectedRoute>
+            } />
+            
+            {/* Modern Dashboard (alternative) */}
+            <Route path="/app/dashboard-modern" element={
               <ProtectedRoute>
                 <ModernDashboard />
               </ProtectedRoute>
