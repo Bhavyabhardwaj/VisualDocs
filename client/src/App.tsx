@@ -13,9 +13,17 @@ import LandingLogin from './pages/auth/LandingLogin';
 import LandingRegister from './pages/auth/LandingRegister';
 import { ForgotPassword } from './pages/ForgotPassword';
 
-// App Pages
-import { ShadcnDashboard } from '@/pages/app/ShadcnDashboard';
+// App Pages - World-Class Platform
+import { WorldClassDashboard } from '@/pages/app/WorldClassDashboard';
+import { WorldClassProjects } from '@/pages/app/WorldClassProjects';
 import { ShadcnProjectDetail } from '@/pages/app/ShadcnProjectDetail';
+import { LiveCollaboration } from '@/pages/app/LiveCollaboration';
+import { AIAnalysisDashboard } from '@/pages/app/AIAnalysisDashboard';
+import { DiagramStudio } from '@/pages/app/DiagramStudio';
+import { TeamManagement } from '@/pages/app/TeamManagement';
+import { SettingsProfile } from '@/pages/app/SettingsProfile';
+
+// Legacy Pages (for reference)
 import PremiumDashboard from '@/pages/app/PremiumDashboard';
 import ModernDashboard from '@/pages/app/ModernDashboard';
 import { Dashboard as RedesignedDashboard } from '@/pages/app/RedesignedDashboard';
@@ -23,7 +31,6 @@ import { PremiumRedesignedDashboard } from '@/pages/app/PremiumRedesignedDashboa
 import { VSCodeStyleProjectDetail } from '@/pages/app/VSCodeStyleProjectDetail';
 import PremiumProjectDetail from '@/pages/app/PremiumProjectDetail';
 import AnalyticsDashboard from '@/pages/app/Analytics';
-import TeamManagement from '@/pages/app/Team';
 import { Diagrams } from './pages/Diagrams';
 import { DiagramGenerator } from '@/pages/app/DiagramGenerator';
 import { Settings } from '@/pages/app/Settings';
@@ -41,14 +48,65 @@ function App() {
             <Route path="/register" element={<LandingRegister />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             
-            {/* Dashboard - Shadcn Professional Dashboard */}
+            {/* Dashboard - World-Class Project Command Center */}
             <Route path="/app/dashboard" element={
               <ProtectedRoute>
-                <ShadcnDashboard />
+                <WorldClassDashboard />
               </ProtectedRoute>
             } />
             
-            {/* Alternative Dashboards (for reference) */}
+            {/* Projects - Professional Data Table & Grid */}
+            <Route path="/app/projects" element={
+              <ProtectedRoute>
+                <WorldClassProjects />
+              </ProtectedRoute>
+            } />
+            
+            {/* Project Detail - Professional 3-Column Layout */}
+            <Route path="/app/projects/:id" element={
+              <ProtectedRoute>
+                <ShadcnProjectDetail />
+              </ProtectedRoute>
+            } />
+            
+            {/* Live Collaboration - Real-time cursors & comments */}
+            <Route path="/app/collaboration/:projectId?" element={
+              <ProtectedRoute>
+                <LiveCollaboration />
+              </ProtectedRoute>
+            } />
+            
+            {/* AI Analysis - Intelligence Dashboard */}
+            <Route path="/app/analysis" element={
+              <ProtectedRoute>
+                <AIAnalysisDashboard />
+              </ProtectedRoute>
+            } />
+            
+            {/* Diagram Studio - Visual Diagram Generator */}
+            <Route path="/app/diagrams" element={
+              <ProtectedRoute>
+                <DiagramStudio />
+              </ProtectedRoute>
+            } />
+            
+            {/* Team Management - Member & Permission Control */}
+            <Route path="/app/team" element={
+              <ProtectedRoute>
+                <TeamManagement />
+              </ProtectedRoute>
+            } />
+            
+            {/* Settings & Profile - Tabbed Preferences */}
+            <Route path="/app/settings" element={
+              <ProtectedRoute>
+                <SettingsProfile />
+              </ProtectedRoute>
+            } />
+            
+            {/* ========== LEGACY ROUTES (for reference) ========== */}
+            
+            {/* Alternative Dashboards */}
             <Route path="/app/dashboard-premium" element={
               <ProtectedRoute>
                 <PremiumRedesignedDashboard />
@@ -67,17 +125,10 @@ function App() {
               </ProtectedRoute>
             } />
             
-            {/* Old Dashboard (keep for reference) */}
+            {/* Old Dashboard */}
             <Route path="/app/dashboard-old" element={
               <ProtectedRoute>
                 <PremiumDashboard />
-              </ProtectedRoute>
-            } />
-            
-            {/* Project Detail - Shadcn Professional UI */}
-            <Route path="/app/projects/:id" element={
-              <ProtectedRoute>
-                <ShadcnProjectDetail />
               </ProtectedRoute>
             } />
             
@@ -105,29 +156,29 @@ function App() {
               </ProtectedRoute>
             } />
             
-            {/* Team */}
-            <Route path="/app/team" element={
-              <ProtectedRoute>
-                <TeamManagement />
-              </ProtectedRoute>
-            } />
-            
-            {/* Settings - Standalone with its own layout */}
-            <Route path="/app/settings" element={
+            {/* Old Settings */}
+            <Route path="/app/settings-old" element={
               <ProtectedRoute>
                 <Settings />
               </ProtectedRoute>
             } />
-            <Route path="/app/settings/:section" element={
+            <Route path="/app/settings-old/:section" element={
               <ProtectedRoute>
                 <Settings />
               </ProtectedRoute>
             } />
             
-            {/* Diagram Generator - Standalone */}
-            <Route path="/app/diagrams" element={
+            {/* Diagram Generator - Old */}
+            <Route path="/app/diagrams-old" element={
               <ProtectedRoute>
                 <DiagramGenerator />
+              </ProtectedRoute>
+            } />
+            
+            {/* Old Diagrams */}
+            <Route path="/app/diagrams-legacy" element={
+              <ProtectedRoute>
+                <Diagrams />
               </ProtectedRoute>
             } />
             
