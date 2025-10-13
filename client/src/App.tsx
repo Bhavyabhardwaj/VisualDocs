@@ -14,13 +14,18 @@ import LandingRegister from './pages/auth/LandingRegister';
 import { ForgotPassword } from './pages/ForgotPassword';
 
 // App Pages
+import { ShadcnDashboard } from '@/pages/app/ShadcnDashboard';
+import { ShadcnProjectDetail } from '@/pages/app/ShadcnProjectDetail';
 import PremiumDashboard from '@/pages/app/PremiumDashboard';
 import ModernDashboard from '@/pages/app/ModernDashboard';
 import { Dashboard as RedesignedDashboard } from '@/pages/app/RedesignedDashboard';
+import { PremiumRedesignedDashboard } from '@/pages/app/PremiumRedesignedDashboard';
+import { VSCodeStyleProjectDetail } from '@/pages/app/VSCodeStyleProjectDetail';
 import PremiumProjectDetail from '@/pages/app/PremiumProjectDetail';
 import AnalyticsDashboard from '@/pages/app/Analytics';
 import TeamManagement from '@/pages/app/Team';
 import { Diagrams } from './pages/Diagrams';
+import { DiagramGenerator } from '@/pages/app/DiagramGenerator';
 import { Settings } from '@/pages/app/Settings';
 
 function App() {
@@ -36,14 +41,26 @@ function App() {
             <Route path="/register" element={<LandingRegister />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             
-            {/* Dashboard - New Redesigned Dashboard */}
+            {/* Dashboard - Shadcn Professional Dashboard */}
             <Route path="/app/dashboard" element={
+              <ProtectedRoute>
+                <ShadcnDashboard />
+              </ProtectedRoute>
+            } />
+            
+            {/* Alternative Dashboards (for reference) */}
+            <Route path="/app/dashboard-premium" element={
+              <ProtectedRoute>
+                <PremiumRedesignedDashboard />
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/app/dashboard-v2" element={
               <ProtectedRoute>
                 <RedesignedDashboard />
               </ProtectedRoute>
             } />
             
-            {/* Modern Dashboard (alternative) */}
             <Route path="/app/dashboard-modern" element={
               <ProtectedRoute>
                 <ModernDashboard />
@@ -57,8 +74,22 @@ function App() {
               </ProtectedRoute>
             } />
             
-            {/* Project Detail - Standalone with collaboration */}
+            {/* Project Detail - Shadcn Professional UI */}
             <Route path="/app/projects/:id" element={
+              <ProtectedRoute>
+                <ShadcnProjectDetail />
+              </ProtectedRoute>
+            } />
+            
+            {/* Old Project Detail - VSCode Style */}
+            <Route path="/app/projects/:id/vscode" element={
+              <ProtectedRoute>
+                <VSCodeStyleProjectDetail />
+              </ProtectedRoute>
+            } />
+            
+            {/* Old Project Detail with collaboration */}
+            <Route path="/app/projects/:id/collab" element={
               <ProtectedRoute>
                 <CollaborationProvider projectId="default">
                   <LiveCursors />
@@ -93,6 +124,13 @@ function App() {
               </ProtectedRoute>
             } />
             
+            {/* Diagram Generator - Standalone */}
+            <Route path="/app/diagrams" element={
+              <ProtectedRoute>
+                <DiagramGenerator />
+              </ProtectedRoute>
+            } />
+            
             {/* Protected App Routes with Layout */}
             <Route path="/app" element={
               <ProtectedRoute>
@@ -101,7 +139,6 @@ function App() {
             }>
               <Route index element={<Navigate to="/app/dashboard" replace />} />
               <Route path="projects" element={<Navigate to="/app/dashboard" replace />} />
-              <Route path="diagrams" element={<Diagrams />} />
             </Route>
             
             {/* Legacy routes - redirect to /app */}
