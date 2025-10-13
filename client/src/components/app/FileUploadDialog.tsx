@@ -9,6 +9,8 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import { projectService } from '@/services/project.service';
 import { useToast } from '@/components/ui/use-toast';
@@ -17,7 +19,7 @@ interface FileUploadDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   projectId?: string | null;
-  onUploadComplete?: () => void;
+  onUploadComplete?: (projectId?: string) => void;
 }
 
 interface UploadFile {
@@ -37,6 +39,9 @@ export const FileUploadDialog = ({
   const [files, setFiles] = useState<UploadFile[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [projectName, setProjectName] = useState('');
+  const [projectDescription, setProjectDescription] = useState('');
+  const [needsProjectCreation, setNeedsProjectCreation] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
@@ -80,12 +85,9 @@ export const FileUploadDialog = ({
   };
 
   const handleUpload = async () => {
-    if (!projectId) {
-      toast({
-        title: 'Error',
-        description: 'Please select or create a project first',
-        variant: 'destructive',
-      });
+    // Check if we need to create a project first
+    if (!projectId && files.length > 0) {
+      setNeedsProjectCreation(true);
       return;
     }
 
@@ -101,6 +103,30 @@ export const FileUploadDialog = ({
     setIsUploading(true);
 
     try {
+      let targetProjectId = projectId;
+
+      // Create project if needed
+      if (needsProjectCreation && projectName.trim()) {
+        const createResponse = await projectService.createProject({
+          name: projectName,
+          description: projectDescription || undefined,
+        });
+        targetProjectId = createResponse.data?.id || null;
+        
+        if (!targetProjectId) {
+          throw new Error('Failed to create project');
+        }
+
+        toast({
+          title: 'Project created',
+          description: `Created project: ${projectName}`,
+        });
+      }
+
+      if (!targetProjectId) {
+        throw new Error('No project ID available');
+      }
+
       // Update all files to uploading status
       setFiles((prev) =>
         prev.map((f) => ({ ...f, status: 'uploading' as const, progress: 0 }))
@@ -118,7 +144,7 @@ export const FileUploadDialog = ({
 
       // Upload files
       const fileArray = files.map((f) => f.file);
-      await projectService.uploadFiles(projectId, fileArray);
+      await projectService.uploadFiles(targetProjectId, fileArray);
 
       clearInterval(progressInterval);
 
@@ -136,7 +162,10 @@ export const FileUploadDialog = ({
       setTimeout(() => {
         onOpenChange(false);
         setFiles([]);
-        if (onUploadComplete) onUploadComplete();
+        setProjectName('');
+        setProjectDescription('');
+        setNeedsProjectCreation(false);
+        if (onUploadComplete) onUploadComplete(targetProjectId || undefined);
       }, 1500);
     } catch (error) {
       console.error('Upload failed:', error);
@@ -185,15 +214,53 @@ export const FileUploadDialog = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>Upload Files</DialogTitle>
+          <DialogTitle>
+            {needsProjectCreation ? 'Create Project & Upload Files' : 'Upload Files'}
+          </DialogTitle>
           <DialogDescription>
-            {projectId
+            {needsProjectCreation
+              ? 'Create a new project for your files'
+              : projectId
               ? 'Drag and drop files or click to browse'
-              : 'Please select a project first before uploading files'}
+              : 'Upload files to create a new project'}
           </DialogDescription>
         </DialogHeader>
 
-        {projectId ? (
+        {needsProjectCreation ? (
+          /* Project Creation Form */
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="project-name">Project Name *</Label>
+              <Input
+                id="project-name"
+                placeholder="My Awesome Project"
+                value={projectName}
+                onChange={(e) => setProjectName(e.target.value)}
+                disabled={isUploading}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="project-description">Description (Optional)</Label>
+              <Input
+                id="project-description"
+                placeholder="Brief description of your project"
+                value={projectDescription}
+                onChange={(e) => setProjectDescription(e.target.value)}
+                disabled={isUploading}
+              />
+            </div>
+
+            <div className="rounded-lg bg-blue-50 p-4">
+              <p className="text-sm font-medium text-blue-900 mb-1">
+                {files.length} file(s) ready to upload
+              </p>
+              <p className="text-xs text-blue-700">
+                A new project will be created with these files
+              </p>
+            </div>
+          </div>
+        ) : (
           <>
             {/* Drop Zone */}
             <div
@@ -268,39 +335,66 @@ export const FileUploadDialog = ({
               </div>
             )}
           </>
-        ) : (
-          <div className="py-8 text-center">
-            <AlertCircle className="mx-auto h-12 w-12 text-orange-400 mb-4" />
-            <p className="text-sm text-gray-600">
-              You need to create a project before uploading files
-            </p>
-          </div>
         )}
 
         <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={() => {
-              onOpenChange(false);
-              setFiles([]);
-            }}
-            disabled={isUploading}
-          >
-            Cancel
-          </Button>
-          <Button
-            onClick={handleUpload}
-            disabled={!projectId || files.length === 0 || isUploading}
-          >
-            {isUploading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Uploading...
-              </>
-            ) : (
-              `Upload ${files.length} file(s)`
-            )}
-          </Button>
+          {needsProjectCreation ? (
+            <>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setNeedsProjectCreation(false);
+                  setProjectName('');
+                  setProjectDescription('');
+                }}
+                disabled={isUploading}
+              >
+                Back
+              </Button>
+              <Button
+                onClick={handleUpload}
+                disabled={!projectName.trim() || isUploading}
+              >
+                {isUploading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Creating & Uploading...
+                  </>
+                ) : (
+                  `Create Project & Upload ${files.length} file(s)`
+                )}
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  onOpenChange(false);
+                  setFiles([]);
+                  setNeedsProjectCreation(false);
+                }}
+                disabled={isUploading}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleUpload}
+                disabled={files.length === 0 || isUploading}
+              >
+                {isUploading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Uploading...
+                  </>
+                ) : projectId ? (
+                  `Upload ${files.length} file(s)`
+                ) : (
+                  `Continue with ${files.length} file(s)`
+                )}
+              </Button>
+            </>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>
