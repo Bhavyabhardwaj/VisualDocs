@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   FolderGit2, FileText, Sparkles, Users, TrendingUp, 
-  Clock, GitBranch, Plus, Search, Bell, Github,
+  Clock, GitBranch, Search, Bell, Github,
   Upload, BarChart3, CheckCircle2, AlertCircle, Loader2,
   Filter, ArrowUpRight, Zap
 } from 'lucide-react';
@@ -12,7 +12,8 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { Input } from '@/components/ui/input';
-import { Progress } from '@/components/ui/progress';
+import { FileUploadDialog } from '@/components/app/FileUploadDialog';
+import { GitHubImportDialog } from '@/components/app/GitHubImportDialog';
 import { projectService } from '@/services/project.service';
 import type { Project } from '@/types/api';
 import { formatDistanceToNow } from 'date-fns';
@@ -23,6 +24,9 @@ export const WorldClassDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
+  const [githubDialogOpen, setGithubDialogOpen] = useState(false);
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
 
   useEffect(() => {
     loadProjects();
@@ -84,16 +88,36 @@ export const WorldClassDashboard = () => {
                 <span className="text-lg font-semibold tracking-tight">VisualDocs</span>
               </div>
               <nav className="hidden md:flex items-center gap-1">
-                <Button variant="ghost" size="sm" className="font-medium text-gray-900">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="font-medium text-gray-900"
+                  onClick={() => navigate('/app/dashboard')}
+                >
                   Dashboard
                 </Button>
-                <Button variant="ghost" size="sm" className="text-gray-600 hover:text-gray-900">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="text-gray-600 hover:text-gray-900"
+                  onClick={() => navigate('/app/projects')}
+                >
                   Projects
                 </Button>
-                <Button variant="ghost" size="sm" className="text-gray-600 hover:text-gray-900">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="text-gray-600 hover:text-gray-900"
+                  onClick={() => navigate('/app/analysis')}
+                >
                   Analytics
                 </Button>
-                <Button variant="ghost" size="sm" className="text-gray-600 hover:text-gray-900">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="text-gray-600 hover:text-gray-900"
+                  onClick={() => navigate('/app/team')}
+                >
                   Team
                 </Button>
               </nav>
@@ -116,14 +140,22 @@ export const WorldClassDashboard = () => {
                 </div>
               </div>
               
-              <Button variant="ghost" size="icon" className="relative hover:bg-gray-100">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="relative hover:bg-gray-100"
+                onClick={() => navigate('/app/settings')}
+              >
                 <Bell className="h-4 w-4" />
                 <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-blue-600 ring-2 ring-white" />
               </Button>
               
               <Separator orientation="vertical" className="h-6" />
               
-              <Avatar className="h-8 w-8 cursor-pointer ring-2 ring-transparent hover:ring-gray-200 transition-all">
+              <Avatar 
+                className="h-8 w-8 cursor-pointer ring-2 ring-transparent hover:ring-gray-200 transition-all"
+                onClick={() => navigate('/app/settings')}
+              >
                 <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-500 text-white text-xs font-medium">
                   JD
                 </AvatarFallback>
@@ -140,20 +172,39 @@ export const WorldClassDashboard = () => {
           <div className="flex items-start justify-between">
             <div>
               <h1 className="text-3xl font-semibold tracking-tight text-gray-900">Dashboard</h1>
+          <div>
+              <h1 className="text-3xl font-semibold tracking-tight text-gray-900">Dashboard</h1>
               <p className="mt-2 text-sm text-gray-600">
                 Welcome back! Here's what's happening with your projects today.
               </p>
             </div>
             <div className="flex items-center gap-3">
-              <Button variant="outline" size="sm" className="gap-2 hover:bg-gray-50">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="gap-2 hover:bg-gray-50"
+                onClick={() => {
+                  setSelectedProjectId(projects.length > 0 ? projects[0].id : null);
+                  setUploadDialogOpen(true);
+                }}
+              >
                 <Upload className="h-4 w-4" />
                 Upload Files
               </Button>
-              <Button variant="outline" size="sm" className="gap-2 hover:bg-gray-50">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="gap-2 hover:bg-gray-50"
+                onClick={() => navigate('/app/analysis')}
+              >
                 <BarChart3 className="h-4 w-4" />
                 Analytics
               </Button>
-              <Button size="sm" className="gap-2 bg-gray-900 hover:bg-gray-800 shadow-sm">
+              <Button 
+                size="sm" 
+                className="gap-2 bg-gray-900 hover:bg-gray-800 shadow-sm"
+                onClick={() => setGithubDialogOpen(true)}
+              >
                 <Github className="h-4 w-4" />
                 Import from GitHub
               </Button>
@@ -163,7 +214,10 @@ export const WorldClassDashboard = () => {
 
         {/* Premium Stats Grid */}
         <div className="mb-8 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <Card className="border-gray-200 hover:shadow-lg hover:scale-[1.02] transition-all duration-200 cursor-pointer">
+          <Card 
+            className="border-gray-200 hover:shadow-lg hover:scale-[1.02] transition-all duration-200 cursor-pointer"
+            onClick={() => navigate('/app/projects')}
+          >
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium text-gray-600">Projects Analyzed</CardTitle>
               <div className="rounded-lg bg-blue-50 p-2.5">
@@ -179,7 +233,10 @@ export const WorldClassDashboard = () => {
             </CardContent>
           </Card>
 
-          <Card className="border-gray-200 hover:shadow-lg hover:scale-[1.02] transition-all duration-200 cursor-pointer">
+          <Card 
+            className="border-gray-200 hover:shadow-lg hover:scale-[1.02] transition-all duration-200 cursor-pointer"
+            onClick={() => navigate('/app/projects')}
+          >
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium text-gray-600">Docs Generated</CardTitle>
               <div className="rounded-lg bg-purple-50 p-2.5">
@@ -192,7 +249,10 @@ export const WorldClassDashboard = () => {
             </CardContent>
           </Card>
 
-          <Card className="border-gray-200 hover:shadow-lg hover:scale-[1.02] transition-all duration-200 cursor-pointer">
+          <Card 
+            className="border-gray-200 hover:shadow-lg hover:scale-[1.02] transition-all duration-200 cursor-pointer"
+            onClick={() => navigate('/app/analysis')}
+          >
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium text-gray-600">AI Insights</CardTitle>
               <div className="rounded-lg bg-amber-50 p-2.5">
@@ -205,7 +265,10 @@ export const WorldClassDashboard = () => {
             </CardContent>
           </Card>
 
-          <Card className="border-gray-200 hover:shadow-lg hover:scale-[1.02] transition-all duration-200 cursor-pointer">
+          <Card 
+            className="border-gray-200 hover:shadow-lg hover:scale-[1.02] transition-all duration-200 cursor-pointer"
+            onClick={() => navigate('/app/team')}
+          >
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium text-gray-600">Team Members</CardTitle>
               <div className="rounded-lg bg-emerald-50 p-2.5">
@@ -282,11 +345,21 @@ export const WorldClassDashboard = () => {
                 </p>
                 {!searchQuery && filterStatus === 'all' && (
                   <div className="flex items-center gap-3">
-                    <Button className="gap-2 bg-gray-900 hover:bg-gray-800 shadow-md">
+                    <Button 
+                      className="gap-2 bg-gray-900 hover:bg-gray-800 shadow-md"
+                      onClick={() => setGithubDialogOpen(true)}
+                    >
                       <Github className="h-4 w-4" />
                       Import from GitHub
                     </Button>
-                    <Button variant="outline" className="gap-2 hover:bg-gray-50">
+                    <Button 
+                      variant="outline" 
+                      className="gap-2 hover:bg-gray-50"
+                      onClick={() => {
+                        setSelectedProjectId(null);
+                        setUploadDialogOpen(true);
+                      }}
+                    >
                       <Upload className="h-4 w-4" />
                       Upload Files
                     </Button>
@@ -397,7 +470,10 @@ export const WorldClassDashboard = () => {
                 </div>
               </CardHeader>
               <CardContent className="space-y-3">
-                <div className="rounded-xl bg-white p-4 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+                <div 
+                  className="rounded-xl bg-white p-4 shadow-sm border border-gray-100 hover:shadow-md transition-shadow cursor-pointer"
+                  onClick={() => navigate('/app/analysis')}
+                >
                   <div className="flex items-start gap-3">
                     <CheckCircle2 className="h-5 w-5 text-emerald-600 mt-0.5 flex-shrink-0" />
                     <div className="flex-1">
@@ -410,7 +486,10 @@ export const WorldClassDashboard = () => {
                     </div>
                   </div>
                 </div>
-                <div className="rounded-xl bg-white p-4 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+                <div 
+                  className="rounded-xl bg-white p-4 shadow-sm border border-gray-100 hover:shadow-md transition-shadow cursor-pointer"
+                  onClick={() => navigate('/app/projects')}
+                >
                   <div className="flex items-start gap-3">
                     <AlertCircle className="h-5 w-5 text-amber-600 mt-0.5 flex-shrink-0" />
                     <div className="flex-1">
@@ -423,7 +502,10 @@ export const WorldClassDashboard = () => {
                     </div>
                   </div>
                 </div>
-                <div className="rounded-xl bg-white p-4 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+                <div 
+                  className="rounded-xl bg-white p-4 shadow-sm border border-gray-100 hover:shadow-md transition-shadow cursor-pointer"
+                  onClick={() => navigate('/app/diagrams')}
+                >
                   <div className="flex items-start gap-3">
                     <Sparkles className="h-5 w-5 text-purple-600 mt-0.5 flex-shrink-0" />
                     <div className="flex-1">
@@ -441,6 +523,23 @@ export const WorldClassDashboard = () => {
           </div>
         )}
       </main>
+
+      {/* Dialogs */}
+      <FileUploadDialog
+        open={uploadDialogOpen}
+        onOpenChange={setUploadDialogOpen}
+        projectId={selectedProjectId}
+        onUploadComplete={loadProjects}
+      />
+      
+      <GitHubImportDialog
+        open={githubDialogOpen}
+        onOpenChange={setGithubDialogOpen}
+        onImportComplete={(projectId) => {
+          loadProjects();
+          navigate(`/app/projects/${projectId}`);
+        }}
+      />
     </div>
   );
 };

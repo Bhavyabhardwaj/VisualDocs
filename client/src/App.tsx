@@ -6,6 +6,7 @@ import { ProtectedRoute } from '@/components/app/ProtectedRoute';
 import { AppLayout } from '@/components/app/AppLayout';
 import { CollaborationProvider } from '@/components/collaboration/CollaborationProvider';
 import { LiveCursors } from '@/components/collaboration/UserPresence';
+import { Toaster } from '@/components/ui/toaster';
 
 // Marketing Pages
 import NewLanding from './pages/NewLanding';
@@ -202,6 +203,7 @@ function App() {
             {/* Catch all */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
+          <Toaster />
         </Router>
         </AuthProvider>
       </ThemeProvider>

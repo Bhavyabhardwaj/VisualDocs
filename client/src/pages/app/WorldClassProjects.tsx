@@ -2,9 +2,9 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   FolderGit2, FileText, Clock, GitBranch, Search, Filter,
-  Download, Trash2, Archive, MoreHorizontal, Plus, Github,
-  Upload, Grid3x3, List, ChevronDown, Calendar, Users,
-  TrendingUp, CheckCircle2, AlertCircle, Loader2, ArrowUpDown
+  Download, Trash2, Archive, MoreHorizontal, Github,
+  Upload, Grid3x3, List, ChevronDown,
+  Loader2, ArrowUpDown
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -19,7 +19,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Separator } from '@/components/ui/separator';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Progress } from '@/components/ui/progress';
+import { FileUploadDialog } from '@/components/app/FileUploadDialog';
+import { GitHubImportDialog } from '@/components/app/GitHubImportDialog';
 import { projectService } from '@/services/project.service';
 import type { Project } from '@/types/api';
 import { formatDistanceToNow } from 'date-fns';
@@ -38,6 +39,9 @@ export const WorldClassProjects = () => {
   const [sortField, setSortField] = useState<SortField>('updated');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
   const [selectedProjects, setSelectedProjects] = useState<Set<string>>(new Set());
+  const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
+  const [githubDialogOpen, setGithubDialogOpen] = useState(false);
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
 
   useEffect(() => {
     loadProjects();
@@ -128,11 +132,23 @@ export const WorldClassProjects = () => {
               </p>
             </div>
             <div className="flex items-center gap-3">
-              <Button variant="outline" size="sm" className="gap-2 hover:bg-gray-50">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="gap-2 hover:bg-gray-50"
+                onClick={() => {
+                  setSelectedProjectId(projects.length > 0 ? projects[0].id : null);
+                  setUploadDialogOpen(true);
+                }}
+              >
                 <Upload className="h-4 w-4" />
                 Upload
               </Button>
-              <Button size="sm" className="gap-2 bg-gray-900 hover:bg-gray-800 shadow-sm">
+              <Button 
+                size="sm" 
+                className="gap-2 bg-gray-900 hover:bg-gray-800 shadow-sm"
+                onClick={() => setGithubDialogOpen(true)}
+              >
                 <Github className="h-4 w-4" />
                 Import from GitHub
               </Button>
@@ -271,11 +287,21 @@ export const WorldClassProjects = () => {
               </p>
               {!searchQuery && filterStatus === 'all' && (
                 <div className="flex items-center gap-3">
-                  <Button className="gap-2 bg-gray-900 hover:bg-gray-800">
+                  <Button 
+                    className="gap-2 bg-gray-900 hover:bg-gray-800"
+                    onClick={() => setGithubDialogOpen(true)}
+                  >
                     <Github className="h-4 w-4" />
                     Import from GitHub
                   </Button>
-                  <Button variant="outline" className="gap-2 hover:bg-gray-50">
+                  <Button 
+                    variant="outline" 
+                    className="gap-2 hover:bg-gray-50"
+                    onClick={() => {
+                      setSelectedProjectId(null);
+                      setUploadDialogOpen(true);
+                    }}
+                  >
                     <Upload className="h-4 w-4" />
                     Upload Files
                   </Button>
@@ -564,6 +590,23 @@ export const WorldClassProjects = () => {
           </div>
         )}
       </main>
+
+      {/* Dialogs */}
+      <FileUploadDialog
+        open={uploadDialogOpen}
+        onOpenChange={setUploadDialogOpen}
+        projectId={selectedProjectId}
+        onUploadComplete={loadProjects}
+      />
+      
+      <GitHubImportDialog
+        open={githubDialogOpen}
+        onOpenChange={setGithubDialogOpen}
+        onImportComplete={(projectId) => {
+          loadProjects();
+          navigate(`/app/projects/${projectId}`);
+        }}
+      />
     </div>
   );
 };
