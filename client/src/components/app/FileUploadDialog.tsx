@@ -92,9 +92,9 @@ export const FileUploadDialog = ({
     console.log('projectName:', projectName);
     console.log('isUploading:', isUploading);
 
-    // Check if we need to create a project first
-    if (!projectId && files.length > 0) {
-      console.log('Setting needsProjectCreation to true');
+    // Check if we need to show the project creation form first
+    if (!projectId && !needsProjectCreation && files.length > 0) {
+      console.log('Setting needsProjectCreation to true - showing Step 2');
       setNeedsProjectCreation(true);
       return;
     }
@@ -108,6 +108,17 @@ export const FileUploadDialog = ({
       return;
     }
 
+    // Validate project name if creating a new project
+    if (!projectId && needsProjectCreation && !projectName.trim()) {
+      toast({
+        title: 'Project name required',
+        description: 'Please enter a name for your project',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    console.log('🚀 Starting upload process...');
     setIsUploading(true);
 
     try {
