@@ -13,10 +13,9 @@ import {
 import { 
   generalLimiter,
   uploadLimiter,
-  // multipleFilesUpload,
-  // handleUploadError,
   aiLimiter
 } from '../middleware';
+import { multipleFilesUpload, handleUploadError } from '../middleware/upload';
 
 const router = Router();
 
@@ -65,6 +64,8 @@ router.get('/:id/stats',
 router.post('/:id/files', 
   uploadLimiter,
   validate(getProjectSchema),
+  multipleFilesUpload,
+  handleUploadError,
   projectController.uploadFiles
 );
 
