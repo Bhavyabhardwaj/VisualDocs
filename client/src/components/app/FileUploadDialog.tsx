@@ -85,8 +85,16 @@ export const FileUploadDialog = ({
   };
 
   const handleUpload = async () => {
+    console.log('=== HANDLE UPLOAD CALLED ===');
+    console.log('projectId:', projectId);
+    console.log('needsProjectCreation:', needsProjectCreation);
+    console.log('files.length:', files.length);
+    console.log('projectName:', projectName);
+    console.log('isUploading:', isUploading);
+
     // Check if we need to create a project first
     if (!projectId && files.length > 0) {
+      console.log('Setting needsProjectCreation to true');
       setNeedsProjectCreation(true);
       return;
     }
@@ -280,7 +288,7 @@ export const FileUploadDialog = ({
             >
               <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
               <p className="text-sm font-medium text-gray-700 mb-1">
-                Drop files here or click to browse
+                Drop files/folders here or click to browse
               </p>
               <p className="text-xs text-gray-500">
                 Supports: .js, .ts, .jsx, .tsx, .py, .java, .cpp, .c, .go, .rs, etc.
@@ -292,6 +300,7 @@ export const FileUploadDialog = ({
                 onChange={handleFileSelect}
                 className="hidden"
                 accept=".js,.jsx,.ts,.tsx,.py,.java,.cpp,.c,.go,.rs,.php,.rb,.swift,.kt,.cs,.vue,.svelte"
+                {...({ webkitdirectory: '', directory: '' } as any)}
               />
             </div>
 
@@ -379,7 +388,13 @@ export const FileUploadDialog = ({
                 Cancel
               </Button>
               <Button
-                onClick={handleUpload}
+                onClick={(e) => {
+                  console.log('=== BUTTON CLICKED ===');
+                  console.log('Event:', e);
+                  console.log('files.length:', files.length);
+                  console.log('isUploading:', isUploading);
+                  handleUpload();
+                }}
                 disabled={files.length === 0 || isUploading}
               >
                 {isUploading ? (
