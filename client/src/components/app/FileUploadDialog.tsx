@@ -12,6 +12,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { projectService } from '@/services/project.service';
 import { useToast } from '@/components/ui/use-toast';
 
@@ -41,6 +48,7 @@ export const FileUploadDialog = ({
   const [isUploading, setIsUploading] = useState(false);
   const [projectName, setProjectName] = useState('');
   const [projectDescription, setProjectDescription] = useState('');
+  const [projectLanguage, setProjectLanguage] = useState<'typescript' | 'javascript' | 'python' | 'java' | 'csharp' | 'cpp' | 'php' | 'ruby' | 'go'>('typescript');
   const [needsProjectCreation, setNeedsProjectCreation] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
@@ -129,6 +137,7 @@ export const FileUploadDialog = ({
         const createResponse = await projectService.createProject({
           name: projectName,
           description: projectDescription || undefined,
+          language: projectLanguage,
         });
         targetProjectId = createResponse.data?.id || null;
         
@@ -183,6 +192,7 @@ export const FileUploadDialog = ({
         setFiles([]);
         setProjectName('');
         setProjectDescription('');
+        setProjectLanguage('typescript');
         setNeedsProjectCreation(false);
         if (onUploadComplete) onUploadComplete(targetProjectId || undefined);
       }, 1500);
@@ -268,6 +278,30 @@ export const FileUploadDialog = ({
                 onChange={(e) => setProjectDescription(e.target.value)}
                 disabled={isUploading}
               />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="project-language">Primary Language *</Label>
+              <Select
+                value={projectLanguage}
+                onValueChange={(value: any) => setProjectLanguage(value)}
+                disabled={isUploading}
+              >
+                <SelectTrigger id="project-language">
+                  <SelectValue placeholder="Select a language" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="typescript">TypeScript</SelectItem>
+                  <SelectItem value="javascript">JavaScript</SelectItem>
+                  <SelectItem value="python">Python</SelectItem>
+                  <SelectItem value="java">Java</SelectItem>
+                  <SelectItem value="csharp">C#</SelectItem>
+                  <SelectItem value="cpp">C++</SelectItem>
+                  <SelectItem value="php">PHP</SelectItem>
+                  <SelectItem value="ruby">Ruby</SelectItem>
+                  <SelectItem value="go">Go</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="rounded-lg bg-blue-50 p-4">
@@ -393,6 +427,9 @@ export const FileUploadDialog = ({
                   onOpenChange(false);
                   setFiles([]);
                   setNeedsProjectCreation(false);
+                  setProjectName('');
+                  setProjectDescription('');
+                  setProjectLanguage('typescript');
                 }}
                 disabled={isUploading}
               >

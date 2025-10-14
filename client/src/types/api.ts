@@ -67,6 +67,9 @@ export interface CreateProjectInput {
   name: string;
   description?: string;
   githubUrl?: string;
+  language: 'typescript' | 'javascript' | 'python' | 'java' | 'csharp' | 'cpp' | 'php' | 'ruby' | 'go';
+  framework?: string;
+  visibility?: 'PRIVATE' | 'PUBLIC' | 'TEAM';
 }
 
 export interface UpdateProjectInput {
