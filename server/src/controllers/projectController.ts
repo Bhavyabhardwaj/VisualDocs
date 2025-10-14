@@ -31,6 +31,23 @@ declare global {
 }
 
 export class ProjectController {
+    constructor() {
+        // Bind methods to preserve 'this' context
+        this.createProject = this.createProject.bind(this);
+        this.getProjects = this.getProjects.bind(this);
+        this.getProject = this.getProject.bind(this);
+        this.updateProject = this.updateProject.bind(this);
+        this.deleteProject = this.deleteProject.bind(this);
+        this.toggleArchive = this.toggleArchive.bind(this);
+        this.getProjectStatistics = this.getProjectStatistics.bind(this);
+        this.uploadFiles = this.uploadFiles.bind(this);
+        this.getProjectFiles = this.getProjectFiles.bind(this);
+        this.getCollaborators = this.getCollaborators.bind(this);
+        this.importFromGitHub = this.importFromGitHub.bind(this);
+        this.validateGitHubRepository = this.validateGitHubRepository.bind(this);
+        this.getGitHubRepositoryInfo = this.getGitHubRepositoryInfo.bind(this);
+    }
+
     // create new project
     async createProject(req: Request, res: Response, next: NextFunction) {
         try {
