@@ -134,17 +134,29 @@ export const FileUploadDialog = ({
 
       // Create project if needed
       if (needsProjectCreation && projectName.trim()) {
+        console.log('📦 Creating project with data:', {
+          name: projectName,
+          description: projectDescription,
+          language: projectLanguage,
+        });
+        
         const createResponse = await projectService.createProject({
           name: projectName,
           description: projectDescription || undefined,
           language: projectLanguage,
         });
-        targetProjectId = createResponse.data?.id || null;
+        
+        console.log('📦 Create response:', createResponse);
+        
+        // The response structure is { project: { id: "...", ... } }
+        targetProjectId = (createResponse as any).project?.id || createResponse.data?.id || null;
         
         if (!targetProjectId) {
+          console.error('❌ No project ID in response:', createResponse);
           throw new Error('Failed to create project');
         }
 
+        console.log('✅ Project created with ID:', targetProjectId);
         toast({
           title: 'Project created',
           description: `Created project: ${projectName}`,
