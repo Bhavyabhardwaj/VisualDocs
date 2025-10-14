@@ -148,8 +148,8 @@ export const FileUploadDialog = ({
         
         console.log('📦 Create response:', createResponse);
         
-        // The response structure is { project: { id: "...", ... } }
-        targetProjectId = (createResponse as any).project?.id || createResponse.data?.id || null;
+        // The response structure is { success: true, data: { project: { id: "...", ... } } }
+        targetProjectId = (createResponse as any).data?.project?.id || null;
         
         if (!targetProjectId) {
           console.error('❌ No project ID in response:', createResponse);
