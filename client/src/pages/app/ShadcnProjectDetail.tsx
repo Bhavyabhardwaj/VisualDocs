@@ -108,9 +108,10 @@ export const ShadcnProjectDetail = () => {
       });
     } catch (error) {
       console.error('Analysis failed:', error);
+      console.error('Error response:', (error as any)?.response?.data);
       toast({
         title: 'Analysis Failed',
-        description: error instanceof Error ? error.message : 'Failed to analyze project',
+        description: (error as any)?.response?.data?.error || (error instanceof Error ? error.message : 'Failed to analyze project'),
         variant: 'destructive',
       });
     } finally {
