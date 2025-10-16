@@ -30,6 +30,23 @@ export const ShadcnProjectDetail = () => {
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
 
+  // Helper function to safely format dates
+  const safeFormatDate = (dateString: string | undefined | null): string => {
+    if (!dateString) return 'N/A';
+    
+    try {
+      const date = new Date(dateString);
+      // Check if date is valid
+      if (isNaN(date.getTime())) {
+        return 'Invalid date';
+      }
+      return formatDistanceToNow(date, { addSuffix: true });
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return 'Invalid date';
+    }
+  };
+
   useEffect(() => {
     if (id) {
       loadProject();
@@ -40,6 +57,12 @@ export const ShadcnProjectDetail = () => {
     try {
       setLoading(true);
       const response = await projectService.getProject(id!);
+      console.log('📦 Project data received:', response);
+      console.log('📦 Project dates:', {
+        createdAt: response.data?.createdAt,
+        updatedAt: response.data?.updatedAt,
+        lastAnalyzedAt: response.data?.lastAnalyzedAt
+      });
       setProject(response.data || null);
     } catch (error) {
       console.error('Failed to load project:', error);
@@ -240,20 +263,20 @@ export const ShadcnProjectDetail = () => {
                       <div>
                         <p className="text-sm text-neutral-600">Created</p>
                         <p className="text-sm font-medium mt-1">
-                          {formatDistanceToNow(new Date(project.createdAt), { addSuffix: true })}
+                          {safeFormatDate(project.createdAt)}
                         </p>
                       </div>
                       <div>
                         <p className="text-sm text-neutral-600">Last Updated</p>
                         <p className="text-sm font-medium mt-1">
-                          {formatDistanceToNow(new Date(project.updatedAt), { addSuffix: true })}
+                          {safeFormatDate(project.updatedAt)}
                         </p>
                       </div>
                       {project.lastAnalyzedAt && (
                         <div className="col-span-2">
                           <p className="text-sm text-neutral-600">Last Analyzed</p>
                           <p className="text-sm font-medium mt-1">
-                            {formatDistanceToNow(new Date(project.lastAnalyzedAt), { addSuffix: true })}
+                            {safeFormatDate(project.lastAnalyzedAt)}
                           </p>
                         </div>
                       )}
@@ -437,7 +460,7 @@ export const ShadcnProjectDetail = () => {
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium">Project created</p>
                       <p className="text-xs text-neutral-600 mt-1">
-                        {formatDistanceToNow(new Date(project.createdAt), { addSuffix: true })}
+                        {safeFormatDate(project.createdAt)}
                       </p>
                     </div>
                   </div>
@@ -449,7 +472,7 @@ export const ShadcnProjectDetail = () => {
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium">Analysis completed</p>
                         <p className="text-xs text-neutral-600 mt-1">
-                          {formatDistanceToNow(new Date(project.lastAnalyzedAt), { addSuffix: true })}
+                          {safeFormatDate(project.lastAnalyzedAt)}
                         </p>
                       </div>
                     </div>
