@@ -20,14 +20,21 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { projectService } from '@/services/project.service';
-import type { Project } from '@/types/api';
+import { analysisService } from '@/services/analysis.service';
+import { diagramService } from '@/services/diagram.service';
+import type { Project, Analysis, Diagram } from '@/types/api';
 import { formatDistanceToNow } from 'date-fns';
+import { useToast } from '@/components/ui/use-toast';
 
 export const ShadcnProjectDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [project, setProject] = useState<Project | null>(null);
+  const [analysis, setAnalysis] = useState<Analysis | null>(null);
+  const [diagrams, setDiagrams] = useState<Diagram[]>([]);
   const [loading, setLoading] = useState(true);
+  const [analyzing, setAnalyzing] = useState(false);
   const [copied, setCopied] = useState(false);
 
   // Helper function to safely format dates
@@ -76,6 +83,38 @@ export const ShadcnProjectDetail = () => {
       navigator.clipboard.writeText(project.githubUrl);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  const handleRunAnalysis = async () => {
+    if (!id) return;
+    
+    try {
+      setAnalyzing(true);
+      toast({
+        title: 'Analysis Started',
+        description: 'Analyzing your project files...',
+      });
+
+      const response = await analysisService.analyzeProject(id);
+      setAnalysis(response.data);
+      
+      // Reload project to get updated lastAnalyzedAt
+      await loadProject();
+
+      toast({
+        title: 'Analysis Complete',
+        description: 'Project analysis completed successfully!',
+      });
+    } catch (error) {
+      console.error('Analysis failed:', error);
+      toast({
+        title: 'Analysis Failed',
+        description: error instanceof Error ? error.message : 'Failed to analyze project',
+        variant: 'destructive',
+      });
+    } finally {
+      setAnalyzing(false);
     }
   };
 
@@ -319,9 +358,14 @@ export const ShadcnProjectDetail = () => {
                     <CardTitle className="text-base">Quick Actions</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-2">
-                    <Button className="w-full justify-start" variant="outline">
-                      <PlayCircle className="h-4 w-4 mr-2" />
-                      Run Analysis
+                    <Button 
+                      className="w-full justify-start" 
+                      variant="outline"
+                      onClick={handleRunAnalysis}
+                      disabled={analyzing}
+                    >
+                      <PlayCircle className={`h-4 w-4 mr-2 ${analyzing ? 'animate-spin' : ''}`} />
+                      {analyzing ? 'Analyzing...' : 'Run Analysis'}
                     </Button>
                     <Button className="w-full justify-start" variant="outline">
                       <Sparkles className="h-4 w-4 mr-2" />
