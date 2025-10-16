@@ -423,8 +423,8 @@ export class ProjectController {
             const userId = req.user!.userId;
             const projectId = req.params.id as string;
 
-            // Verify project access
-            const project = await projectService.getProjectById(projectId, userId);
+            // Verify project access (correct parameter order: userId, projectId)
+            const project = await projectService.getProjectById(userId, projectId);
 
             // Return files from project data (included from getProjectById)
             const files = (project as any).codeFiles || [];
