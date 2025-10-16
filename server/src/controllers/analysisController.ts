@@ -31,7 +31,7 @@ export class AnalysisController {
     async analyseProject(req: Request, res: Response, next: NextFunction) {
         try {
             const userId = req.user!.userId;
-            const { projectId } = req.params;
+            const projectId = req.params.id; // Changed from req.params.projectId
             const { fields } = req.body;
 
             if (!projectId) {
@@ -195,7 +195,7 @@ export class AnalysisController {
     async getAnalysisProgress(req: Request, res: Response, next: NextFunction) {
         try {
             const userId = req.user!.userId;
-            const projectId = req.params.projectId;
+            const projectId = req.params.id; // Changed from req.params.projectId
             if (!projectId) {
                 return new UnauthorizedError("Project ID is required");
             }
@@ -383,7 +383,7 @@ export class AnalysisController {
     async getRecommendations(req: Request, res: Response, next: NextFunction) {
         try {
             const userId = req.user!.userId;
-            const projectId = req.params.projectId;
+            const projectId = req.params.id; // Changed from req.params.projectId
             if (!projectId) {
                 return new UnauthorizedError("Project ID is required");
             }
@@ -413,7 +413,7 @@ export class AnalysisController {
     async exportAnalysis(req: Request, res: Response, next: NextFunction) {
         try {
             const userId = req.user!.userId;
-            const projectId = req.params.projectId;
+            const projectId = req.params.id; // Changed from req.params.projectId
             const format = req.query.format as string || 'json'; // json, csv, pdf
 
             if (!projectId) {
