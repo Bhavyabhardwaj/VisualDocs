@@ -9,13 +9,13 @@ const router = Router();
 // All analysis routes require authentication (applied in main router)
 
 // Analysis operations
-router.post('/:projectId',
+router.post('/:id',
     aiLimiter, // AI operations are resource intensive
     validate(getProjectSchema),
     analysisController.analyseProject
 );
 
-router.get('/:projectId',
+router.get('/:id',
     validate(getProjectSchema),
     analysisController.getProjectAnalysis
 );
@@ -25,18 +25,18 @@ router.get('/results/:analysisId',
 );
 
 // Analysis actions
-router.post('/:projectId/rerun',
+router.post('/:id/rerun',
     aiLimiter,
     validate(getProjectSchema),
     analysisController.rerunAnalysis
 );
 
-router.get('/:projectId/progress',
+router.get('/:id/progress',
     validate(getProjectSchema),
     analysisController.getAnalysisProgress
 );
 
-router.get('/:projectId/recommendations',
+router.get('/:id/recommendations',
     validate(getProjectSchema),
     analysisController.getRecommendations
 );

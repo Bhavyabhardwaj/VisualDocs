@@ -94,7 +94,12 @@ export const ShadcnProjectDetail = () => {
       
       // First check if project has files
       const filesResponse = await projectService.getProjectFiles(id);
-      const files = filesResponse.data;
+      console.log('📦 Files response:', filesResponse);
+      
+      // The response structure is { data: { files: [...] } }
+      const files = filesResponse.data?.files || filesResponse.data || [];
+      
+      console.log('📁 Extracted files:', files);
       
       if (!files || files.length === 0) {
         toast({
