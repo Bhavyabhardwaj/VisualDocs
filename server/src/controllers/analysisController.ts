@@ -32,7 +32,7 @@ export class AnalysisController {
         try {
             const userId = req.user!.userId;
             const projectId = req.params.id; // Changed from req.params.projectId
-            const { fields } = req.body;
+            const { fields } = req.body || {}; // Handle undefined body
 
             if (!projectId) {
                 return new UnauthorizedError("Project ID is required");

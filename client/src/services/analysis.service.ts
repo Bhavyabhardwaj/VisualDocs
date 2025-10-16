@@ -8,8 +8,8 @@ import type {
 
 export const analysisService = {
   // Analysis Operations
-  async analyzeProject(projectId: string): Promise<ApiResponse<Analysis>> {
-    return apiClient.post<ApiResponse<Analysis>>(`/api/analysis/${projectId}`);
+  async analyzeProject(projectId: string, fields?: string[]): Promise<ApiResponse<Analysis>> {
+    return apiClient.post<ApiResponse<Analysis>>(`/api/analysis/${projectId}`, { fields });
   },
 
   async getProjectAnalysis(projectId: string): Promise<ApiResponse<Analysis>> {
