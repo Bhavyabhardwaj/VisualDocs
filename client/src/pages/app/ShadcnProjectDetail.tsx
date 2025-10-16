@@ -91,9 +91,26 @@ export const ShadcnProjectDetail = () => {
     
     try {
       setAnalyzing(true);
+      
+      // First check if project has files
+      const filesResponse = await projectService.getProjectFiles(id);
+      const files = filesResponse.data;
+      
+      if (!files || files.length === 0) {
+        toast({
+          title: 'No Files Found',
+          description: 'Please upload files to your project before running analysis.',
+          variant: 'destructive',
+        });
+        setAnalyzing(false);
+        return;
+      }
+
+      console.log(`📁 Found ${files.length} files to analyze`);
+      
       toast({
         title: 'Analysis Started',
-        description: 'Analyzing your project files...',
+        description: `Analyzing ${files.length} file(s)...`,
       });
 
       const response = await analysisService.analyzeProject(id);
