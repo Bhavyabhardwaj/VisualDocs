@@ -97,7 +97,7 @@ export const ShadcnProjectDetail = () => {
       });
 
       const response = await analysisService.analyzeProject(id);
-      setAnalysis(response.data);
+      setAnalysis(response.data || null);
       
       // Reload project to get updated lastAnalyzedAt
       await loadProject();
