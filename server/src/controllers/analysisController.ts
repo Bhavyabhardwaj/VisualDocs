@@ -39,7 +39,8 @@ export class AnalysisController {
             }
 
             // Simulate analysis process
-            const analysis = await analysisService.analyzeProject(userId, projectId, fields);
+            // Note: Service expects (projectId, userId, fileIds) - swapped order!
+            const analysis = await analysisService.analyzeProject(projectId, userId, fields);
 
             return successResponse(
                 res,
