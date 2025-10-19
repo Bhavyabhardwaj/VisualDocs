@@ -40,4 +40,9 @@ export const analysisService = {
     });
     return response;
   },
+
+  // Generate comprehensive documentation
+  async generateDocumentation(projectId: string): Promise<ApiResponse<{ documentation: string }>> {
+    return apiClient.get<ApiResponse<{ documentation: string }>>(`/api/analysis/${projectId}/documentation`);
+  },
 };

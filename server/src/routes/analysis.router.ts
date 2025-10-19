@@ -41,6 +41,13 @@ router.get('/:id/recommendations',
     analysisController.getRecommendations
 );
 
+// Generate comprehensive documentation
+router.get('/:id/documentation',
+    aiLimiter,
+    validate(getProjectSchema),
+    analysisController.generateDocumentation
+);
+
 // Export functionality with validation
 router.get('/:projectId/export',
     generalLimiter,
