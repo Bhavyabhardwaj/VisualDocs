@@ -119,6 +119,9 @@ export const ShadcnProjectDetail = () => {
       });
 
       const response = await analysisService.analyzeProject(id);
+      console.log('📊 Analysis response:', response);
+      console.log('📊 Analysis data:', response.data);
+      
       setAnalysis(response.data || null);
       
       // Reload project to get updated lastAnalyzedAt
@@ -447,28 +450,102 @@ export const ShadcnProjectDetail = () => {
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    {project.lastAnalyzedAt ? (
+                    {analysis ? (
+                      <div className="space-y-6">
+                        {/* Analysis Status */}
+                        <div className="flex items-center justify-between p-4 bg-neutral-50 rounded-lg">
+                          <div>
+                            <p className="text-sm font-medium text-neutral-900">Status: {analysis.status}</p>
+                            <p className="text-xs text-neutral-600 mt-1">
+                              Progress: {analysis.progress}%
+                            </p>
+                          </div>
+                          {analysis.status === 'completed' && (
+                            <div className="flex items-center gap-2 text-green-600">
+                              <Check className="h-5 w-5" />
+                              <span className="text-sm font-medium">Complete</span>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Code Quality Metrics */}
+                        {analysis.results && (
+                          <>
+                            <div>
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="text-sm text-neutral-600">Code Quality Score</span>
+                                <span className="text-sm font-medium">{analysis.results.codeQuality.score}%</span>
+                              </div>
+                              <Progress value={analysis.results.codeQuality.score} className="h-2" />
+                            </div>
+
+                            {/* Metrics */}
+                            <div className="grid grid-cols-3 gap-4">
+                              <div className="p-3 bg-neutral-50 rounded-lg border">
+                                <p className="text-xs text-neutral-600">Lines of Code</p>
+                                <p className="text-lg font-semibold text-neutral-900 mt-1">
+                                  {analysis.results.metrics.linesOfCode.toLocaleString()}
+                                </p>
+                              </div>
+                              <div className="p-3 bg-neutral-50 rounded-lg border">
+                                <p className="text-xs text-neutral-600">Files</p>
+                                <p className="text-lg font-semibold text-neutral-900 mt-1">
+                                  {analysis.results.metrics.files}
+                                </p>
+                              </div>
+                              <div className="p-3 bg-neutral-50 rounded-lg border">
+                                <p className="text-xs text-neutral-600">Complexity</p>
+                                <p className="text-lg font-semibold text-neutral-900 mt-1">
+                                  {analysis.results.metrics.complexity}
+                                </p>
+                              </div>
+                            </div>
+
+                            {/* Issues */}
+                            {analysis.results.codeQuality.issues.length > 0 && (
+                              <div>
+                                <h3 className="text-sm font-medium text-neutral-900 mb-3">Code Issues</h3>
+                                <div className="space-y-2">
+                                  {analysis.results.codeQuality.issues.slice(0, 5).map((issue, idx) => (
+                                    <div key={idx} className="p-3 border rounded-lg">
+                                      <div className="flex items-start gap-3">
+                                        <div className={`px-2 py-1 rounded text-xs font-medium ${
+                                          issue.severity === 'critical' ? 'bg-red-100 text-red-700' :
+                                          issue.severity === 'high' ? 'bg-orange-100 text-orange-700' :
+                                          issue.severity === 'medium' ? 'bg-yellow-100 text-yellow-700' :
+                                          'bg-blue-100 text-blue-700'
+                                        }`}>
+                                          {issue.severity}
+                                        </div>
+                                        <div className="flex-1">
+                                          <p className="text-sm text-neutral-900">{issue.message}</p>
+                                          <p className="text-xs text-neutral-600 mt-1">
+                                            {issue.file}:{issue.line}
+                                          </p>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Summary */}
+                            <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                              <h3 className="text-sm font-medium text-blue-900 mb-2">Summary</h3>
+                              <p className="text-sm text-blue-800">{analysis.results.summary}</p>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    ) : project.lastAnalyzedAt ? (
                       <div className="space-y-4">
                         <div>
                           <div className="flex items-center justify-between mb-2">
                             <span className="text-sm text-neutral-600">Code Quality</span>
-                            <span className="text-sm font-medium">85%</span>
+                            <span className="text-sm font-medium">Loading...</span>
                           </div>
-                          <Progress value={85} className="h-2" />
-                        </div>
-                        <div>
-                          <div className="flex items-center justify-between mb-2">
-                            <span className="text-sm text-neutral-600">Documentation Coverage</span>
-                            <span className="text-sm font-medium">60%</span>
-                          </div>
-                          <Progress value={60} className="h-2" />
-                        </div>
-                        <div>
-                          <div className="flex items-center justify-between mb-2">
-                            <span className="text-sm text-neutral-600">Test Coverage</span>
-                            <span className="text-sm font-medium">45%</span>
-                          </div>
-                          <Progress value={45} className="h-2" />
+                          <Progress value={0} className="h-2" />
                         </div>
                       </div>
                     ) : (
@@ -477,9 +554,9 @@ export const ShadcnProjectDetail = () => {
                         <p className="text-sm text-neutral-600 mb-4">
                           No analysis available yet
                         </p>
-                        <Button>
-                          <PlayCircle className="h-4 w-4 mr-2" />
-                          Run First Analysis
+                        <Button onClick={handleRunAnalysis} disabled={analyzing}>
+                          <PlayCircle className={`h-4 w-4 mr-2 ${analyzing ? 'animate-spin' : ''}`} />
+                          {analyzing ? 'Analyzing...' : 'Run First Analysis'}
                         </Button>
                       </div>
                     )}
