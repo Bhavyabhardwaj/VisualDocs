@@ -743,4 +743,29 @@ startxref
 878
 %%EOF`;
     }
+    // Generate comprehensive documentation
+    async generateDocumentation(req: Request, res: Response, next: NextFunction) {
+        try {
+            const userId = req.user!.userId;
+            const projectId = req.params.id;
+
+            if (!projectId) {
+                throw new BadRequestError('Project ID is required');
+            }
+
+            logger.info('Generating documentation', { projectId, userId });
+
+            const documentation = await analysisService.generateDocumentation(projectId, userId);
+
+            return successResponse(
+                res,
+                { documentation },
+                'Documentation generated successfully',
+                200
+            );
+        } catch (error) {
+            next(error);
+        }
+    }
 }
+
