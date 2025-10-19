@@ -122,7 +122,11 @@ export const ShadcnProjectDetail = () => {
       console.log('📊 Analysis response:', response);
       console.log('📊 Analysis data:', response.data);
       
-      setAnalysis(response.data || null);
+      // Backend returns { analysis: {...} }, extract the analysis object
+      const analysisData = (response.data as any)?.analysis || response.data;
+      console.log('📊 Extracted analysis:', analysisData);
+      
+      setAnalysis(analysisData);
       
       // Reload project to get updated lastAnalyzedAt
       await loadProject();
@@ -452,98 +456,157 @@ export const ShadcnProjectDetail = () => {
                   <CardContent>
                     {analysis ? (
                       <div className="space-y-6">
-                        {/* Analysis Status */}
-                        <div className="flex items-center justify-between p-4 bg-neutral-50 rounded-lg">
+                        {/* Analysis Header */}
+                        <div className="flex items-center justify-between p-4 bg-green-50 rounded-lg border border-green-200">
                           <div>
-                            <p className="text-sm font-medium text-neutral-900">Status: {analysis.status}</p>
-                            <p className="text-xs text-neutral-600 mt-1">
-                              Progress: {analysis.progress}%
+                            <p className="text-sm font-medium text-green-900">Analysis Complete</p>
+                            <p className="text-xs text-green-700 mt-1">
+                              Completed {analysis.completedAt ? new Date(analysis.completedAt).toLocaleString() : 'recently'}
                             </p>
                           </div>
-                          {analysis.status === 'completed' && (
-                            <div className="flex items-center gap-2 text-green-600">
-                              <Check className="h-5 w-5" />
-                              <span className="text-sm font-medium">Complete</span>
-                            </div>
-                          )}
+                          <div className="flex items-center gap-2 text-green-600">
+                            <Check className="h-5 w-5" />
+                          </div>
                         </div>
 
-                        {/* Code Quality Metrics */}
-                        {analysis.results && (
-                          <>
-                            <div>
-                              <div className="flex items-center justify-between mb-2">
-                                <span className="text-sm text-neutral-600">Code Quality Score</span>
-                                <span className="text-sm font-medium">{analysis.results.codeQuality.score}%</span>
-                              </div>
-                              <Progress value={analysis.results.codeQuality.score} className="h-2" />
-                            </div>
+                        {/* Metrics Grid */}
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                          <div className="p-4 bg-neutral-50 rounded-lg border">
+                            <p className="text-xs text-neutral-600">Lines of Code</p>
+                            <p className="text-2xl font-semibold text-neutral-900 mt-1">
+                              {(analysis as any).totalLinesOfCode?.toLocaleString() || 0}
+                            </p>
+                          </div>
+                          <div className="p-4 bg-neutral-50 rounded-lg border">
+                            <p className="text-xs text-neutral-600">Total Files</p>
+                            <p className="text-2xl font-semibold text-neutral-900 mt-1">
+                              {(analysis as any).totalFiles || 0}
+                            </p>
+                          </div>
+                          <div className="p-4 bg-neutral-50 rounded-lg border">
+                            <p className="text-xs text-neutral-600">Functions</p>
+                            <p className="text-2xl font-semibold text-neutral-900 mt-1">
+                              {(analysis as any).functionCount || 0}
+                            </p>
+                          </div>
+                          <div className="p-4 bg-neutral-50 rounded-lg border">
+                            <p className="text-xs text-neutral-600">Classes</p>
+                            <p className="text-2xl font-semibold text-neutral-900 mt-1">
+                              {(analysis as any).classCount || 0}
+                            </p>
+                          </div>
+                        </div>
 
-                            {/* Metrics */}
+                        {/* Complexity */}
+                        {(analysis as any).complexity && (
+                          <div className="p-4 bg-neutral-50 rounded-lg border">
+                            <h3 className="text-sm font-medium text-neutral-900 mb-3">Complexity Analysis</h3>
                             <div className="grid grid-cols-3 gap-4">
-                              <div className="p-3 bg-neutral-50 rounded-lg border">
-                                <p className="text-xs text-neutral-600">Lines of Code</p>
-                                <p className="text-lg font-semibold text-neutral-900 mt-1">
-                                  {analysis.results.metrics.linesOfCode.toLocaleString()}
-                                </p>
-                              </div>
-                              <div className="p-3 bg-neutral-50 rounded-lg border">
-                                <p className="text-xs text-neutral-600">Files</p>
-                                <p className="text-lg font-semibold text-neutral-900 mt-1">
-                                  {analysis.results.metrics.files}
-                                </p>
-                              </div>
-                              <div className="p-3 bg-neutral-50 rounded-lg border">
-                                <p className="text-xs text-neutral-600">Complexity</p>
-                                <p className="text-lg font-semibold text-neutral-900 mt-1">
-                                  {analysis.results.metrics.complexity}
-                                </p>
-                              </div>
-                            </div>
-
-                            {/* Issues */}
-                            {analysis.results.codeQuality.issues.length > 0 && (
                               <div>
-                                <h3 className="text-sm font-medium text-neutral-900 mb-3">Code Issues</h3>
-                                <div className="space-y-2">
-                                  {analysis.results.codeQuality.issues.slice(0, 5).map((issue, idx) => (
-                                    <div key={idx} className="p-3 border rounded-lg">
-                                      <div className="flex items-start gap-3">
-                                        <div className={`px-2 py-1 rounded text-xs font-medium ${
-                                          issue.severity === 'critical' ? 'bg-red-100 text-red-700' :
-                                          issue.severity === 'high' ? 'bg-orange-100 text-orange-700' :
-                                          issue.severity === 'medium' ? 'bg-yellow-100 text-yellow-700' :
-                                          'bg-blue-100 text-blue-700'
-                                        }`}>
-                                          {issue.severity}
-                                        </div>
-                                        <div className="flex-1">
-                                          <p className="text-sm text-neutral-900">{issue.message}</p>
-                                          <p className="text-xs text-neutral-600 mt-1">
-                                            {issue.file}:{issue.line}
-                                          </p>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  ))}
-                                </div>
+                                <p className="text-xs text-neutral-600">Total</p>
+                                <p className="text-lg font-semibold text-neutral-900">
+                                  {(analysis as any).complexity.total}
+                                </p>
                               </div>
-                            )}
-
-                            {/* Summary */}
-                            <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                              <h3 className="text-sm font-medium text-blue-900 mb-2">Summary</h3>
-                              <p className="text-sm text-blue-800">{analysis.results.summary}</p>
+                              <div>
+                                <p className="text-xs text-neutral-600">Average</p>
+                                <p className="text-lg font-semibold text-neutral-900">
+                                  {(analysis as any).complexity.average?.toFixed(2)}
+                                </p>
+                              </div>
+                              <div>
+                                <p className="text-xs text-neutral-600">Distribution</p>
+                                <p className="text-sm text-neutral-700">
+                                  {Object.keys((analysis as any).complexity.distribution || {}).length} levels
+                                </p>
+                              </div>
                             </div>
-                          </>
+                          </div>
                         )}
+
+                        {/* Dependencies */}
+                        {(analysis as any).dependencies && (
+                          <div className="p-4 bg-neutral-50 rounded-lg border">
+                            <h3 className="text-sm font-medium text-neutral-900 mb-3">Dependencies</h3>
+                            <div className="grid grid-cols-2 gap-4">
+                              <div>
+                                <p className="text-xs text-neutral-600">External</p>
+                                <p className="text-lg font-semibold text-neutral-900">
+                                  {(analysis as any).dependencies.external?.length || 0}
+                                </p>
+                                {(analysis as any).dependencies.external?.length > 0 && (
+                                  <div className="mt-2 space-y-1">
+                                    {(analysis as any).dependencies.external.slice(0, 5).map((dep: string, idx: number) => (
+                                      <p key={idx} className="text-xs text-neutral-600 font-mono truncate">
+                                        {dep}
+                                      </p>
+                                    ))}
+                                    {(analysis as any).dependencies.external.length > 5 && (
+                                      <p className="text-xs text-neutral-500">
+                                        +{(analysis as any).dependencies.external.length - 5} more
+                                      </p>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+                              <div>
+                                <p className="text-xs text-neutral-600">Internal</p>
+                                <p className="text-lg font-semibold text-neutral-900">
+                                  {(analysis as any).dependencies.internal?.length || 0}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Language Distribution */}
+                        {(analysis as any).languageDistribution && (
+                          <div className="p-4 bg-neutral-50 rounded-lg border">
+                            <h3 className="text-sm font-medium text-neutral-900 mb-3">Language Distribution</h3>
+                            <div className="space-y-2">
+                              {Object.entries((analysis as any).languageDistribution).map(([lang, count]) => (
+                                <div key={lang} className="flex items-center justify-between">
+                                  <span className="text-sm text-neutral-700 capitalize">{lang}</span>
+                                  <span className="text-sm font-medium text-neutral-900">{count} files</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Recommendations */}
+                        {(analysis as any).recommendations && (analysis as any).recommendations.length > 0 && (
+                          <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                            <h3 className="text-sm font-medium text-blue-900 mb-2">
+                              <Sparkles className="h-4 w-4 inline mr-2" />
+                              AI Recommendations
+                            </h3>
+                            <ul className="space-y-2">
+                              {(analysis as any).recommendations.map((rec: string, idx: number) => (
+                                <li key={idx} className="text-sm text-blue-800 flex items-start gap-2">
+                                  <span className="text-blue-600 mt-0.5">•</span>
+                                  <span>{rec}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+
+                        {/* Raw Data (for debugging) */}
+                        <details className="text-xs">
+                          <summary className="cursor-pointer text-neutral-600 hover:text-neutral-900">
+                            View raw analysis data
+                          </summary>
+                          <pre className="mt-2 p-3 bg-neutral-100 rounded overflow-auto text-xs">
+                            {JSON.stringify(analysis, null, 2)}
+                          </pre>
+                        </details>
                       </div>
                     ) : project.lastAnalyzedAt ? (
                       <div className="space-y-4">
                         <div>
                           <div className="flex items-center justify-between mb-2">
-                            <span className="text-sm text-neutral-600">Code Quality</span>
-                            <span className="text-sm font-medium">Loading...</span>
+                            <span className="text-sm text-neutral-600">Loading analysis...</span>
                           </div>
                           <Progress value={0} className="h-2" />
                         </div>
