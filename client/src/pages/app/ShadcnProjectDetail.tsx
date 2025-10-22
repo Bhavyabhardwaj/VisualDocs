@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { 
   ArrowLeft, GitBranch, FileText, Sparkles, Download, Share2,
   PlayCircle, Settings, Trash2, Archive, MoreVertical, FolderTree,
-  Code2, FileJson, Eye, Copy, Check, Network, GitGraph, Database, X
+  Code2, FileJson, Eye, Copy, Check, Network, GitGraph, Database
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -300,18 +300,6 @@ export const ShadcnProjectDetail = () => {
         description: 'Failed to download diagram',
         variant: 'destructive',
       });
-    }
-  };
-
-  const handleLoadDiagrams = async () => {
-    if (!id) return;
-    
-    try {
-      const response = await diagramService.getProjectDiagrams(id);
-      const diagramsData = (response.data as any)?.diagrams || response.data || [];
-      setDiagrams(diagramsData);
-    } catch (error) {
-      console.error('Failed to load diagrams:', error);
     }
   };
 
