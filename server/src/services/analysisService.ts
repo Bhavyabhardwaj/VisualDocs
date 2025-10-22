@@ -999,12 +999,9 @@ export class AnalysisService {
         files: any[]
     ): Promise<void> {
         try {
-            // Get project details
+            // Get project details and analysis
             const project = await prisma.project.findUnique({
-                where: { id: projectId },
-                include: {
-                    analysis: true
-                }
+                where: { id: projectId }
             });
 
             if (!project) {
@@ -1012,30 +1009,38 @@ export class AnalysisService {
                 return;
             }
 
-            // Check if analysis exists
-            if (!project.analysis) {
+            // Get existing analysis
+            const analysis = await prisma.analysis.findUnique({
+                where: { projectId }
+            });
+
+            if (!analysis) {
                 logger.warn('No analysis found for diagram generation', { projectId });
                 return;
             }
 
-            // Convert analysis to ProjectAnalysisResult format for AI
+            // Convert analysis to format expected by AI service
             const analysisData: any = {
-                totalFiles: project.analysis.totalFiles,
-                totalLinesOfCode: project.analysis.totalLinesOfCode,
-                totalComplexity: project.analysis.totalComplexity,
-                averageComplexity: project.analysis.averageComplexity,
-                functionCount: project.analysis.functionCount,
-                classCount: project.analysis.classCount,
-                interfaceCount: project.analysis.interfaceCount,
-                languageDistribution: project.analysis.languageDistribution,
-                frameworksDetected: project.analysis.frameworksDetected,
-                dependencies: project.analysis.dependencies,
-                recommendations: project.analysis.recommendations,
-                metrics: project.analysis.metrics
+                totalFiles: analysis.totalFiles,
+                totalLinesOfCode: analysis.totalLinesOfCode,
+                totalComplexity: analysis.totalComplexity,
+                averageComplexity: analysis.averageComplexity,
+                functionCount: analysis.functionCount,
+                classCount: analysis.classCount,
+                interfaceCount: analysis.interfaceCount,
+                languageDistribution: analysis.languageDistribution,
+                frameworksDetected: analysis.frameworksDetected,
+                dependencies: analysis.dependencies,
+                recommendations: analysis.recommendations,
+                metrics: analysis.metrics
             };
 
             // Generate multiple diagram types
-            const diagramTypes: Array<{ type: 'ARCHITECTURE' | 'FLOWCHART' | 'CLASS' | 'SEQUENCE' | 'ER', title: string, description: string }> = [
+            const diagramTypes: Array<{ 
+                type: 'ARCHITECTURE' | 'FLOWCHART' | 'CLASS' | 'SEQUENCE' | 'ER', 
+                title: string, 
+                description: string 
+            }> = [
                 { 
                     type: 'ARCHITECTURE', 
                     title: `${project.name} - Architecture Diagram`,
@@ -1055,7 +1060,10 @@ export class AnalysisService {
 
             for (const diagramConfig of diagramTypes) {
                 try {
-                    logger.info(`Generating ${diagramConfig.type} diagram`, { projectId, type: diagramConfig.type });
+                    logger.info(`Generating ${diagramConfig.type} diagram`, { 
+                        projectId, 
+                        type: diagramConfig.type 
+                    });
                     
                     // Generate Mermaid code using AI
                     const mermaidCode = await aiService.generateDiagramDescription(
@@ -1072,14 +1080,17 @@ export class AnalysisService {
                             type: diagramConfig.type,
                             title: diagramConfig.title,
                             description: diagramConfig.description,
-                            prompt: `Auto-generated ${diagramConfig.type.toLowerCase()} diagram`,
-                            content: mermaidCode,
+                            prompt: `Auto-generated ${diagramConfig.type.toLowerCase()} diagram from code analysis`,
+                            imageData: mermaidCode,
                             format: 'mermaid',
                             status: 'COMPLETED'
                         }
                     });
 
-                    logger.info(`Successfully generated ${diagramConfig.type} diagram`, { projectId, type: diagramConfig.type });
+                    logger.info(`Successfully generated ${diagramConfig.type} diagram`, { 
+                        projectId, 
+                        type: diagramConfig.type 
+                    });
                 } catch (diagramError: any) {
                     logger.error(`Failed to generate ${diagramConfig.type} diagram`, { 
                         projectId, 
@@ -1092,7 +1103,7 @@ export class AnalysisService {
 
             logger.info('Diagram auto-generation completed', { 
                 projectId, 
-                generatedTypes: diagramTypes.length 
+                generatedCount: diagramTypes.length 
             });
         } catch (error: any) {
             logger.error('Auto-generate diagrams failed', { 
