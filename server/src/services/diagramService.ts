@@ -22,14 +22,18 @@ export class DiagramService {
             if (!project || project.userId !== userId) {
                 throw new UnauthorizedError('Project not found or access denied');
             }
+            
+            // Normalize diagram type to uppercase
+            const normalizedType = (request.type as string).toUpperCase() as 'ARCHITECTURE' | 'FLOWCHART' | 'SEQUENCE' | 'CLASS' | 'ER' | 'COMPONENT';
+            
             // create a new diagram entry in the database
             const diagram = await prisma.diagram.create({
                 data: {
                     projectId: request.projectId,
-                    type: request.type,
+                    type: normalizedType === 'ERD' ? 'ER' : normalizedType,
                     title: request.title || 'Untitled Diagram',
                     description: request.description || '',
-                    style: request.style,
+                    style: request.style || 'MODERN',
                     codeFileId: request.codeFileIds ? request.codeFileIds.join(',') : null,
                     prompt: '',
                     status: 'PENDING',

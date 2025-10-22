@@ -203,10 +203,14 @@ export const ShadcnProjectDetail = () => {
         description: `Creating ${type} diagram...`,
       });
 
+      // Convert type to uppercase for API
+      const diagramType = type.toUpperCase() as 'ARCHITECTURE' | 'FLOWCHART' | 'SEQUENCE' | 'CLASS' | 'ER';
+
       const response = await diagramService.generateDiagram({
         projectId: id,
-        type,
+        type: diagramType === 'ERD' ? 'ER' : diagramType,
         title: `${project?.name || 'Project'} ${type.charAt(0).toUpperCase() + type.slice(1)} Diagram`,
+        style: 'MODERN',
       });
 
       // Add new diagram to list
