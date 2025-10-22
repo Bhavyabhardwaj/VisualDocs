@@ -120,7 +120,7 @@ export class DiagramService {
                 userId,
                 progress: 90,
                 status: 'GENERATING',
-                stage: 'FINALIZING',
+                stage: 'STORAGE',
             })
 
             const completedDiagram = await prisma.diagram.update({
@@ -611,5 +611,110 @@ export class DiagramService {
         prompt += 'Make it professional and clear.';
 
         return prompt;
+    }
+
+    // Generate basic fallback diagram in Mermaid format
+    private generateBasicDiagram(type: string, projectName: string): string {
+        const typeUpper = type.toUpperCase();
+        
+        switch (typeUpper) {
+            case 'ARCHITECTURE':
+                return `graph TB
+    subgraph "${projectName} Architecture"
+        A[Application Layer] --> B[Business Logic]
+        B --> C[Data Access Layer]
+        C --> D[(Database)]
+        A --> E[External APIs]
+    end
+    
+    style A fill:#e3f2fd
+    style B fill:#bbdefb
+    style C fill:#90caf9
+    style D fill:#64b5f6
+    style E fill:#42a5f5`;
+
+            case 'FLOWCHART':
+                return `flowchart TD
+    Start([Start]) --> Input[Receive Input]
+    Input --> Process[Process Data]
+    Process --> Decision{Valid?}
+    Decision -->|Yes| Success[Success]
+    Decision -->|No| Error[Error Handler]
+    Success --> End([End])
+    Error --> End
+    
+    style Start fill:#4caf50
+    style End fill:#f44336
+    style Success fill:#8bc34a
+    style Error fill:#ff9800`;
+
+            case 'CLASS':
+                return `classDiagram
+    class Application {
+        +config: Config
+        +initialize()
+        +run()
+    }
+    class Service {
+        +process()
+        +validate()
+    }
+    class Repository {
+        +save()
+        +find()
+        +delete()
+    }
+    class Model {
+        +id: string
+        +data: any
+    }
+    
+    Application --> Service
+    Service --> Repository
+    Repository --> Model`;
+
+            case 'SEQUENCE':
+                return `sequenceDiagram
+    participant User
+    participant Client
+    participant Server
+    participant Database
+    
+    User->>Client: Initiate Request
+    Client->>Server: API Call
+    Server->>Database: Query
+    Database-->>Server: Results
+    Server-->>Client: Response
+    Client-->>User: Display`;
+
+            case 'ER':
+                return `erDiagram
+    USER ||--o{ PROJECT : owns
+    PROJECT ||--|{ FILE : contains
+    PROJECT ||--o{ ANALYSIS : has
+    
+    USER {
+        string id PK
+        string email
+        string name
+    }
+    PROJECT {
+        string id PK
+        string userId FK
+        string name
+    }
+    FILE {
+        string id PK
+        string projectId FK
+        string name
+        string content
+    }`;
+
+            default:
+                return `graph LR
+    A[${projectName}] --> B[Component 1]
+    A --> C[Component 2]
+    A --> D[Component 3]`;
+        }
     }
 }

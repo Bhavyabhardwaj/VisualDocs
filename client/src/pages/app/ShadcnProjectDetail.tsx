@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { 
   ArrowLeft, GitBranch, FileText, Sparkles, Download, Share2,
   PlayCircle, Settings, Trash2, Archive, MoreVertical, FolderTree,
-  Code2, FileJson, Eye, Copy, Check, Network, GitGraph, Database
+  Code2, FileJson, Eye, Copy, Check, Network, GitGraph, Database, X
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -12,6 +12,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -39,6 +46,8 @@ export const ShadcnProjectDetail = () => {
   const [generatingDocs, setGeneratingDocs] = useState(false);
   const [generatingDiagram, setGeneratingDiagram] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [selectedDiagram, setSelectedDiagram] = useState<Diagram | null>(null);
+  const [showDiagramModal, setShowDiagramModal] = useState(false);
 
   // Helper function to safely format dates
   const safeFormatDate = (dateString: string | undefined | null): string => {
@@ -235,6 +244,62 @@ export const ShadcnProjectDetail = () => {
       });
     } finally {
       setGeneratingDiagram(false);
+    }
+  };
+
+  const handleLoadDiagrams = async () => {
+    if (!id) return;
+    
+    try {
+      const response = await diagramService.getProjectDiagrams(id);
+      const diagramsData = (response.data as any)?.diagrams || response.data || [];
+      setDiagrams(diagramsData);
+    } catch (error) {
+      console.error('Failed to load diagrams:', error);
+    }
+  };
+
+  const handleViewDiagram = (diagram: Diagram) => {
+    setSelectedDiagram(diagram);
+    setShowDiagramModal(true);
+  };
+
+  const handleDownloadDiagram = (diagram: Diagram) => {
+    try {
+      // Get the diagram content (Mermaid code or image data)
+      const content = (diagram as any).imageData || diagram.content || '';
+      
+      if (!content) {
+        toast({
+          title: 'No Content',
+          description: 'Diagram has no content to download',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      // Create blob and download
+      const blob = new Blob([content], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${diagram.title.replace(/\s+/g, '_')}.mmd`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      toast({
+        title: 'Downloaded',
+        description: 'Diagram downloaded successfully',
+      });
+    } catch (error) {
+      console.error('Download failed:', error);
+      toast({
+        title: 'Download Failed',
+        description: 'Failed to download diagram',
+        variant: 'destructive',
+      });
     }
   };
 
@@ -929,10 +994,20 @@ export const ShadcnProjectDetail = () => {
                                   </div>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                  <Button variant="ghost" size="sm">
+                                  <Button 
+                                    variant="ghost" 
+                                    size="sm"
+                                    onClick={() => handleViewDiagram(diagram)}
+                                    title="View Diagram"
+                                  >
                                     <Eye className="h-4 w-4" />
                                   </Button>
-                                  <Button variant="ghost" size="sm">
+                                  <Button 
+                                    variant="ghost" 
+                                    size="sm"
+                                    onClick={() => handleDownloadDiagram(diagram)}
+                                    title="Download Diagram"
+                                  >
                                     <Download className="h-4 w-4" />
                                   </Button>
                                   <Button 
@@ -1036,6 +1111,75 @@ export const ShadcnProjectDetail = () => {
           </div>
         </div>
       </div>
+
+      {/* Diagram Viewer Modal */}
+      <Dialog open={showDiagramModal} onOpenChange={setShowDiagramModal}>
+        <DialogContent className="max-w-4xl max-h-[80vh]">
+          <DialogHeader>
+            <DialogTitle>{selectedDiagram?.title}</DialogTitle>
+            <DialogDescription>
+              {selectedDiagram?.type} • {selectedDiagram?.format}
+            </DialogDescription>
+          </DialogHeader>
+          <ScrollArea className="h-[60vh] w-full rounded border p-4">
+            {selectedDiagram && (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between mb-4">
+                  <Badge variant={
+                    selectedDiagram.status === 'completed' ? 'default' :
+                    selectedDiagram.status === 'generating' ? 'secondary' : 'destructive'
+                  }>
+                    {selectedDiagram.status}
+                  </Badge>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        const content = (selectedDiagram as any).imageData || selectedDiagram.content || '';
+                        navigator.clipboard.writeText(content);
+                        toast({
+                          title: 'Copied',
+                          description: 'Diagram code copied to clipboard',
+                        });
+                      }}
+                    >
+                      <Copy className="h-4 w-4 mr-2" />
+                      Copy Code
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleDownloadDiagram(selectedDiagram)}
+                    >
+                      <Download className="h-4 w-4 mr-2" />
+                      Download
+                    </Button>
+                  </div>
+                </div>
+                <div className="bg-neutral-50 p-4 rounded font-mono text-sm whitespace-pre-wrap">
+                  {(selectedDiagram as any).imageData || selectedDiagram.content || 'No content available'}
+                </div>
+                <div className="text-xs text-neutral-500 mt-4">
+                  <p>Created: {new Date(selectedDiagram.createdAt).toLocaleString()}</p>
+                  <p className="mt-1">
+                    Tip: Copy the code above and paste it into{' '}
+                    <a 
+                      href="https://mermaid.live" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:underline"
+                    >
+                      mermaid.live
+                    </a>
+                    {' '}to visualize it
+                  </p>
+                </div>
+              </div>
+            )}
+          </ScrollArea>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
