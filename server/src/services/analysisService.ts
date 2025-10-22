@@ -481,6 +481,80 @@ export class AnalysisService {
         });
     }
 
+    // Helper method to aggregate results without storing to DB
+    private aggregateAnalysisResults(fileAnalyses: FileAnalysisResult[], projectId: string): ProjectAnalysisResult {
+        const languageDistribution = new Map<string, number>();
+        const dependencySet = new Set<string>();
+        const internalDeps = new Set<string>();
+        
+        let totalFiles = 0;
+        let totalLinesOfCode = 0;
+        let functionCount = 0;
+        let classCount = 0;
+        let interfaceCount = 0;
+        let totalComplexity = 0;
+        
+        const complexityBuckets: { [key: string]: number } = {
+            'low (1-5)': 0,
+            'medium (6-10)': 0,
+            'high (11-15)': 0,
+            'critical (16+)': 0
+        };
+
+        for (const analysis of fileAnalyses) {
+            totalFiles++;
+            totalLinesOfCode += analysis.linesOfCode;
+            functionCount += analysis.functions.length;
+            classCount += analysis.classes.length;
+            interfaceCount += analysis.interfaces.length;
+            totalComplexity += analysis.complexity;
+
+            const currentCount = languageDistribution.get(analysis.language) || 0;
+            languageDistribution.set(analysis.language, currentCount + 1);
+
+            if (analysis.complexity <= 5) complexityBuckets['low (1-5)']++;
+            else if (analysis.complexity <= 10) complexityBuckets['medium (6-10)']++;
+            else if (analysis.complexity <= 15) complexityBuckets['high (11-15)']++;
+            else complexityBuckets['critical (16+)']++;
+
+            analysis.imports.forEach(imp => {
+                if (imp.startsWith('.') || imp.startsWith('/')) {
+                    internalDeps.add(imp);
+                } else {
+                    dependencySet.add(imp);
+                }
+            });
+        }
+
+        const averageComplexity = totalFiles > 0 ? totalComplexity / totalFiles : 0;
+
+        return {
+            id: `analysis_${Date.now()}`,
+            projectId,
+            totalFiles,
+            totalLinesOfCode,
+            functionCount,
+            classCount,
+            interfaceCount,
+            languageDistribution: Object.fromEntries(languageDistribution),
+            complexity: {
+                total: totalComplexity,
+                average: averageComplexity,
+                distribution: complexityBuckets
+            },
+            dependencies: {
+                external: Array.from(dependencySet),
+                internal: Array.from(internalDeps)
+            },
+            recommendations: [
+                averageComplexity <= 5 ? 'Code quality looks good - maintain current standards' : 
+                averageComplexity <= 10 ? 'Consider refactoring more complex functions' :
+                'High complexity detected - prioritize refactoring'
+            ],
+            completedAt: new Date().toISOString()
+        };
+    }
+
     // Generate comprehensive documentation
     async generateDocumentation(projectId: string, userId: string): Promise<string> {
         try {
@@ -517,8 +591,8 @@ export class AnalysisService {
                 files.map(file => this.analyzeFile(file))
             );
 
-            // Aggregate data
-            const aggregated = await this.aggregateResults(fileAnalyses);
+            // Aggregate data (without storing to DB)
+            const aggregated = this.aggregateAnalysisResults(fileAnalyses, projectId);
 
             // Generate comprehensive markdown documentation
             const documentation = this.buildDetailedDocumentation(project, aggregated, files);
