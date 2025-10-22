@@ -1,6 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
 import { analysisService, eventService } from "../services";
-import { UnauthorizedError } from "../errors";
+import { UnauthorizedError, BadRequestError } from "../errors";
 import { successResponse, logger } from "../utils";
 import prisma from "../config/db";
 
