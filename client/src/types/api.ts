@@ -145,8 +145,11 @@ export interface Diagram {
 
 export interface GenerateDiagramInput {
   projectId: string;
-  type: 'flowchart' | 'sequence' | 'class' | 'architecture' | 'erd';
+  type: 'ARCHITECTURE' | 'FLOWCHART' | 'SEQUENCE' | 'CLASS' | 'ER' | 'COMPONENT';
   title?: string;
+  description?: string;
+  style?: 'MODERN' | 'MINIMALIST' | 'DETAILED' | 'COLORFUL';
+  codeFileIds?: string[];
   options?: {
     includeComments?: boolean;
     maxDepth?: number;
