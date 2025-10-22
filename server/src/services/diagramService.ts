@@ -3,6 +3,7 @@ import prisma from "../config/db";
 import { UnauthorizedError } from "../errors";
 import type { DiagramRequest, FileAnalysisResult, ProjectAnalysisResult } from "../types";
 import { logger } from "../utils";
+import { aiService } from './ai.service';
 
 export class DiagramService {
     // Diagram service implementation
@@ -57,29 +58,78 @@ export class DiagramService {
                 stage: 'PROMPT_GENERATION',
             })
 
-            // simulate AI processing 
+            // Get project files and analysis for AI generation
+            const files = await prisma.codeFile.findMany({
+                where: { projectId: request.projectId },
+                select: {
+                    name: true,
+                    content: true,
+                    language: true,
+                    path: true,
+                }
+            });
+
+            const analysis = await prisma.analysis.findUnique({
+                where: { projectId: request.projectId }
+            });
+
             eventService.emitDiagramProgress({
                 diagramId,
                 projectId: request.projectId,
                 userId,
-                progress: 70,
+                progress: 50,
                 status: 'GENERATING',
                 stage: 'AI_PROCESSING',
             })
 
-            // give some time (simulate delay)
-            await new Promise(resolve => setTimeout(resolve, 2000));
-            // generate diagram
+            // Generate Mermaid diagram using AI
+            let mermaidCode: string;
+            try {
+                if (analysis && files.length > 0) {
+                    const analysisData: any = {
+                        totalFiles: analysis.totalFiles,
+                        totalLinesOfCode: analysis.totalLinesOfCode,
+                        functionCount: analysis.functionCount,
+                        classCount: analysis.classCount,
+                        interfaceCount: analysis.interfaceCount,
+                        complexity: analysis.metrics,
+                        languageDistribution: analysis.languageDistribution,
+                        dependencies: analysis.dependencies,
+                    };
 
-            const imageUrl = `/uploads/diagrams/diagram_${diagramId}_${Date.now()}.png`;
+                    mermaidCode = await aiService.generateDiagramDescription(
+                        project.name,
+                        request.type.toLowerCase(),
+                        analysisData,
+                        files as any
+                    );
+                } else {
+                    // Fallback: generate basic diagram
+                    mermaidCode = this.generateBasicDiagram(request.type, project.name);
+                }
+            } catch (aiError) {
+                logger.warn('AI diagram generation failed, using fallback', { 
+                    error: aiError instanceof Error ? aiError.message : 'Unknown error' 
+                });
+                mermaidCode = this.generateBasicDiagram(request.type, project.name);
+            }
+
+            eventService.emitDiagramProgress({
+                diagramId,
+                projectId: request.projectId,
+                userId,
+                progress: 90,
+                status: 'GENERATING',
+                stage: 'FINALIZING',
+            })
 
             const completedDiagram = await prisma.diagram.update({
                 where: { id: diagramId },
                 data: {
-                    imageUrl,
+                    imageData: mermaidCode,
                     status: 'COMPLETED',
                     prompt,
-                    generationTime: 2000,
+                    generationTime: Date.now() - parseInt(diagramId.slice(-13), 36),
                 },
             });
             eventService.emitDiagramProgress({
