@@ -512,10 +512,10 @@ export class AnalysisService {
             const currentCount = languageDistribution.get(analysis.language) || 0;
             languageDistribution.set(analysis.language, currentCount + 1);
 
-            if (analysis.complexity <= 5) complexityBuckets['low (1-5)']++;
-            else if (analysis.complexity <= 10) complexityBuckets['medium (6-10)']++;
-            else if (analysis.complexity <= 15) complexityBuckets['high (11-15)']++;
-            else complexityBuckets['critical (16+)']++;
+            if (analysis.complexity <= 5) complexityBuckets['low (1-5)'] = (complexityBuckets['low (1-5)'] || 0) + 1;
+            else if (analysis.complexity <= 10) complexityBuckets['medium (6-10)'] = (complexityBuckets['medium (6-10)'] || 0) + 1;
+            else if (analysis.complexity <= 15) complexityBuckets['high (11-15)'] = (complexityBuckets['high (11-15)'] || 0) + 1;
+            else complexityBuckets['critical (16+)'] = (complexityBuckets['critical (16+)'] || 0) + 1;
 
             analysis.imports.forEach(imp => {
                 if (imp.startsWith('.') || imp.startsWith('/')) {
@@ -540,7 +540,7 @@ export class AnalysisService {
             complexity: {
                 total: totalComplexity,
                 average: averageComplexity,
-                distribution: complexityBuckets
+                distribution: complexityBuckets as any // Type cast for flexibility
             },
             dependencies: {
                 external: Array.from(dependencySet),
@@ -551,7 +551,7 @@ export class AnalysisService {
                 averageComplexity <= 10 ? 'Consider refactoring more complex functions' :
                 'High complexity detected - prioritize refactoring'
             ],
-            completedAt: new Date().toISOString()
+            completedAt: new Date().toISOString() as any // Type cast for string date
         };
     }
 
@@ -829,16 +829,22 @@ export class AnalysisService {
         };
 
         deps.forEach(dep => {
-            if (dep.match(/express|nest|fastify|koa/i)) groups['Core Frameworks'].push(dep);
-            else if (dep.match(/prisma|mongoose|typeorm|sequelize/i)) groups['Database'].push(dep);
-            else if (dep.match(/passport|jwt|bcrypt|auth/i)) groups['Authentication'].push(dep);
-            else if (dep.match(/lodash|axios|date-fns|moment/i)) groups['Utilities'].push(dep);
-            else groups['Other'].push(dep);
+            if (dep.match(/express|nest|fastify|koa/i)) {
+                groups['Core Frameworks']?.push(dep);
+            } else if (dep.match(/prisma|mongoose|typeorm|sequelize/i)) {
+                groups['Database']?.push(dep);
+            } else if (dep.match(/passport|jwt|bcrypt|auth/i)) {
+                groups['Authentication']?.push(dep);
+            } else if (dep.match(/lodash|axios|date-fns|moment/i)) {
+                groups['Utilities']?.push(dep);
+            } else {
+                groups['Other']?.push(dep);
+            }
         });
 
         // Remove empty groups
         Object.keys(groups).forEach(key => {
-            if (groups[key].length === 0) delete groups[key];
+            if (groups[key]?.length === 0) delete groups[key];
         });
 
         return groups;
