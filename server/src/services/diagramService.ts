@@ -9,6 +9,7 @@ export class DiagramService {
     // Diagram service implementation
     async generateDiagram(request: DiagramRequest, userId: string): Promise<any> {
         let diagramId: string = '';
+        const startTime = Date.now();
 
         try {
             logger.info('Starting diagram generation process', {
@@ -123,13 +124,15 @@ export class DiagramService {
                 stage: 'STORAGE',
             })
 
+            const generationTime = Math.floor(Date.now() - startTime);
+
             const completedDiagram = await prisma.diagram.update({
                 where: { id: diagramId },
                 data: {
                     imageData: mermaidCode,
                     status: 'COMPLETED',
                     prompt,
-                    generationTime: Date.now() - parseInt(diagramId.slice(-13), 36),
+                    generationTime,
                 },
             });
             eventService.emitDiagramProgress({
