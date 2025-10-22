@@ -1001,7 +1001,10 @@ export class AnalysisService {
         try {
             // Get project details
             const project = await prisma.project.findUnique({
-                where: { id: projectId }
+                where: { id: projectId },
+                include: {
+                    analysis: true
+                }
             });
 
             if (!project) {
@@ -1009,25 +1012,56 @@ export class AnalysisService {
                 return;
             }
 
-            // Aggregate analysis for diagram context
-            const analysis = await this.aggregateAnalysisResults(projectId, files);
+            // Check if analysis exists
+            if (!project.analysis) {
+                logger.warn('No analysis found for diagram generation', { projectId });
+                return;
+            }
+
+            // Convert analysis to ProjectAnalysisResult format for AI
+            const analysisData: any = {
+                totalFiles: project.analysis.totalFiles,
+                totalLinesOfCode: project.analysis.totalLinesOfCode,
+                totalComplexity: project.analysis.totalComplexity,
+                averageComplexity: project.analysis.averageComplexity,
+                functionCount: project.analysis.functionCount,
+                classCount: project.analysis.classCount,
+                interfaceCount: project.analysis.interfaceCount,
+                languageDistribution: project.analysis.languageDistribution,
+                frameworksDetected: project.analysis.frameworksDetected,
+                dependencies: project.analysis.dependencies,
+                recommendations: project.analysis.recommendations,
+                metrics: project.analysis.metrics
+            };
 
             // Generate multiple diagram types
-            const diagramTypes: Array<'architecture' | 'flowchart' | 'class' | 'sequence' | 'erd'> = [
-                'architecture',
-                'flowchart', 
-                'class'
+            const diagramTypes: Array<{ type: 'ARCHITECTURE' | 'FLOWCHART' | 'CLASS' | 'SEQUENCE' | 'ER', title: string, description: string }> = [
+                { 
+                    type: 'ARCHITECTURE', 
+                    title: `${project.name} - Architecture Diagram`,
+                    description: 'System architecture and component overview'
+                },
+                { 
+                    type: 'FLOWCHART', 
+                    title: `${project.name} - Flow Diagram`,
+                    description: 'Application flow and process diagram'
+                },
+                { 
+                    type: 'CLASS', 
+                    title: `${project.name} - Class Diagram`,
+                    description: 'Class structure and relationships'
+                }
             ];
 
-            for (const type of diagramTypes) {
+            for (const diagramConfig of diagramTypes) {
                 try {
-                    logger.info(`Generating ${type} diagram`, { projectId, type });
+                    logger.info(`Generating ${diagramConfig.type} diagram`, { projectId, type: diagramConfig.type });
                     
                     // Generate Mermaid code using AI
                     const mermaidCode = await aiService.generateDiagramDescription(
                         project.name,
-                        type,
-                        analysis,
+                        diagramConfig.type.toLowerCase() as any,
+                        analysisData,
                         files
                     );
 
@@ -1035,19 +1069,21 @@ export class AnalysisService {
                     await prisma.diagram.create({
                         data: {
                             projectId,
-                            userId,
-                            type,
+                            type: diagramConfig.type,
+                            title: diagramConfig.title,
+                            description: diagramConfig.description,
+                            prompt: `Auto-generated ${diagramConfig.type.toLowerCase()} diagram`,
                             content: mermaidCode,
                             format: 'mermaid',
-                            status: 'completed'
+                            status: 'COMPLETED'
                         }
                     });
 
-                    logger.info(`Successfully generated ${type} diagram`, { projectId, type });
+                    logger.info(`Successfully generated ${diagramConfig.type} diagram`, { projectId, type: diagramConfig.type });
                 } catch (diagramError: any) {
-                    logger.error(`Failed to generate ${type} diagram`, { 
+                    logger.error(`Failed to generate ${diagramConfig.type} diagram`, { 
                         projectId, 
-                        type, 
+                        type: diagramConfig.type, 
                         error: diagramError.message 
                     });
                     // Continue with next diagram type
