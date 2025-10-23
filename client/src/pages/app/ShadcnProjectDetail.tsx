@@ -29,6 +29,8 @@ import {
 import { projectService } from '@/services/project.service';
 import { analysisService } from '@/services/analysis.service';
 import { diagramService } from '@/services/diagram.service';
+import { socketService } from '@/services/socket.service';
+import { CollaborationPanel } from '@/components/collaboration/CollaborationPanel';
 import type { Project, Analysis, Diagram } from '@/types/api';
 import { formatDistanceToNow } from 'date-fns';
 import { useToast } from '@/components/ui/use-toast';
@@ -48,6 +50,11 @@ export const ShadcnProjectDetail = () => {
   const [copied, setCopied] = useState(false);
   const [selectedDiagram, setSelectedDiagram] = useState<Diagram | null>(null);
   const [showDiagramModal, setShowDiagramModal] = useState(false);
+  
+  // Collaboration state
+  const [isSocketConnected, setIsSocketConnected] = useState(false);
+  const [activeUsers, setActiveUsers] = useState<any[]>([]);
+  const [comments, setComments] = useState<any[]>([]);
 
   // Helper function to safely format dates
   const safeFormatDate = (dateString: string | undefined | null): string => {
@@ -72,6 +79,85 @@ export const ShadcnProjectDetail = () => {
       handleLoadDiagrams();
     }
   }, [id]);
+
+  // Initialize socket connection
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      socketService.connect(token);
+      setIsSocketConnected(socketService.isConnected());
+
+      // Check connection status
+      const connectionCheck = setInterval(() => {
+        setIsSocketConnected(socketService.isConnected());
+      }, 2000);
+
+      return () => clearInterval(connectionCheck);
+    }
+  }, []);
+
+  // Join project and setup socket listeners
+  useEffect(() => {
+    if (!id || !isSocketConnected) return;
+
+    // Join project room
+    socketService.joinProject(id);
+
+    // Listen for user updates
+    socketService.onUserJoined((data) => {
+      console.log('👋 User joined:', data);
+      if (data.users) setActiveUsers(data.users);
+    });
+
+    socketService.onUserLeft((data) => {
+      console.log('👋 User left:', data);
+      if (data.users) setActiveUsers(data.users);
+    });
+
+    socketService.onProjectUsers((data) => {
+      console.log('👥 Project users:', data);
+      if (data.users) setActiveUsers(data.users);
+    });
+
+    // Listen for comments
+    socketService.onComment((comment) => {
+      console.log('💬 New comment:', comment);
+      setComments(prev => [...prev, {
+        id: Date.now().toString(),
+        userId: comment.userId || 'unknown',
+        userName: comment.userName || comment.user?.name || 'Anonymous',
+        content: comment.comment || comment.content,
+        timestamp: new Date().toISOString(),
+      }]);
+    });
+
+    // Listen for analysis progress
+    socketService.onAnalysisProgress((data) => {
+      console.log('📊 Analysis progress:', data);
+      toast({
+        title: 'Analysis Progress',
+        description: `${data.progress || 0}% complete`,
+      });
+    });
+
+    // Listen for diagram progress
+    socketService.onDiagramProgress((data) => {
+      console.log('🎨 Diagram progress:', data);
+      if (data.status === 'COMPLETED') {
+        handleLoadDiagrams();
+        toast({
+          title: 'Diagram Complete',
+          description: 'Diagram generation finished',
+        });
+      }
+    });
+
+    return () => {
+      if (id) {
+        socketService.leaveProject(id);
+      }
+    };
+  }, [id, isSocketConnected, toast]);
 
   const loadProject = async () => {
     try {
@@ -301,6 +387,11 @@ export const ShadcnProjectDetail = () => {
         variant: 'destructive',
       });
     }
+  };
+
+  const handleSendComment = (comment: string) => {
+    if (!id) return;
+    socketService.sendComment(id, comment);
   };
 
   const getStatusBadge = (status: string) => {
@@ -1083,19 +1174,13 @@ export const ShadcnProjectDetail = () => {
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">Team</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-neutral-600">
-                  No team members yet
-                </p>
-                <Button variant="outline" size="sm" className="w-full mt-3">
-                  Invite Team
-                </Button>
-              </CardContent>
-            </Card>
+            {/* Live Collaboration Panel */}
+            <CollaborationPanel
+              isConnected={isSocketConnected}
+              activeUsers={activeUsers}
+              comments={comments}
+              onSendComment={handleSendComment}
+            />
           </div>
         </div>
       </div>
