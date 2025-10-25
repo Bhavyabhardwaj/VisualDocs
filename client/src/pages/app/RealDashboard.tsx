@@ -20,6 +20,7 @@ import {
 import { Progress } from '@/components/ui/progress';
 import { FileUploadDialog } from '@/components/app/FileUploadDialog';
 import { GitHubImportDialog } from '@/components/app/GitHubImportDialog';
+import { PremiumLayout } from '@/components/layout/PremiumLayout';
 import { projectService } from '@/services/project.service';
 import type { Project } from '@/types/api';
 import { cn } from '@/lib/utils';
@@ -89,32 +90,33 @@ export const RealDashboard = () => {
   );
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Header */}
-      <div className="border-b border-neutral-200 bg-white">
-        <div className="container mx-auto px-8 py-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-semibold tracking-tight text-neutral-900">Dashboard</h1>
-              <p className="text-neutral-600 mt-2 text-[15px]">
-                Welcome back! Here's what's happening with your projects.
-              </p>
-            </div>
-            <div className="flex items-center gap-3">
-              <Button variant="outline" onClick={() => setGithubDialogOpen(true)} className="h-9 text-sm">
-                <Github className="w-4 h-4 mr-2" />
-                Import from GitHub
-              </Button>
-              <Button onClick={() => setUploadDialogOpen(true)} className="h-9 text-sm">
-                <Upload className="w-4 h-4 mr-2" />
-                Upload Files
-              </Button>
+    <PremiumLayout>
+      <div className="min-h-screen bg-white">
+        {/* Header */}
+        <div className="border-b border-neutral-200 bg-white">
+          <div className="mx-auto px-8 py-8">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-3xl font-semibold tracking-tight text-neutral-900">Dashboard</h1>
+                <p className="text-neutral-600 mt-2 text-[15px]">
+                  Welcome back! Here's what's happening with your projects.
+                </p>
+              </div>
+              <div className="flex items-center gap-3">
+                <Button variant="outline" onClick={() => setGithubDialogOpen(true)} className="h-9 text-sm">
+                  <Github className="w-4 h-4 mr-2" />
+                  Import from GitHub
+                </Button>
+                <Button onClick={() => setUploadDialogOpen(true)} className="h-9 text-sm">
+                  <Upload className="w-4 h-4 mr-2" />
+                  Upload Files
+                </Button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <div className="container mx-auto px-8 py-8">
+        <div className="mx-auto px-8 py-8">
         {/* Stats Grid - Premium Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
           <Card className="border border-neutral-200 shadow-sm">
@@ -418,5 +420,6 @@ export const RealDashboard = () => {
         onImportComplete={handleUploadSuccess}
       />
     </div>
+    </PremiumLayout>
   );
 };

@@ -24,6 +24,7 @@ import { Separator } from '@/components/ui/separator';
 import { Progress } from '@/components/ui/progress';
 import { FileUploadDialog } from '@/components/app/FileUploadDialog';
 import { GitHubImportDialog } from '@/components/app/GitHubImportDialog';
+import { PremiumLayout } from '@/components/layout/PremiumLayout';
 import { projectService } from '@/services/project.service';
 import type { Project } from '@/types/api';
 import { cn } from '@/lib/utils';
@@ -111,28 +112,29 @@ export const RealProjects = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Header */}
-      <div className="border-b border-neutral-200 bg-white">
-        <div className="container mx-auto px-8 py-8">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h1 className="text-3xl font-semibold tracking-tight text-neutral-900">Projects</h1>
-              <p className="text-neutral-600 mt-2 text-[15px]">
-                Manage and analyze your codebase projects
-              </p>
+    <PremiumLayout>
+      <div className="min-h-screen bg-white">
+        {/* Header */}
+        <div className="border-b border-neutral-200 bg-white">
+          <div className="mx-auto px-8 py-8">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h1 className="text-3xl font-semibold tracking-tight text-neutral-900">Projects</h1>
+                <p className="text-neutral-600 mt-2 text-[15px]">
+                  Manage and analyze your codebase projects
+                </p>
+              </div>
+              <div className="flex items-center gap-3">
+                <Button variant="outline" onClick={() => setGithubDialogOpen(true)} className="h-9 text-sm">
+                  <Github className="w-4 h-4 mr-2" />
+                  Import from GitHub
+                </Button>
+                <Button onClick={() => setUploadDialogOpen(true)} className="h-9 text-sm">
+                  <Upload className="w-4 h-4 mr-2" />
+                  Upload Files
+                </Button>
+              </div>
             </div>
-            <div className="flex items-center gap-3">
-              <Button variant="outline" onClick={() => setGithubDialogOpen(true)} className="h-9 text-sm">
-                <Github className="w-4 h-4 mr-2" />
-                Import from GitHub
-              </Button>
-              <Button onClick={() => setUploadDialogOpen(true)} className="h-9 text-sm">
-                <Upload className="w-4 h-4 mr-2" />
-                Upload Files
-              </Button>
-            </div>
-          </div>
 
           {/* Filters and Search */}
           <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
@@ -255,7 +257,7 @@ export const RealProjects = () => {
       </div>
 
       {/* Content */}
-      <div className="container mx-auto px-8 py-8">
+      <div className="mx-auto px-8 py-8">
         {loading ? (
           <div className="flex items-center justify-center py-16">
             <Loader2 className="w-8 h-8 animate-spin text-neutral-400" />
@@ -523,5 +525,6 @@ export const RealProjects = () => {
         onImportComplete={handleUploadSuccess}
       />
     </div>
+    </PremiumLayout>
   );
 };
