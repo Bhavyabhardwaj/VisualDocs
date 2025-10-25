@@ -78,7 +78,7 @@ export const RealProjects = () => {
   const getQualityScore = (project: Project) => {
     const baseScore = 70;
     const fileBonus = Math.min((project.fileCount || 0) * 2, 20);
-    const analysisBonus = project.status === 'COMPLETED' ? 10 : 0;
+    const analysisBonus = project.status === 'active' ? 10 : 0;
     return Math.min(baseScore + fileBonus + analysisBonus, 100);
   };
 
@@ -105,9 +105,9 @@ export const RealProjects = () => {
 
   const statusCounts = {
     all: projects.length,
-    COMPLETED: projects.filter(p => p.status === 'COMPLETED').length,
-    ANALYZING: projects.filter(p => p.status === 'ANALYZING').length,
-    PENDING: projects.filter(p => p.status === 'PENDING').length,
+    active: projects.filter(p => p.status === 'active').length,
+    analyzing: projects.filter(p => p.status === 'analyzing').length,
+    archived: projects.filter(p => p.status === 'archived').length,
   };
 
   return (
@@ -167,22 +167,22 @@ export const RealProjects = () => {
                     All ({statusCounts.all})
                   </DropdownMenuCheckboxItem>
                   <DropdownMenuCheckboxItem
-                    checked={filterStatus === 'COMPLETED'}
-                    onCheckedChange={() => setFilterStatus('COMPLETED')}
+                    checked={filterStatus === 'active'}
+                    onCheckedChange={() => setFilterStatus('active')}
                   >
-                    Completed ({statusCounts.COMPLETED})
+                    Active ({statusCounts.active})
                   </DropdownMenuCheckboxItem>
                   <DropdownMenuCheckboxItem
-                    checked={filterStatus === 'ANALYZING'}
-                    onCheckedChange={() => setFilterStatus('ANALYZING')}
+                    checked={filterStatus === 'analyzing'}
+                    onCheckedChange={() => setFilterStatus('analyzing')}
                   >
-                    Analyzing ({statusCounts.ANALYZING})
+                    Analyzing ({statusCounts.analyzing})
                   </DropdownMenuCheckboxItem>
                   <DropdownMenuCheckboxItem
-                    checked={filterStatus === 'PENDING'}
-                    onCheckedChange={() => setFilterStatus('PENDING')}
+                    checked={filterStatus === 'archived'}
+                    onCheckedChange={() => setFilterStatus('archived')}
                   >
-                    Pending ({statusCounts.PENDING})
+                    Archived ({statusCounts.archived})
                   </DropdownMenuCheckboxItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -374,27 +374,22 @@ export const RealProjects = () => {
                       </div>
 
                       <div className="flex items-center justify-between pt-2">
-                        {project.language && (
-                          <Badge variant="outline" className="text-xs">
-                            {project.language}
-                          </Badge>
-                        )}
                         <Badge
                           variant={
-                            project.status === 'COMPLETED'
+                            project.status === 'active'
                               ? 'default'
-                              : project.status === 'ANALYZING'
+                              : project.status === 'analyzing'
                               ? 'secondary'
                               : 'outline'
                           }
                           className={cn(
                             'text-xs',
-                            project.status === 'ANALYZING' && 'animate-pulse'
+                            project.status === 'analyzing' && 'animate-pulse'
                           )}
                         >
-                          {project.status === 'COMPLETED'
+                          {project.status === 'active'
                             ? 'Ready'
-                            : project.status === 'ANALYZING'
+                            : project.status === 'analyzing'
                             ? 'Analyzing'
                             : project.status || 'Pending'}
                         </Badge>
@@ -415,7 +410,6 @@ export const RealProjects = () => {
                     <th className="p-4 font-medium">Status</th>
                     <th className="p-4 font-medium">Files</th>
                     <th className="p-4 font-medium">Quality</th>
-                    <th className="p-4 font-medium">Language</th>
                     <th className="p-4 font-medium">Updated</th>
                     <th className="p-4 font-medium w-12"></th>
                   </tr>
@@ -446,19 +440,19 @@ export const RealProjects = () => {
                         <td className="p-4">
                           <Badge
                             variant={
-                              project.status === 'COMPLETED'
+                              project.status === 'active'
                                 ? 'default'
-                                : project.status === 'ANALYZING'
+                                : project.status === 'analyzing'
                                 ? 'secondary'
                                 : 'outline'
                             }
                             className={cn(
-                              project.status === 'ANALYZING' && 'animate-pulse'
+                              project.status === 'analyzing' && 'animate-pulse'
                             )}
                           >
-                            {project.status === 'COMPLETED'
+                            {project.status === 'active'
                               ? 'Ready'
-                              : project.status === 'ANALYZING'
+                              : project.status === 'analyzing'
                               ? 'Analyzing'
                               : project.status || 'Pending'}
                           </Badge>
@@ -470,13 +464,7 @@ export const RealProjects = () => {
                             <span className="text-sm font-medium">{qualityScore}%</span>
                           </div>
                         </td>
-                        <td className="p-4">
-                          {project.language && (
-                            <Badge variant="outline" className="text-xs">
-                              {project.language}
-                            </Badge>
-                          )}
-                        </td>
+                        <td className="p-4"></td>
                         <td className="p-4 text-sm text-neutral-600">
                           {formatDistanceToNow(new Date(project.updatedAt), { addSuffix: true })}
                         </td>
@@ -525,14 +513,14 @@ export const RealProjects = () => {
 
       {/* Dialogs */}
       <FileUploadDialog
-        isOpen={uploadDialogOpen}
-        onClose={() => setUploadDialogOpen(false)}
-        onSuccess={handleUploadSuccess}
+        open={uploadDialogOpen}
+        onOpenChange={setUploadDialogOpen}
+        onUploadComplete={handleUploadSuccess}
       />
       <GitHubImportDialog
-        isOpen={githubDialogOpen}
-        onClose={() => setGithubDialogOpen(false)}
-        onSuccess={handleUploadSuccess}
+        open={githubDialogOpen}
+        onOpenChange={setGithubDialogOpen}
+        onImportComplete={handleUploadSuccess}
       />
     </div>
   );

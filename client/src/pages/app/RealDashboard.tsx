@@ -403,12 +403,12 @@ export const RealDashboard = () => {
       <FileUploadDialog
         open={uploadDialogOpen}
         onOpenChange={setUploadDialogOpen}
-        onSuccess={handleUploadSuccess}
+        onUploadComplete={handleUploadSuccess}
       />
       <GitHubImportDialog
         open={githubDialogOpen}
         onOpenChange={setGithubDialogOpen}
-        onSuccess={handleUploadSuccess}
+        onImportComplete={handleUploadSuccess}
       />
     </div>
   );
