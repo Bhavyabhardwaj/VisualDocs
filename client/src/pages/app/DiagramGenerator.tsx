@@ -5,6 +5,7 @@ import {
   RefreshCw, Settings, Maximize2, Code2, Sparkles 
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { PremiumLayout } from '@/components/layout/PremiumLayout';
 
 interface DiagramType {
   id: string;
@@ -54,12 +55,13 @@ export const DiagramGenerator = () => {
   };
 
   return (
-    <div className="flex h-full bg-background">
-      {/* Left Panel - Diagram Types */}
-      <div className="w-80 border-r border-border flex flex-col">
-        <div className="p-6 border-b border-border">
+    <PremiumLayout>
+      <div className="flex h-full bg-white">
+        {/* Left Panel - Diagram Types */}
+        <div className="w-80 border-r border-neutral-200 flex flex-col">
+        <div className="p-6 border-b border-neutral-200">
           <h2 className="text-lg font-semibold mb-1">Diagram Generator</h2>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-neutral-600">
             AI-powered visual documentation
           </p>
         </div>
@@ -79,7 +81,7 @@ export const DiagramGenerator = () => {
                   "w-full p-4 rounded-lg border text-left transition-all",
                   isSelected
                     ? "bg-foreground text-background border-foreground"
-                    : "bg-background border-border hover:border-foreground/20"
+                    : "bg-white border-neutral-200 hover:border-foreground/20"
                 )}
               >
                 <div className="flex items-start gap-3">
@@ -88,7 +90,7 @@ export const DiagramGenerator = () => {
                     <div className="font-medium mb-1">{type.name}</div>
                     <div className={cn(
                       "text-xs",
-                      isSelected ? "text-background/70" : "text-muted-foreground"
+                      isSelected ? "text-background/70" : "text-neutral-600"
                     )}>
                       {type.description}
                     </div>
@@ -100,7 +102,7 @@ export const DiagramGenerator = () => {
         </div>
 
         {/* Generate Button */}
-        <div className="p-4 border-t border-border">
+        <div className="p-4 border-t border-neutral-200">
           <button
             onClick={handleGenerate}
             disabled={isGenerating}
@@ -124,7 +126,7 @@ export const DiagramGenerator = () => {
       {/* Right Panel - Preview/Canvas */}
       <div className="flex-1 flex flex-col">
         {/* Toolbar */}
-        <div className="h-14 border-b border-border px-4 flex items-center justify-between">
+        <div className="h-14 border-b border-neutral-200 px-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <button className="p-2 hover:bg-muted rounded transition-colors">
               <Code2 className="h-4 w-4" />
@@ -151,15 +153,15 @@ export const DiagramGenerator = () => {
             <div className="h-full flex items-center justify-center">
               <div className="text-center">
                 <div className="w-16 h-16 border-2 border-muted border-t-foreground rounded-full animate-spin mx-auto mb-4" />
-                <p className="text-sm text-muted-foreground">Analyzing codebase...</p>
-                <p className="text-xs text-muted-foreground mt-1">This may take a few seconds</p>
+                <p className="text-sm text-neutral-600">Analyzing codebase...</p>
+                <p className="text-xs text-neutral-600 mt-1">This may take a few seconds</p>
               </div>
             </div>
           ) : generatedDiagram ? (
             <div className="bg-muted rounded-lg p-8 min-h-full flex items-center justify-center">
               <div className="text-center">
-                <div className="w-full max-w-4xl aspect-video bg-background border border-border rounded-lg mb-4 flex items-center justify-center">
-                  <div className="text-muted-foreground">
+                <div className="w-full max-w-4xl aspect-video bg-white border border-neutral-200 rounded-lg mb-4 flex items-center justify-center">
+                  <div className="text-neutral-600">
                     <Network className="h-16 w-16 mx-auto mb-4" />
                     <p className="text-sm">Generated {selectedType} diagram</p>
                   </div>
@@ -170,13 +172,13 @@ export const DiagramGenerator = () => {
             <div className="h-full flex items-center justify-center">
               <div className="text-center max-w-md">
                 <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Sparkles className="h-8 w-8 text-muted-foreground" />
+                  <Sparkles className="h-8 w-8 text-neutral-600" />
                 </div>
                 <h3 className="text-lg font-semibold mb-2">No diagram generated yet</h3>
-                <p className="text-sm text-muted-foreground mb-6">
+                <p className="text-sm text-neutral-600 mb-6">
                   Select a diagram type and click "Generate Diagram" to create AI-powered visual documentation
                 </p>
-                <div className="flex flex-col gap-2 text-xs text-muted-foreground">
+                <div className="flex flex-col gap-2 text-xs text-neutral-600">
                   <div className="flex items-center gap-2">
                     <div className="w-1.5 h-1.5 rounded-full bg-success" />
                     Automatically analyzes your codebase
@@ -195,6 +197,8 @@ export const DiagramGenerator = () => {
           )}
         </div>
       </div>
-    </div>
+      </div>
+    </PremiumLayout>
   );
 };
+
