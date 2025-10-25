@@ -31,6 +31,7 @@ import { analysisService } from '@/services/analysis.service';
 import { diagramService } from '@/services/diagram.service';
 import { socketService } from '@/services/socket.service';
 import { CollaborationPanel } from '@/components/collaboration/CollaborationPanel';
+import { PremiumLayout } from '@/components/layout/PremiumLayout';
 import type { Project, Analysis, Diagram } from '@/types/api';
 import { formatDistanceToNow } from 'date-fns';
 import { useToast } from '@/components/ui/use-toast';
@@ -433,6 +434,7 @@ export const ShadcnProjectDetail = () => {
   }
 
   return (
+    <PremiumLayout>
     <div className="min-h-screen bg-white">
       {/* Header */}
       <div className="border-b border-neutral-200 bg-white sticky top-0 z-10">
@@ -1254,5 +1256,6 @@ export const ShadcnProjectDetail = () => {
         </DialogContent>
       </Dialog>
     </div>
+    </PremiumLayout>
   );
 };

@@ -21,7 +21,6 @@ import { Progress } from '@/components/ui/progress';
 import { FileUploadDialog } from '@/components/app/FileUploadDialog';
 import { GitHubImportDialog } from '@/components/app/GitHubImportDialog';
 import { PremiumLayout } from '@/components/layout/PremiumLayout';
-import { DashboardSkeleton } from '@/components/ui/DashboardSkeleton';
 import { projectService } from '@/services/project.service';
 import type { Project } from '@/types/api';
 import { cn } from '@/lib/utils';
@@ -92,10 +91,6 @@ export const RealDashboard = () => {
 
   return (
     <PremiumLayout>
-      {loading ? (
-        <DashboardSkeleton />
-      ) : (
-        <>
       <div className="min-h-screen bg-white">
         {/* Header */}
         <div className="border-b border-neutral-200 bg-white">
@@ -411,6 +406,7 @@ export const RealDashboard = () => {
             </CardContent>
           </Card>
         )}
+        </div>
       </div>
 
       {/* Dialogs */}
@@ -424,8 +420,6 @@ export const RealDashboard = () => {
         onOpenChange={setGithubDialogOpen}
         onImportComplete={handleUploadSuccess}
       />
-        </>
-      )}
     </PremiumLayout>
   );
 };
