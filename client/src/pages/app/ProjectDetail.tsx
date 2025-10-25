@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
 import { PremiumLayout } from '@/components/layout/PremiumLayout';
+import { ProjectDetailSkeleton } from '@/components/ui/ProjectDetailSkeleton';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -86,8 +87,20 @@ const mockFileTree: FileNode[] = [
 
 export const ProjectDetail: React.FC = () => {
   const { id } = useParams();
+  const [loading, setLoading] = useState(true);
   const [selectedFile, setSelectedFile] = useState<string | null>('src/App.tsx');
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set(['src', 'src/components', 'src/pages']));
+
+  useEffect(() => {
+    // Simulate loading project data
+    const loadProject = async () => {
+      setLoading(true);
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 800));
+      setLoading(false);
+    };
+    loadProject();
+  }, [id]);
 
   // Mock project data
   const project = {
@@ -181,6 +194,9 @@ export const ProjectDetail: React.FC = () => {
 
   return (
     <PremiumLayout>
+      {loading ? (
+        <ProjectDetailSkeleton />
+      ) : (
       <div className="h-screen bg-white flex flex-col">
         {/* 3-Panel Layout: File Explorer | Editor | Info Panel */}
         <div className="flex-1 flex overflow-hidden border-t border-neutral-200">
@@ -562,6 +578,7 @@ export default App;`}
           </div>
         </div>
       </div>
+      )}
     </PremiumLayout>
   );
 };

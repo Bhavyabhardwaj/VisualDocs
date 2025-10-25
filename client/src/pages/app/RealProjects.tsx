@@ -114,6 +114,10 @@ export const RealProjects = () => {
 
   return (
     <PremiumLayout>
+      {loading ? (
+        <ProjectsTableSkeleton />
+      ) : (
+        <>
       <div className="min-h-screen bg-white">
         {/* Header */}
         <div className="border-b border-neutral-200 bg-white">
@@ -525,7 +529,8 @@ export const RealProjects = () => {
         onOpenChange={setGithubDialogOpen}
         onImportComplete={handleUploadSuccess}
       />
-    </div>
+        </>
+      )}
     </PremiumLayout>
   );
 };

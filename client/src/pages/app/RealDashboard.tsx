@@ -95,6 +95,7 @@ export const RealDashboard = () => {
       {loading ? (
         <DashboardSkeleton />
       ) : (
+        <>
       <div className="min-h-screen bg-white">
         {/* Header */}
         <div className="border-b border-neutral-200 bg-white">
@@ -423,6 +424,7 @@ export const RealDashboard = () => {
         onOpenChange={setGithubDialogOpen}
         onImportComplete={handleUploadSuccess}
       />
+        </>
       )}
     </PremiumLayout>
   );
