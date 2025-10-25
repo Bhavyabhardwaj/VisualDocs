@@ -111,23 +111,23 @@ export const RealProjects = () => {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-50">
+    <div className="min-h-screen bg-white">
       {/* Header */}
-      <div className="border-b bg-white">
-        <div className="container mx-auto px-6 py-6">
+      <div className="border-b border-neutral-200 bg-white">
+        <div className="container mx-auto px-8 py-8">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h1 className="text-3xl font-bold tracking-tight">Projects</h1>
-              <p className="text-neutral-600 mt-1">
+              <h1 className="text-3xl font-semibold tracking-tight text-neutral-900">Projects</h1>
+              <p className="text-neutral-600 mt-2 text-[15px]">
                 Manage and analyze your codebase projects
               </p>
             </div>
             <div className="flex items-center gap-3">
-              <Button variant="outline" onClick={() => setGithubDialogOpen(true)}>
+              <Button variant="outline" onClick={() => setGithubDialogOpen(true)} className="h-9 text-sm">
                 <Github className="w-4 h-4 mr-2" />
                 Import from GitHub
               </Button>
-              <Button onClick={() => setUploadDialogOpen(true)}>
+              <Button onClick={() => setUploadDialogOpen(true)} className="h-9 text-sm">
                 <Upload className="w-4 h-4 mr-2" />
                 Upload Files
               </Button>
@@ -143,16 +143,16 @@ export const RealProjects = () => {
                   placeholder="Search projects..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-9"
+                  className="pl-10 h-9 border-neutral-200 bg-white"
                 />
               </div>
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="gap-2">
+                  <Button variant="outline" className="gap-2 h-9 text-sm">
                     <Filter className="w-4 h-4" />
                     Filter
-                    <Badge variant="secondary" className="ml-1">
+                    <Badge variant="secondary" className="ml-1 text-xs">
                       {filterStatus === 'all' ? 'All' : filterStatus}
                     </Badge>
                   </Button>
@@ -255,32 +255,32 @@ export const RealProjects = () => {
       </div>
 
       {/* Content */}
-      <div className="container mx-auto px-6 py-8">
+      <div className="container mx-auto px-8 py-8">
         {loading ? (
           <div className="flex items-center justify-center py-16">
             <Loader2 className="w-8 h-8 animate-spin text-neutral-400" />
           </div>
         ) : filteredAndSortedProjects.length === 0 ? (
-          <Card className="border-dashed">
+          <Card className="border-2 border-dashed border-neutral-200">
             <CardContent className="flex flex-col items-center justify-center py-16">
               <div className="w-16 h-16 rounded-full bg-neutral-100 flex items-center justify-center mb-4">
                 <FolderGit2 className="w-8 h-8 text-neutral-400" />
               </div>
-              <h3 className="text-lg font-semibold mb-2">
+              <h3 className="text-lg font-semibold mb-2 text-neutral-900">
                 {searchQuery ? 'No projects found' : 'No projects yet'}
               </h3>
-              <p className="text-neutral-600 text-center max-w-md mb-6">
+              <p className="text-neutral-600 text-center max-w-md mb-6 text-sm">
                 {searchQuery
                   ? 'Try adjusting your search or filters'
                   : 'Get started by uploading your code or importing from GitHub'}
               </p>
               {!searchQuery && (
                 <div className="flex gap-3">
-                  <Button onClick={() => setUploadDialogOpen(true)}>
+                  <Button onClick={() => setUploadDialogOpen(true)} className="h-9">
                     <Upload className="w-4 h-4 mr-2" />
                     Upload Files
                   </Button>
-                  <Button variant="outline" onClick={() => setGithubDialogOpen(true)}>
+                  <Button variant="outline" onClick={() => setGithubDialogOpen(true)} className="h-9">
                     <Github className="w-4 h-4 mr-2" />
                     Import from GitHub
                   </Button>
@@ -289,14 +289,14 @@ export const RealProjects = () => {
             </CardContent>
           </Card>
         ) : viewMode === 'grid' ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {filteredAndSortedProjects.map((project) => {
               const qualityScore = getQualityScore(project);
               
               return (
                 <Card
                   key={project.id}
-                  className="group hover:shadow-lg transition-all duration-200 cursor-pointer"
+                  className="group hover:shadow-md transition-all duration-200 cursor-pointer border border-neutral-200 bg-white"
                   onClick={() => navigate(`/app/projects/${project.id}`)}
                 >
                   <CardContent className="p-6">
