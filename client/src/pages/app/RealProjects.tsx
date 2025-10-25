@@ -25,6 +25,7 @@ import { Progress } from '@/components/ui/progress';
 import { FileUploadDialog } from '@/components/app/FileUploadDialog';
 import { GitHubImportDialog } from '@/components/app/GitHubImportDialog';
 import { PremiumLayout } from '@/components/layout/PremiumLayout';
+import { ProjectsTableSkeleton } from '@/components/ui/ProjectsTableSkeleton';
 import { projectService } from '@/services/project.service';
 import type { Project } from '@/types/api';
 import { cn } from '@/lib/utils';

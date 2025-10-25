@@ -21,7 +21,7 @@ import { ShadcnProjectDetail } from '@/pages/app/ShadcnProjectDetail';
 import { LiveCollaboration } from '@/pages/app/LiveCollaboration';
 import { AIAnalysisDashboard } from '@/pages/app/AIAnalysisDashboard';
 import { DiagramStudio } from '@/pages/app/DiagramStudio';
-import { TeamManagement } from '@/pages/app/TeamManagement';
+import { PremiumTeamManagement } from '@/pages/app/PremiumTeamManagement';
 import { PremiumSettings } from '@/pages/app/PremiumSettings';
 
 // Legacy Pages (for reference)
@@ -91,10 +91,10 @@ function App() {
               </ProtectedRoute>
             } />
             
-            {/* Team Management - Member & Permission Control */}
+            {/* Team Management - Premium GitHub-style Interface */}
             <Route path="/app/team" element={
               <ProtectedRoute>
-                <TeamManagement />
+                <PremiumTeamManagement />
               </ProtectedRoute>
             } />
             
