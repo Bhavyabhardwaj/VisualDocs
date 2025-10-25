@@ -22,7 +22,7 @@ import { LiveCollaboration } from '@/pages/app/LiveCollaboration';
 import { AIAnalysisDashboard } from '@/pages/app/AIAnalysisDashboard';
 import { DiagramStudio } from '@/pages/app/DiagramStudio';
 import { TeamManagement } from '@/pages/app/TeamManagement';
-import { SettingsProfile } from '@/pages/app/SettingsProfile';
+import { PremiumSettings } from '@/pages/app/PremiumSettings';
 
 // Legacy Pages (for reference)
 import PremiumDashboard from '@/pages/app/PremiumDashboard';
@@ -98,10 +98,10 @@ function App() {
               </ProtectedRoute>
             } />
             
-            {/* Settings & Profile - Tabbed Preferences */}
+            {/* Settings & Profile - Premium Tabbed Interface */}
             <Route path="/app/settings" element={
               <ProtectedRoute>
-                <SettingsProfile />
+                <PremiumSettings />
               </ProtectedRoute>
             } />
             
