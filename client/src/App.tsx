@@ -15,8 +15,8 @@ import LandingRegister from './pages/auth/LandingRegister';
 import { ForgotPassword } from './pages/ForgotPassword';
 
 // App Pages - World-Class Platform
-import { WorldClassDashboard } from '@/pages/app/WorldClassDashboard';
-import { WorldClassProjects } from '@/pages/app/WorldClassProjects';
+import { RealDashboard } from '@/pages/app/RealDashboard';
+import { RealProjects } from '@/pages/app/RealProjects';
 import { ShadcnProjectDetail } from '@/pages/app/ShadcnProjectDetail';
 import { LiveCollaboration } from '@/pages/app/LiveCollaboration';
 import { AIAnalysisDashboard } from '@/pages/app/AIAnalysisDashboard';
@@ -52,14 +52,14 @@ function App() {
             {/* Dashboard - World-Class Project Command Center */}
             <Route path="/app/dashboard" element={
               <ProtectedRoute>
-                <WorldClassDashboard />
+                <RealDashboard />
               </ProtectedRoute>
             } />
             
             {/* Projects - Professional Data Table & Grid */}
             <Route path="/app/projects" element={
               <ProtectedRoute>
-                <WorldClassProjects />
+                <RealProjects />
               </ProtectedRoute>
             } />
             
