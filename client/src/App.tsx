@@ -4,8 +4,6 @@ import { AuthProvider } from '@/contexts/AuthContext';
 import { ErrorBoundary } from './components/app/ErrorBoundary';
 import { ProtectedRoute } from '@/components/app/ProtectedRoute';
 import { AppLayout } from '@/components/app/AppLayout';
-import { CollaborationProvider } from '@/components/collaboration/CollaborationProvider';
-import { LiveCursors } from '@/components/collaboration/UserPresence';
 import { Toaster } from '@/components/ui/toaster';
 
 // Marketing Pages
@@ -23,18 +21,6 @@ import { AIAnalysisDashboard } from '@/pages/app/AIAnalysisDashboard';
 import { DiagramStudio } from '@/pages/app/DiagramStudio';
 import { PremiumTeamManagement } from '@/pages/app/PremiumTeamManagement';
 import { PremiumSettings } from '@/pages/app/PremiumSettings';
-
-// Legacy Pages (for reference)
-import PremiumDashboard from '@/pages/app/PremiumDashboard';
-import ModernDashboard from '@/pages/app/ModernDashboard';
-import { Dashboard as RedesignedDashboard } from '@/pages/app/RedesignedDashboard';
-import { PremiumRedesignedDashboard } from '@/pages/app/PremiumRedesignedDashboard';
-import { VSCodeStyleProjectDetail } from '@/pages/app/VSCodeStyleProjectDetail';
-import PremiumProjectDetail from '@/pages/app/PremiumProjectDetail';
-import AnalyticsDashboard from '@/pages/app/Analytics';
-import { Diagrams } from './pages/Diagrams';
-import { DiagramGenerator } from '@/pages/app/DiagramGenerator';
-import { Settings } from '@/pages/app/Settings';
 
 function App() {
   return (
@@ -102,84 +88,6 @@ function App() {
             <Route path="/app/settings" element={
               <ProtectedRoute>
                 <PremiumSettings />
-              </ProtectedRoute>
-            } />
-            
-            {/* ========== LEGACY ROUTES (for reference) ========== */}
-            
-            {/* Alternative Dashboards */}
-            <Route path="/app/dashboard-premium" element={
-              <ProtectedRoute>
-                <PremiumRedesignedDashboard />
-              </ProtectedRoute>
-            } />
-            
-            <Route path="/app/dashboard-v2" element={
-              <ProtectedRoute>
-                <RedesignedDashboard />
-              </ProtectedRoute>
-            } />
-            
-            <Route path="/app/dashboard-modern" element={
-              <ProtectedRoute>
-                <ModernDashboard />
-              </ProtectedRoute>
-            } />
-            
-            {/* Old Dashboard */}
-            <Route path="/app/dashboard-old" element={
-              <ProtectedRoute>
-                <PremiumDashboard />
-              </ProtectedRoute>
-            } />
-            
-            {/* Old Project Detail - VSCode Style */}
-            <Route path="/app/projects/:id/vscode" element={
-              <ProtectedRoute>
-                <VSCodeStyleProjectDetail />
-              </ProtectedRoute>
-            } />
-            
-            {/* Old Project Detail with collaboration */}
-            <Route path="/app/projects/:id/collab" element={
-              <ProtectedRoute>
-                <CollaborationProvider projectId="default">
-                  <LiveCursors />
-                  <PremiumProjectDetail />
-                </CollaborationProvider>
-              </ProtectedRoute>
-            } />
-            
-            {/* Analytics */}
-            <Route path="/app/analytics" element={
-              <ProtectedRoute>
-                <AnalyticsDashboard />
-              </ProtectedRoute>
-            } />
-            
-            {/* Old Settings */}
-            <Route path="/app/settings-old" element={
-              <ProtectedRoute>
-                <Settings />
-              </ProtectedRoute>
-            } />
-            <Route path="/app/settings-old/:section" element={
-              <ProtectedRoute>
-                <Settings />
-              </ProtectedRoute>
-            } />
-            
-            {/* Diagram Generator - Old */}
-            <Route path="/app/diagrams-old" element={
-              <ProtectedRoute>
-                <DiagramGenerator />
-              </ProtectedRoute>
-            } />
-            
-            {/* Old Diagrams */}
-            <Route path="/app/diagrams-legacy" element={
-              <ProtectedRoute>
-                <Diagrams />
               </ProtectedRoute>
             } />
             
