@@ -5,40 +5,53 @@
 
 @import "tailwindcss";
 
-/* CSS Variables for Premium Theme System */
+/* CSS Variables for Premium Theme System - EXACT shadcn/Notion/Linear Style */
 :root {
-  /* Light theme (default) */
-  --bg-primary: #ffffff;
-  --bg-secondary: #f8fafc;
-  --bg-tertiary: #f1f5f9;
-  --text-primary: #0f172a;
-  --text-secondary: #475569;
-  --text-tertiary: #64748b;
-  --border-primary: #e2e8f0;
-  --border-secondary: #cbd5e1;
-  --shadow-color: rgba(0, 0, 0, 0.08);
-  --shadow-hover: rgba(0, 0, 0, 0.12);
+  /* Pure white backgrounds - MANDATORY */
+  --background: #ffffff;
+  --foreground: #0c0c0c;
   
-  /* Premium colors */
-  --primary: #3b82f6;
-  --primary-hover: #2563eb;
-  --success: #10b981;
+  /* Subtle greys */
+  --muted: #f9fafb;
+  --muted-foreground: #6b7280;
+  
+  /* Borders - Light grey only */
+  --border: #e5e7eb;
+  --input: #e5e7eb;
+  
+  /* Cards */
+  --card: #ffffff;
+  --card-foreground: #0c0c0c;
+  
+  /* Status colors - Use SPARINGLY */
+  --success: #22c55e;
   --warning: #f59e0b;
   --error: #ef4444;
+  --info: #3b82f6;
+  
+  /* Accent (for primary actions) */
+  --primary: #0c0c0c;
+  --primary-foreground: #ffffff;
+  
+  /* Secondary */
+  --secondary: #f9fafb;
+  --secondary-foreground: #0c0c0c;
+  
+  /* Destructive */
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  
+  /* Ring (focus) */
+  --ring: #e5e7eb;
+  
+  /* Radius */
+  --radius: 0.5rem;
 }
 
+/* NO DARK THEME - keeping light only for now */
 .dark {
-  /* Dark theme */
-  --bg-primary: #0f172a;
-  --bg-secondary: #1e293b;
-  --bg-tertiary: #334155;
-  --text-primary: #f8fafc;
-  --text-secondary: #cbd5e1;
-  --text-tertiary: #94a3b8;
-  --border-primary: #334155;
-  --border-secondary: #475569;
-  --shadow-color: rgba(0, 0, 0, 0.3);
-  --shadow-hover: rgba(0, 0, 0, 0.4);
+  --background: #ffffff;
+  --foreground: #0c0c0c;
 }
 
 /* Marketing theme variables (for landing page) */
@@ -51,52 +64,95 @@
   --glow-secondary: rgba(99, 102, 241, 0.5);
 }
 
-/* Base Styles */
+/* Base Styles - EXACT Notion/Linear/Shadcn Style */
 * {
-  border-color: var(--border-primary);
+  border-color: #e5e7eb;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 body {
-  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  margin: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-feature-settings: "rlig" 1, "calt" 1;
-  background-color: var(--bg-primary);
-  color: var(--text-primary);
-  line-height: 1.6;
+  font-weight: 400;
+  background-color: #ffffff;
+  color: #0c0c0c;
+  line-height: 1.5;
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Premium Scrollbar Styling */
+/* Typography Scale - EXACT Inter specifications */
+h1 {
+  font-size: 32px;
+  font-weight: 600;
+  line-height: 1.2;
+  color: #0c0c0c;
+}
+
+h2 {
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: #0c0c0c;
+}
+
+h3 {
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: #0c0c0c;
+}
+
+h4 {
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.4;
+  color: #0c0c0c;
+}
+
+p {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+small {
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+/* Clean Scrollbar - Shadcn Style */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--bg-secondary);
+  background: #f9fafb;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--border-secondary);
+  background: #e5e7eb;
   border-radius: 4px;
   transition: background 0.2s ease;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--primary);
+  background: #d1d5db;
 }
 
-/* Beautiful Selection */
+/* Clean Selection */
 ::selection {
-  background-color: rgba(59, 130, 246, 0.25);
-  color: var(--text-primary);
+  background-color: rgba(59, 130, 246, 0.15);
+  color: #0c0c0c;
 }
 
 ::-moz-selection {
-  background-color: rgba(59, 130, 246, 0.25);
-  color: var(--text-primary);
+  background-color: rgba(59, 130, 246, 0.15);
+  color: #0c0c0c;
 }
 
 /* ========================================
