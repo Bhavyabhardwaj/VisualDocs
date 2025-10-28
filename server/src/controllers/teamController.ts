@@ -1,12 +1,16 @@
 import { Request, Response, NextFunction } from 'express';
 import { successResponse } from '../utils';
-import { prisma } from '../config';
+import prisma from '../config/db';
 
 export const teamController = {
   async getTeamMembers(req: Request, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
       const userId = req.user?.userId;
+
+      if (!userId) {
+        return res.status(401).json({ error: 'Unauthorized' });
+      }
 
       // For now, return the current user's team (workspace members)
       // In a real app, you'd fetch team by ID
@@ -51,6 +55,10 @@ export const teamController = {
       const { id } = req.params;
       const userId = req.user?.userId;
 
+      if (!userId) {
+        return res.status(401).json({ error: 'Unauthorized' });
+      }
+
       // Fetch recent project activities
       const recentProjects = await prisma.project.findMany({
         where: { userId },
@@ -65,7 +73,7 @@ export const teamController = {
         }
       });
 
-      const activities = recentProjects.map(project => ({
+      const activities = recentProjects.map((project: any) => ({
         id: `activity-${project.id}`,
         type: 'project_update',
         user: {

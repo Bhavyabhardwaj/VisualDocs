@@ -1,12 +1,16 @@
 import { Request, Response, NextFunction } from 'express';
 import { successResponse } from '../utils';
-import { prisma } from '../config';
+import prisma from '../config/db';
 
 export const activityController = {
   async getProjectActivity(req: Request, res: Response, next: NextFunction) {
     try {
       const { projectId } = req.params;
       const userId = req.user?.userId;
+
+      if (!userId || !projectId) {
+        return res.status(401).json({ error: 'Unauthorized' });
+      }
 
       // Get project
       const project = await prisma.project.findFirst({
@@ -27,7 +31,6 @@ export const activityController = {
             take: 5,
             select: {
               id: true,
-              status: true,
               createdAt: true,
             }
           },
@@ -82,7 +85,7 @@ export const activityController = {
       }
 
       // Analysis activities
-      project.analyses.forEach(analysis => {
+      project.analyses.forEach((analysis: any) => {
         activities.push({
           id: `analysis-${analysis.id}`,
           type: 'analysis',
@@ -91,14 +94,14 @@ export const activityController = {
             name: project.user.name,
             avatar: project.user.avatar,
           },
-          action: analysis.status === 'COMPLETED' ? 'completed analysis' : 'started analysis',
+          action: 'completed analysis',
           target: project.name,
           timestamp: analysis.createdAt,
         });
       });
 
       // Diagram activities
-      project.diagrams.forEach(diagram => {
+      project.diagrams.forEach((diagram: any) => {
         activities.push({
           id: `diagram-${diagram.id}`,
           type: 'diagram',
@@ -133,6 +136,10 @@ export const activityController = {
       const userId = req.user?.userId;
       const limit = parseInt(req.query.limit as string) || 20;
 
+      if (!userId) {
+        return res.status(401).json({ error: 'Unauthorized' });
+      }
+
       // Get user's recent projects
       const projects = await prisma.project.findMany({
         where: { userId },
@@ -147,7 +154,7 @@ export const activityController = {
         }
       });
 
-      const activities = projects.map(project => ({
+      const activities = projects.map((project: any) => ({
         id: `project-${project.id}`,
         type: 'project_update',
         action: project.status === 'ANALYZING' ? 'started analysis on' : 'updated',
@@ -171,6 +178,10 @@ export const activityController = {
       const { teamId } = req.params;
       const userId = req.user?.userId;
 
+      if (!userId) {
+        return res.status(401).json({ error: 'Unauthorized' });
+      }
+
       // For now, return user activity as team activity
       // In production, fetch activities from all team members
       const activities = await prisma.project.findMany({
@@ -192,7 +203,7 @@ export const activityController = {
         }
       });
 
-      const formattedActivities = activities.map(project => ({
+      const formattedActivities = activities.map((project: any) => ({
         id: `team-${project.id}`,
         type: 'project_update',
         user: {
