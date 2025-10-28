@@ -3,14 +3,12 @@ import { Bell, Check, CheckCheck, Trash2, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { notificationService, type Notification } from '@/services/notification.service';
-import { socketService } from '@/services/socket.service';
 import { formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
@@ -70,19 +68,18 @@ export const NotificationsPanel = () => {
     }
   };
 
-  // Listen for real-time notifications
+  // Listen for real-time notifications via window events (WebSocket integration)
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token && socketService.isConnected()) {
-      // Listen for notification events
-      socketService.socket?.on('notification:new', (notification: Notification) => {
-        setNotifications(prev => [notification, ...prev]);
-        setUnreadCount(prev => prev + 1);
-      });
-    }
+    const handleNewNotification = (event: CustomEvent<Notification>) => {
+      const notification = event.detail;
+      setNotifications(prev => [notification, ...prev]);
+      setUnreadCount(prev => prev + 1);
+    };
+
+    window.addEventListener('notification:new' as any, handleNewNotification);
 
     return () => {
-      socketService.socket?.off('notification:new');
+      window.removeEventListener('notification:new' as any, handleNewNotification);
     };
   }, []);
 
@@ -158,7 +155,7 @@ export const NotificationsPanel = () => {
           <Bell className="h-4 w-4 text-neutral-600" />
           {unreadCount > 0 && (
             <Badge
-              variant="error"
+              variant="destructive"
               className="absolute -right-1 -top-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-[10px] font-semibold"
             >
               {unreadCount > 9 ? '9+' : unreadCount}

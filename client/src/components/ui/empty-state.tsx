@@ -1,5 +1,4 @@
-import { ReactNode } from 'react';
-import { Button } from '@/components/ui/button';
+import type { ReactNode } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 
