@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { PremiumLayout } from '@/components/layout/PremiumLayout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
@@ -33,92 +33,41 @@ import {
   Activity
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
-
-interface TeamMember {
-  id: string;
-  name: string;
-  email: string;
-  role: 'owner' | 'admin' | 'member';
-  status: 'active' | 'pending' | 'suspended';
-  joinedAt: Date;
-  lastActive: Date;
-  projectsCount: number;
-}
+import { teamService, type TeamMember } from '@/services/team.service';
 
 export const PremiumTeamManagement = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterRole, setFilterRole] = useState<string>('all');
   const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Mock data
-  const teamMembers: TeamMember[] = [
-    {
-      id: '1',
-      name: 'John Doe',
-      email: 'john.doe@company.com',
-      role: 'owner',
-      status: 'active',
-      joinedAt: new Date('2024-01-15'),
-      lastActive: new Date(),
-      projectsCount: 12,
-    },
-    {
-      id: '2',
-      name: 'Sarah Adams',
-      email: 'sarah.adams@company.com',
-      role: 'admin',
-      status: 'active',
-      joinedAt: new Date('2024-02-20'),
-      lastActive: new Date(Date.now() - 2 * 60 * 60 * 1000),
-      projectsCount: 8,
-    },
-    {
-      id: '3',
-      name: 'Mike Brown',
-      email: 'mike.brown@company.com',
-      role: 'member',
-      status: 'active',
-      joinedAt: new Date('2024-03-10'),
-      lastActive: new Date(Date.now() - 5 * 60 * 60 * 1000),
-      projectsCount: 5,
-    },
-    {
-      id: '4',
-      name: 'Emily Chen',
-      email: 'emily.chen@company.com',
-      role: 'member',
-      status: 'active',
-      joinedAt: new Date('2024-04-05'),
-      lastActive: new Date(Date.now() - 24 * 60 * 60 * 1000),
-      projectsCount: 3,
-    },
-    {
-      id: '5',
-      name: 'David Wilson',
-      email: 'david.wilson@company.com',
-      role: 'admin',
-      status: 'active',
-      joinedAt: new Date('2024-01-20'),
-      lastActive: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
-      projectsCount: 10,
-    },
-    {
-      id: '6',
-      name: 'Lisa Martinez',
-      email: 'lisa.martinez@company.com',
-      role: 'member',
-      status: 'pending',
-      joinedAt: new Date('2024-10-20'),
-      lastActive: new Date('2024-10-20'),
-      projectsCount: 0,
-    },
-  ];
+  // Load team members
+  useEffect(() => {
+    const loadTeamMembers = async () => {
+      try {
+        setLoading(true);
+        // Use "default" as teamId since we don't have multi-team support yet
+        const response = await teamService.getTeamMembers('default');
+        if (response.data) {
+          setTeamMembers(response.data.members);
+        }
+      } catch (error) {
+        console.error('Failed to load team members:', error);
+        setTeamMembers([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadTeamMembers();
+  }, []);
 
   const stats = {
     totalMembers: teamMembers.length,
-    activeMembers: teamMembers.filter(m => m.status === 'active').length,
-    pendingInvites: teamMembers.filter(m => m.status === 'pending').length,
-    admins: teamMembers.filter(m => m.role === 'admin' || m.role === 'owner').length,
+    activeMembers: teamMembers.filter(m => new Date(m.lastActive) > new Date(Date.now() - 24 * 60 * 60 * 1000)).length,
+    pendingInvites: 0,
+    admins: teamMembers.filter(m => m.role.toLowerCase() === 'admin' || m.role.toLowerCase() === 'owner').length,
   };
 
   const filteredMembers = teamMembers.filter(member => {
@@ -353,6 +302,7 @@ export const PremiumTeamManagement = () => {
                       <td className="p-4">
                         <div className="flex items-center gap-3">
                           <Avatar className="w-8 h-8">
+                            {member.avatar && <AvatarImage src={member.avatar} alt={member.name} />}
                             <AvatarFallback className="bg-blue-100 text-blue-600 text-xs font-medium">
                               {member.name.split(' ').map(n => n[0]).join('')}
                             </AvatarFallback>
@@ -364,25 +314,27 @@ export const PremiumTeamManagement = () => {
                         </div>
                       </td>
                       <td className="p-4">
-                        <Badge variant="outline" className={`${getRoleBadge(member.role)} capitalize`}>
-                          <span className="mr-1">{getRoleIcon(member.role)}</span>
+                        <Badge variant="outline" className={`${getRoleBadge(member.role.toLowerCase())} capitalize`}>
+                          <span className="mr-1">{getRoleIcon(member.role.toLowerCase())}</span>
                           {member.role}
                         </Badge>
                       </td>
                       <td className="p-4">
-                        {getStatusBadge(member.status)}
+                        <Badge variant="success" className="border-green-200 bg-green-50 text-green-700">
+                          Active
+                        </Badge>
                       </td>
                       <td className="p-4">
-                        <span className="text-sm text-neutral-900">{member.projectsCount}</span>
+                        <span className="text-sm text-neutral-900">{member.projectCount}</span>
                       </td>
                       <td className="p-4">
                         <span className="text-sm text-neutral-600">
-                          {member.joinedAt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                          {new Date(member.joinedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                         </span>
                       </td>
                       <td className="p-4">
                         <span className="text-sm text-neutral-600">
-                          {formatDistanceToNow(member.lastActive, { addSuffix: true })}
+                          {formatDistanceToNow(new Date(member.lastActive), { addSuffix: true })}
                         </span>
                       </td>
                       <td className="p-4">

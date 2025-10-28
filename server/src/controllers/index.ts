@@ -2,6 +2,8 @@ import { AuthController } from './authController';
 import { ProjectController } from './projectController';
 import { AnalysisController } from './analysisController';
 import { DiagramController } from './diagramController';
+import { teamController } from './teamController';
+import { activityController } from './activityController';
 
 // Create controller instances
 export const authController = new AuthController();
@@ -14,6 +16,8 @@ export { AuthController } from './authController';
 export { ProjectController } from './projectController';
 export { AnalysisController } from './analysisController';
 export { DiagramController } from './diagramController';
+export { teamController } from './teamController';
+export { activityController } from './activityController';
 
 // Export default object for easy importing
 export default {
@@ -21,4 +25,6 @@ export default {
   project: projectController,
   analysis: analysisController,
   diagram: diagramController,
+  team: teamController,
+  activity: activityController,
 };

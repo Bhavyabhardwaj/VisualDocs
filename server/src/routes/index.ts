@@ -8,6 +8,8 @@ import projectRouter from './project.router';
 import analysisRouter from './analysis.router';
 import diagramRouter, { projectDiagramRouter } from './diagram.router';
 import publicRouter from './public.router';
+import teamRouter from './team.router';
+import activityRouter from './activity.router';
 
 const router = Router();
 
@@ -18,6 +20,8 @@ const apiRoutes = [
   { path: '/projects', route: projectRouter, isProtected: true },
   { path: '/analysis', route: analysisRouter, isProtected: true },
   { path: '/diagrams', route: diagramRouter, isProtected: true },
+  { path: '/teams', route: teamRouter, isProtected: true },
+  { path: '/activity', route: activityRouter, isProtected: true },
   { path: '/public', route: publicRouter },
 ];
 
