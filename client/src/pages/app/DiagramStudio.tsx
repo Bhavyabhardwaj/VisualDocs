@@ -142,11 +142,11 @@ export const DiagramStudio = () => {
           </div>
 
           <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm" className="gap-2 hover:bg-gray-50">
+            <Button variant="outline" size="sm" className="gap-2">
               <Sparkles className="h-4 w-4" />
               AI Generate
             </Button>
-            <Button size="sm" className="gap-2 bg-gray-900 hover:bg-gray-800">
+            <Button size="sm" className="gap-2">
               <Upload className="h-4 w-4" />
               Share
             </Button>
@@ -261,7 +261,6 @@ export const DiagramStudio = () => {
                 variant={selectedTool === 'select' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setSelectedTool('select')}
-                className={selectedTool === 'select' ? 'bg-gray-900 hover:bg-gray-800' : 'hover:bg-gray-50'}
               >
                 <Move className="h-4 w-4" />
               </Button>
@@ -274,7 +273,6 @@ export const DiagramStudio = () => {
                     variant={selectedTool === shape.id ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => setSelectedTool(shape.id)}
-                    className={selectedTool === shape.id ? 'bg-gray-900 hover:bg-gray-800' : 'hover:bg-gray-50'}
                   >
                     <Icon className="h-4 w-4" />
                   </Button>
@@ -287,14 +285,13 @@ export const DiagramStudio = () => {
                 variant={showGrid ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setShowGrid(!showGrid)}
-                className={showGrid ? 'bg-gray-900 hover:bg-gray-800' : 'hover:bg-gray-50'}
               >
                 <Grid3x3 className="h-4 w-4" />
               </Button>
-              <Button variant="outline" size="sm" className="hover:bg-gray-50">
+              <Button variant="outline" size="sm">
                 <AlignLeft className="h-4 w-4" />
               </Button>
-              <Button variant="outline" size="sm" className="hover:bg-gray-50">
+              <Button variant="outline" size="sm">
                 <AlignCenter className="h-4 w-4" />
               </Button>
             </div>
@@ -325,11 +322,11 @@ export const DiagramStudio = () => {
                         Select a shape from the left toolbar or use AI to generate a diagram from your codebase.
                       </p>
                       <div className="flex items-center gap-3 justify-center">
-                        <Button className="gap-2 bg-gray-900 hover:bg-gray-800">
+                        <Button className="gap-2">
                           <Sparkles className="h-4 w-4" />
                           AI Generate
                         </Button>
-                        <Button variant="outline" className="gap-2 hover:bg-gray-50">
+                        <Button variant="outline" className="gap-2">
                           <Plus className="h-4 w-4" />
                           Choose Template
                         </Button>
