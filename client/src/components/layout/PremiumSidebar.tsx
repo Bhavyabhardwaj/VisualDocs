@@ -1,11 +1,12 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import { 
   LayoutDashboard, FolderGit2, Users, Brain, 
   Network, Settings, LogOut, User, ChevronRight,
   Code2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import {
   DropdownMenu,
@@ -16,7 +17,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
-import { useState } from 'react';
+import { authService } from '@/services/auth.service';
+import type { User as UserType } from '@/types/api';
 
 interface NavItem {
   name: string;
@@ -36,14 +38,42 @@ const navigation: NavItem[] = [
 export const PremiumSidebar = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const [user] = useState({ name: 'John Doe', email: 'john@example.com' });
+  const [user, setUser] = useState<UserType | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch real user data
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const response = await authService.getProfile();
+        if (response.data) {
+          setUser(response.data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch user profile:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUser();
+  }, []);
 
   const isActive = (href: string) => {
     return location.pathname === href || location.pathname.startsWith(href + '/');
   };
 
-  const handleLogout = () => {
-    navigate('/login');
+  const handleLogout = async () => {
+    try {
+      await authService.logout();
+      localStorage.removeItem('token');
+      navigate('/login');
+    } catch (error) {
+      console.error('Logout failed:', error);
+      // Still navigate to login even if API fails
+      localStorage.removeItem('token');
+      navigate('/login');
+    }
   };
 
   const getUserInitials = (name: string) => {
@@ -103,45 +133,58 @@ export const PremiumSidebar = () => {
 
       {/* User Profile */}
       <div className="p-3">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              className="w-full justify-start gap-3 px-3 py-2.5 h-auto hover:bg-neutral-50"
-            >
-              <Avatar className="h-8 w-8">
-                <AvatarFallback className="bg-gradient-to-br from-blue-600 to-indigo-600 text-white text-xs font-semibold">
-                  {getUserInitials(user.name)}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex flex-col items-start flex-1 min-w-0">
-                <span className="text-sm font-medium text-neutral-900 truncate w-full">
-                  {user.name}
-                </span>
-                <span className="text-xs text-neutral-500 truncate w-full">
-                  {user.email}
-                </span>
+        {loading ? (
+          <div className="w-full px-3 py-2.5">
+            <div className="flex items-center gap-3">
+              <div className="h-8 w-8 rounded-full bg-neutral-200 animate-pulse" />
+              <div className="flex-1 space-y-2">
+                <div className="h-3 w-24 bg-neutral-200 rounded animate-pulse" />
+                <div className="h-3 w-32 bg-neutral-100 rounded animate-pulse" />
               </div>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56">
-            <DropdownMenuLabel>My Account</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => navigate('/app/settings')}>
-              <User className="mr-2 h-4 w-4" />
-              Profile
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => navigate('/app/settings')}>
-              <Settings className="mr-2 h-4 w-4" />
-              Settings
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleLogout} className="text-red-600">
-              <LogOut className="mr-2 h-4 w-4" />
-              Log out
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+            </div>
+          </div>
+        ) : user ? (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                className="w-full justify-start gap-3 px-3 py-2.5 h-auto hover:bg-neutral-50"
+              >
+                <Avatar className="h-8 w-8">
+                  {user.avatar && <AvatarImage src={user.avatar} alt={user.name} />}
+                  <AvatarFallback className="bg-gradient-to-br from-blue-600 to-indigo-600 text-white text-xs font-semibold">
+                    {getUserInitials(user.name)}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex flex-col items-start flex-1 min-w-0">
+                  <span className="text-sm font-medium text-neutral-900 truncate w-full">
+                    {user.name}
+                  </span>
+                  <span className="text-xs text-neutral-500 truncate w-full">
+                    {user.email}
+                  </span>
+                </div>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuLabel>My Account</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => navigate('/app/settings')}>
+                <User className="mr-2 h-4 w-4" />
+                Profile
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate('/app/settings')}>
+                <Settings className="mr-2 h-4 w-4" />
+                Settings
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={handleLogout} className="text-red-600">
+                <LogOut className="mr-2 h-4 w-4" />
+                Log out
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ) : null}
       </div>
     </div>
   );

@@ -22,54 +22,54 @@ import { FileUploadDialog } from '@/components/app/FileUploadDialog';
 import { GitHubImportDialog } from '@/components/app/GitHubImportDialog';
 import { PremiumLayout } from '@/components/layout/PremiumLayout';
 import { projectService } from '@/services/project.service';
-import type { Project } from '@/types/api';
+import { authService } from '@/services/auth.service';
+import type { Project, UserStats } from '@/types/api';
 import { cn } from '@/lib/utils';
 
 export const RealDashboard = () => {
   const navigate = useNavigate();
   const [projects, setProjects] = useState<Project[]>([]);
+  const [stats, setStats] = useState<UserStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
   const [githubDialogOpen, setGithubDialogOpen] = useState(false);
 
   useEffect(() => {
-    loadProjects();
+    loadDashboardData();
   }, []);
 
-  const loadProjects = async () => {
+  const loadDashboardData = async () => {
     try {
       setLoading(true);
-      const response = await projectService.getProjects({ limit: 100 });
-      setProjects(response.data.items || []);
+      const [projectsResponse, statsResponse] = await Promise.all([
+        projectService.getProjects({ limit: 100 }),
+        authService.getUserStats(),
+      ]);
+      
+      setProjects(projectsResponse.data.items || []);
+      setStats(statsResponse.data || null);
     } catch (error) {
-      console.error('Failed to load projects:', error);
+      console.error('Failed to load dashboard data:', error);
       setProjects([]);
+      setStats(null);
     } finally {
       setLoading(false);
     }
   };
 
   const handleUploadSuccess = () => {
-    loadProjects();
+    loadDashboardData();
     setUploadDialogOpen(false);
   };
 
   const handleDeleteProject = async (id: string) => {
     try {
       await projectService.deleteProject(id);
-      loadProjects();
+      loadDashboardData();
     } catch (error) {
       console.error('Failed to delete project:', error);
     }
-  };
-
-  // Calculate stats from real data
-  const stats = {
-    totalProjects: projects.length,
-    analyzed: projects.filter(p => p.status === 'active').length,
-    analyzing: projects.filter(p => p.status === 'analyzing').length,
-    totalFiles: projects.reduce((sum, p) => sum + (p.fileCount || 0), 0),
   };
 
   const recentProjects = projects
@@ -118,85 +118,103 @@ export const RealDashboard = () => {
 
         <div className="mx-auto px-8 py-8">
         {/* Stats Grid - Premium Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-          <Card className="border border-neutral-200 shadow-sm">
-            <CardContent className="pt-6 pb-6 px-6">
-              <div className="flex items-start justify-between">
-                <div className="space-y-3">
-                  <p className="text-sm font-medium text-neutral-600">Projects Analyzed</p>
-                  <div className="text-4xl font-semibold tracking-tight text-neutral-900">
-                    {stats.totalProjects}
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+            {[...Array(4)].map((_, i) => (
+              <Card key={i} className="border border-neutral-200 shadow-sm">
+                <CardContent className="pt-6 pb-6 px-6">
+                  <div className="space-y-3">
+                    <div className="h-4 w-24 bg-neutral-200 rounded animate-pulse" />
+                    <div className="h-10 w-16 bg-neutral-200 rounded animate-pulse" />
+                    <div className="h-3 w-32 bg-neutral-100 rounded animate-pulse" />
                   </div>
-                  <p className="text-xs text-neutral-500">
-                    {stats.totalProjects > 0 ? '+2 from last month' : 'Get started'}
-                  </p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : stats ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+            <Card className="border border-neutral-200 shadow-sm">
+              <CardContent className="pt-6 pb-6 px-6">
+                <div className="flex items-start justify-between">
+                  <div className="space-y-3">
+                    <p className="text-sm font-medium text-neutral-600">Total Projects</p>
+                    <div className="text-4xl font-semibold tracking-tight text-neutral-900">
+                      {stats.projectCount}
+                    </div>
+                    <p className="text-xs text-neutral-500">
+                      {stats.projectCount > 0 ? 'Active projects' : 'Get started'}
+                    </p>
+                  </div>
+                  <div className="flex-shrink-0">
+                    <Folder className="w-5 h-5 text-neutral-400" />
+                  </div>
                 </div>
-                <div className="flex-shrink-0">
-                  <Folder className="w-5 h-5 text-neutral-400" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
 
-          <Card className="border border-neutral-200 shadow-sm">
-            <CardContent className="pt-6 pb-6 px-6">
-              <div className="flex items-start justify-between">
-                <div className="space-y-3">
-                  <p className="text-sm font-medium text-neutral-600">Files Uploaded</p>
-                  <div className="text-4xl font-semibold tracking-tight text-neutral-900">
-                    {stats.totalFiles}
+            <Card className="border border-neutral-200 shadow-sm">
+              <CardContent className="pt-6 pb-6 px-6">
+                <div className="flex items-start justify-between">
+                  <div className="space-y-3">
+                    <p className="text-sm font-medium text-neutral-600">Diagrams Created</p>
+                    <div className="text-4xl font-semibold tracking-tight text-neutral-900">
+                      {stats.diagramCount}
+                    </div>
+                    <p className="text-xs text-neutral-500">
+                      Across all projects
+                    </p>
                   </div>
-                  <p className="text-xs text-neutral-500">
-                    Across {stats.totalProjects} {stats.totalProjects === 1 ? 'project' : 'projects'}
-                  </p>
+                  <div className="flex-shrink-0">
+                    <FileCode className="w-5 h-5 text-neutral-400" />
+                  </div>
                 </div>
-                <div className="flex-shrink-0">
-                  <FileCode className="w-5 h-5 text-neutral-400" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
 
-          <Card className="border border-neutral-200 shadow-sm">
-            <CardContent className="pt-6 pb-6 px-6">
-              <div className="flex items-start justify-between">
-                <div className="space-y-3">
-                  <p className="text-sm font-medium text-neutral-600">Analysis Complete</p>
-                  <div className="text-4xl font-semibold tracking-tight text-neutral-900">
-                    {stats.analyzed}
+            <Card className="border border-neutral-200 shadow-sm">
+              <CardContent className="pt-6 pb-6 px-6">
+                <div className="flex items-start justify-between">
+                  <div className="space-y-3">
+                    <p className="text-sm font-medium text-neutral-600">Analyses Complete</p>
+                    <div className="text-4xl font-semibold tracking-tight text-neutral-900">
+                      {stats.analysisCount}
+                    </div>
+                    <p className="text-xs text-neutral-500">
+                      {stats.analysisCount > 0 
+                        ? `${Math.round((stats.analysisCount / Math.max(stats.projectCount, 1)) * 100)}% completion rate`
+                        : 'No analyses yet'}
+                    </p>
                   </div>
-                  <p className="text-xs text-neutral-500">
-                    {stats.totalProjects > 0 
-                      ? `${Math.round((stats.analyzed / stats.totalProjects) * 100)}% completion rate`
-                      : 'No analyses yet'}
-                  </p>
+                  <div className="flex-shrink-0">
+                    <BarChart3 className="w-5 h-5 text-neutral-400" />
+                  </div>
                 </div>
-                <div className="flex-shrink-0">
-                  <BarChart3 className="w-5 h-5 text-neutral-400" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
 
-          <Card className="border border-neutral-200 shadow-sm">
-            <CardContent className="pt-6 pb-6 px-6">
-              <div className="flex items-start justify-between">
-                <div className="space-y-3">
-                  <p className="text-sm font-medium text-neutral-600">In Progress</p>
-                  <div className="text-4xl font-semibold tracking-tight text-neutral-900">
-                    {stats.analyzing}
+            <Card className="border border-neutral-200 shadow-sm">
+              <CardContent className="pt-6 pb-6 px-6">
+                <div className="flex items-start justify-between">
+                  <div className="space-y-3">
+                    <p className="text-sm font-medium text-neutral-600">Last Activity</p>
+                    <div className="text-4xl font-semibold tracking-tight text-neutral-900">
+                      {stats.lastActivity 
+                        ? formatDistanceToNow(new Date(stats.lastActivity), { addSuffix: false })
+                        : 'Never'}
+                    </div>
+                    <p className="text-xs text-neutral-500">
+                      {stats.lastActivity ? 'ago' : 'No activity yet'}
+                    </p>
                   </div>
-                  <p className="text-xs text-neutral-500">
-                    {stats.analyzing > 0 ? 'Currently analyzing' : 'All complete'}
-                  </p>
+                  <div className="flex-shrink-0">
+                    <Activity className="w-5 h-5 text-neutral-400" />
+                  </div>
                 </div>
-                <div className="flex-shrink-0">
-                  <Activity className={cn("w-5 h-5 text-neutral-400", stats.analyzing > 0 && "animate-pulse text-blue-500")} />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+              </CardContent>
+            </Card>
+          </div>
+        ) : null}
 
         {/* Recent Projects Section */}
         <div className="space-y-6">

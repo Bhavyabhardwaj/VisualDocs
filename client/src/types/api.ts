@@ -32,11 +32,10 @@ export interface User {
 }
 
 export interface UserStats {
-  totalProjects: number;
-  totalAnalyses: number;
-  totalDiagrams: number;
-  storageUsed: number;
-  storageLimit: number;
+  projectCount: number;
+  diagramCount: number;
+  analysisCount: number;
+  lastActivity: string | null;
 }
 
 // Project Types
