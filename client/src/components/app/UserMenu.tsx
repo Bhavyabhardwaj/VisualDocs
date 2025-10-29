@@ -19,11 +19,13 @@ import {
 } from '../ui/dropdown-menu';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { KeyboardShortcutsModal } from './KeyboardShortcutsModal';
 
 export const UserMenu = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
+  const [shortcutsModalOpen, setShortcutsModalOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -40,6 +42,7 @@ export const UserMenu = () => {
   };
 
   return (
+    <>
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
       <DropdownMenuTrigger asChild>
         <button className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-zinc-50 transition-colors">
@@ -107,14 +110,14 @@ export const UserMenu = () => {
         {/* Keyboard Shortcuts */}
         <DropdownMenuItem 
           onClick={() => {
-            // TODO: Open keyboard shortcuts modal
-            console.log('Open keyboard shortcuts');
+            setIsOpen(false);
+            setShortcutsModalOpen(true);
           }}
           className="flex items-center gap-3 px-3 py-2 cursor-pointer rounded-md hover:bg-zinc-50 focus:bg-zinc-50"
         >
           <Keyboard className="w-4 h-4 text-zinc-600" />
           <span className="text-sm text-zinc-900">Keyboard Shortcuts</span>
-          <kbd className="ml-auto text-xs text-zinc-500 font-mono">?</kbd>
+          <kbd className="ml-auto text-xs text-zinc-500 font-mono">⌘/</kbd>
         </DropdownMenuItem>
 
         {/* Help & Support */}
@@ -138,5 +141,9 @@ export const UserMenu = () => {
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
+    
+    {/* Keyboard Shortcuts Modal */}
+    <KeyboardShortcutsModal open={shortcutsModalOpen} onOpenChange={setShortcutsModalOpen} />
+    </>
   );
 };

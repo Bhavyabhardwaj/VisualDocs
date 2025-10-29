@@ -2,10 +2,38 @@ import { Search, Settings } from 'lucide-react';
 import { UserMenu } from './UserMenu';
 import { NotificationsMenu } from './NotificationsMenu';
 import { CommandPalette } from './CommandPalette';
-import { useState } from 'react';
+import { KeyboardShortcutsModal } from './KeyboardShortcutsModal';
+import { useState, useEffect } from 'react';
 
 export const TopNavBar = () => {
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
+  const [shortcutsModalOpen, setShortcutsModalOpen] = useState(false);
+
+  // Global keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Command Palette: Cmd/Ctrl + K
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setCommandPaletteOpen(true);
+      }
+      
+      // Keyboard Shortcuts: Cmd/Ctrl + /
+      if ((e.metaKey || e.ctrlKey) && e.key === '/') {
+        e.preventDefault();
+        setShortcutsModalOpen(true);
+      }
+
+      // Close modals: Escape
+      if (e.key === 'Escape') {
+        setCommandPaletteOpen(false);
+        setShortcutsModalOpen(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   return (
     <>
@@ -42,7 +70,11 @@ export const TopNavBar = () => {
           <NotificationsMenu />
 
           {/* Settings */}
-          <button className="p-2 rounded-lg hover:bg-zinc-50 transition-colors">
+          <button 
+            className="p-2 rounded-lg hover:bg-zinc-50 transition-colors"
+            onClick={() => setShortcutsModalOpen(true)}
+            title="Settings & Shortcuts"
+          >
             <Settings className="w-5 h-5 text-zinc-600" />
           </button>
 
@@ -53,6 +85,9 @@ export const TopNavBar = () => {
 
       {/* Command Palette */}
       <CommandPalette open={commandPaletteOpen} onOpenChange={setCommandPaletteOpen} />
+      
+      {/* Keyboard Shortcuts Modal */}
+      <KeyboardShortcutsModal open={shortcutsModalOpen} onOpenChange={setShortcutsModalOpen} />
     </>
   );
 };
