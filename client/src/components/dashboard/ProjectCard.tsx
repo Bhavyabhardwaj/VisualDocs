@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { FileText, Github, Gitlab, Upload, Clock, TrendingUp, Users, Eye, RefreshCw, Share2, Settings, MoreVertical } from 'lucide-react';
+import { FileText, Github, Gitlab, Upload, Clock, TrendingUp, Eye, RefreshCw, Share2, MoreVertical } from 'lucide-react';
 import type { DashboardProject } from '@/types/dashboard';
 import { formatDistanceToNow } from 'date-fns';
 import { useState } from 'react';
@@ -145,7 +145,7 @@ export const ProjectCard = ({ project, onViewDocs, onRegenerate, onShare }: Proj
         <div className="flex items-center gap-2">
           {/* Collaborators */}
           <div className="flex -space-x-2">
-            {project.collaborators.slice(0, 3).map((user, idx) => (
+            {project.collaborators.slice(0, 3).map((user) => (
               <div
                 key={user.id}
                 className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 border-2 border-white flex items-center justify-center text-white text-xs font-medium"

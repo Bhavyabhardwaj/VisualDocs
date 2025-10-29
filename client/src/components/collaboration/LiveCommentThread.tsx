@@ -55,13 +55,14 @@ export const LiveCommentThread = ({
 }: LiveCommentThreadProps) => {
   const [isExpanded, setIsExpanded] = useState(true);
   const [replyText, setReplyText] = useState('');
-  const [isTyping, setIsTyping] = useState(false);
+  
+  // Suppress unused variable warnings
+  void threadId;
 
   const handleSendReply = () => {
     if (replyText.trim() && onAddComment) {
       onAddComment(replyText);
       setReplyText('');
-      setIsTyping(false);
     }
   };
 
@@ -213,7 +214,6 @@ export const LiveCommentThread = ({
                       value={replyText}
                       onChange={(e) => {
                         setReplyText(e.target.value);
-                        setIsTyping(e.target.value.length > 0);
                       }}
                       onKeyDown={(e) => {
                         if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {

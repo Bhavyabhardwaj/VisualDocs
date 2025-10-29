@@ -9,14 +9,6 @@ interface LiveCursorProps {
   isTyping?: boolean;
 }
 
-const CURSOR_COLORS = {
-  user1: '#3b82f6', // Blue
-  user2: '#8b5cf6', // Purple
-  user3: '#ec4899', // Pink
-  user4: '#10b981', // Green
-  user5: '#f59e0b', // Amber
-};
-
 export const LiveCursor = ({ x, y, name, color, isTyping }: LiveCursorProps) => {
   return (
     <motion.div
@@ -97,7 +89,7 @@ export const LiveCursor = ({ x, y, name, color, isTyping }: LiveCursorProps) => 
 export const LiveCursors = ({ cursors }: { cursors: LiveCursorProps[] }) => {
   return (
     <>
-      {cursors.map((cursor, index) => (
+      {cursors.map((cursor) => (
         <LiveCursor
           key={cursor.name}
           {...cursor}

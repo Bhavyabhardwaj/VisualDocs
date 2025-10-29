@@ -13,6 +13,9 @@ interface AppLayoutProps {
 export const AppLayout: React.FC<AppLayoutProps> = ({ breadcrumbs }) => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  
+  // Suppress unused variable warning - breadcrumbs reserved for future use
+  void breadcrumbs;
 
   return (
     <div className="min-h-screen bg-light-bg dark:bg-dark-bg transition-theme">
