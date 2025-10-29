@@ -5,23 +5,23 @@
 
 @import "tailwindcss";
 
-/* CSS Variables for Premium Theme System - EXACT shadcn/Notion/Linear Style */
+/* CSS Variables for Premium Theme System - Landing Page Theme */
 :root {
-  /* Pure white backgrounds - MANDATORY */
-  --background: #ffffff;
-  --foreground: #0c0c0c;
+  /* Warm backgrounds - LANDING PAGE THEME */
+  --background: #F7F5F3;
+  --foreground: #37322F;
   
-  /* Subtle greys */
-  --muted: #f9fafb;
-  --muted-foreground: #6b7280;
+  /* Warm greys/browns */
+  --muted: #E8D5C4;
+  --muted-foreground: #605A57;
   
-  /* Borders - Light grey only */
-  --border: #e5e7eb;
-  --input: #e5e7eb;
+  /* Borders - Warm subtle */
+  --border: rgba(55,50,47,0.12);
+  --input: rgba(55,50,47,0.12);
   
   /* Cards */
   --card: #ffffff;
-  --card-foreground: #0c0c0c;
+  --card-foreground: #37322F;
   
   /* Status colors - Use SPARINGLY */
   --success: #22c55e;
@@ -29,20 +29,20 @@
   --error: #ef4444;
   --info: #3b82f6;
   
-  /* Accent (for primary actions) */
-  --primary: #0c0c0c;
-  --primary-foreground: #ffffff;
+  /* Accent (for primary actions) - Dark brown */
+  --primary: #37322F;
+  --primary-foreground: #F7F5F3;
   
   /* Secondary */
-  --secondary: #f9fafb;
-  --secondary-foreground: #0c0c0c;
+  --secondary: #E8D5C4;
+  --secondary-foreground: #37322F;
   
   /* Destructive */
   --destructive: #ef4444;
   --destructive-foreground: #ffffff;
   
   /* Ring (focus) */
-  --ring: #e5e7eb;
+  --ring: #37322F;
   
   /* Radius */
   --radius: 0.5rem;
@@ -58,10 +58,10 @@
   --space-16: 64px;
 }
 
-/* NO DARK THEME - keeping light only for now */
+/* NO DARK THEME - Light warm theme only */
 .dark {
-  --background: #ffffff;
-  --foreground: #0c0c0c;
+  --background: #F7F5F3;
+  --foreground: #37322F;
 }
 
 /* Marketing theme variables (for landing page) */
@@ -74,9 +74,9 @@
   --glow-secondary: rgba(99, 102, 241, 0.5);
 }
 
-/* Base Styles - EXACT Notion/Linear/Shadcn Style */
+/* Base Styles - Landing Page Theme */
 * {
-  border-color: #e5e7eb;
+  border-color: rgba(55,50,47,0.12);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -86,8 +86,8 @@ body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-feature-settings: "rlig" 1, "calt" 1;
   font-weight: 400;
-  background-color: #ffffff;
-  color: #0c0c0c;
+  background-color: #F7F5F3;
+  color: #37322F;
   line-height: 1.5;
   transition: background-color 0.3s ease, color 0.3s ease;
 }
@@ -97,7 +97,7 @@ h1 {
   font-size: 32px;
   font-weight: 600;
   line-height: 1.2;
-  color: #0c0c0c;
+  color: #37322F;
 }
 
 h2 {

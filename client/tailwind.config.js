@@ -27,47 +27,43 @@ export default {
         ],
       },
       colors: {
-        // Marketing Theme (Landing Page) - PRESERVED
-        marketing: {
-          dark: '#0a0a0f',
-          primary: '#00d4aa',
-          secondary: '#6366f1',
-          accent: '#f59e0b',
+        // Landing Page Theme - UNIFIED ACROSS ENTIRE APP
+        brand: {
+          bg: '#F7F5F3',           // Warm off-white background
+          primary: '#37322F',       // Dark brown (primary buttons, text)
+          secondary: '#322D2B',     // Darker brown
+          tertiary: '#49423D',      // Medium brown
+          muted: '#605A57',         // Light brown for muted text
+          accent: '#2F3037',        // Accent color
         },
         
-        // Premium App Interior (Linear/Vercel/Shadcn style)
-        background: '#ffffff',
-        foreground: '#0c0c0c',
+        // Override default colors to match landing page
+        background: '#F7F5F3',
+        foreground: '#37322F',
         muted: {
-          DEFAULT: '#f8f9fa',
-          foreground: '#6c757d',
+          DEFAULT: '#E8D5C4',      // Warm muted background
+          foreground: '#605A57',    // Muted text
         },
-        border: '#e9ecef',
-        input: '#e9ecef',
-        ring: '#0c0c0c',
+        border: 'rgba(55,50,47,0.12)',
+        input: 'rgba(55,50,47,0.12)',
+        ring: '#37322F',
         
-        // Neutral scale (Shadcn-style)
+        // Neutral scale matching landing page warmth
         neutral: {
-          50: '#fafafa',
-          100: '#f5f5f5',
-          200: '#e5e5e5',
-          300: '#d4d4d4',
-          400: '#a3a3a3',
-          500: '#737373',
-          600: '#525252',
-          700: '#404040',
-          800: '#262626',
-          900: '#171717',
-          950: '#0a0a0a',
+          50: '#F7F5F3',
+          100: '#EDE9E6',
+          200: '#E0DEDB',
+          300: '#C9C5C2',
+          400: '#A3A09D',
+          500: '#7D7A77',
+          600: '#605A57',
+          700: '#49423D',
+          800: '#37322F',
+          900: '#322D2B',
+          950: '#1A1816',
         },
         
-        // Subtle accent (minimal use)
-        accent: {
-          DEFAULT: '#f8f9fa',
-          foreground: '#0c0c0c',
-        },
-        
-        // Status colors (very subtle)
+        // Status colors (keep subtle)
         success: {
           DEFAULT: '#198754',
           muted: '#d1e7dd',
@@ -89,17 +85,14 @@ export default {
           500: '#ef4444', 
           600: '#dc2626',
         },
-        info: {
-          DEFAULT: '#0dcaf0',
-          muted: '#cff4fc',
-        },
         
-        // Primary for apps (black-based)
+        // Primary for apps (dark brown based)
         primary: {
-          50: '#f8f9fa',
-          100: '#e9ecef',
-          500: '#0c0c0c',
-          600: '#000000',
+          50: '#F7F5F3',
+          100: '#EDE9E6',
+          500: '#37322F',
+          600: '#322D2B',
+          700: '#1A1816',
         },
       },
       
