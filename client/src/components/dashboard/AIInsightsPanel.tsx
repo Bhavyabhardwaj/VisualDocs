@@ -31,10 +31,10 @@ export const AIInsightsPanel = ({ insights }: AIInsightsPanelProps) => {
         };
       case 'suggestion':
         return {
-          bg: 'bg-blue-50',
-          text: 'text-blue-700',
-          border: 'border-blue-200',
-          icon: 'text-blue-600',
+          bg: 'bg-emerald-50',
+          text: 'text-emerald-700',
+          border: 'border-emerald-200',
+          icon: 'text-emerald-600',
         };
       case 'success':
         return {

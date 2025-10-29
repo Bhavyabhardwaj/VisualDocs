@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Dialog,
@@ -16,6 +16,10 @@ import {
   Clock,
   Command,
   ArrowRight,
+  Hash,
+  Sparkles,
+  TrendingUp,
+  X,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -49,6 +53,14 @@ export const CommandPalette = ({ open, onOpenChange }: CommandPaletteProps) => {
     'payment integration',
     'dashboard components',
   ]);
+
+  // Reset state when dialog closes
+  useEffect(() => {
+    if (!open) {
+      setQuery('');
+      setSelectedIndex(0);
+    }
+  }, [open]);
 
   // Filter results based on query
   const filteredProjects = mockSearchResults.projects.filter(
@@ -152,102 +164,225 @@ export const CommandPalette = ({ open, onOpenChange }: CommandPaletteProps) => {
     setQuery(search);
   };
 
+  const clearSearch = () => {
+    setQuery('');
+    setSelectedIndex(0);
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl p-0 gap-0 overflow-hidden">
-        {/* Header */}
-        <div className="p-4 border-b border-neutral-200">
-          <div className="flex items-center gap-3">
-            <Search className="w-5 h-5 text-neutral-400" />
-            <Input
-              placeholder="Search projects, files, team members..."
-              value={query}
-              onChange={(e) => {
-                setQuery(e.target.value);
-                setSelectedIndex(0);
-              }}
-              className="border-0 focus-visible:ring-0 text-base h-auto p-0"
-              autoFocus
-            />
-            <div className="flex items-center gap-1.5 text-xs text-neutral-500">
-              <kbd className="px-2 py-1 bg-neutral-100 rounded border border-neutral-200 font-mono">
-                <Command className="w-3 h-3 inline" />K
-              </kbd>
+      <DialogContent className="max-w-3xl p-0 gap-0 overflow-hidden border-0 shadow-2xl">
+        {/* Glassmorphic Header */}
+        <div className="relative bg-gradient-to-br from-zinc-50 via-slate-50 to-gray-50 border-b border-zinc-200/60">
+          <div className="absolute inset-0 bg-white/70 backdrop-blur-xl" />
+          <div className="relative p-5">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-zinc-900 to-zinc-700 shadow-lg shadow-zinc-900/20">
+                <Search className="w-5 h-5 text-white" />
+              </div>
+              <div className="flex-1 relative">
+                <Input
+                  placeholder="Search anything... projects, files, team members"
+                  value={query}
+                  onChange={(e) => {
+                    setQuery(e.target.value);
+                    setSelectedIndex(0);
+                  }}
+                  className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0 text-base h-auto p-0 bg-transparent placeholder:text-gray-400 font-medium"
+                  autoFocus
+                />
+                {query && (
+                  <button
+                    onClick={clearSearch}
+                    className="absolute right-0 top-1/2 -translate-y-1/2 p-1 rounded-md hover:bg-gray-200/50 transition-colors"
+                  >
+                    <X className="w-4 h-4 text-gray-400" />
+                  </button>
+                )}
+              </div>
+              <div className="flex items-center gap-1.5">
+                <kbd className="hidden sm:inline-flex items-center gap-1 px-2 py-1.5 bg-white/80 backdrop-blur-sm rounded-lg border border-gray-200 shadow-sm text-[11px] font-medium text-gray-600">
+                  <Command className="w-3 h-3" />
+                  <span>K</span>
+                </kbd>
+              </div>
             </div>
+            
+            {/* Quick Stats */}
+            {query && totalResults > 0 && (
+              <div className="mt-4 flex items-center gap-3">
+                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/80 backdrop-blur-sm border border-zinc-200 shadow-sm">
+                  <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+                  <span className="text-xs font-medium text-zinc-700">{totalResults} results</span>
+                </div>
+                {filteredProjects.length > 0 && (
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-200">
+                    <Folder className="w-3.5 h-3.5 text-emerald-600" />
+                    <span className="text-xs font-medium text-emerald-700">{filteredProjects.length}</span>
+                  </div>
+                )}
+                {filteredFiles.length > 0 && (
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-orange-50 border border-orange-200">
+                    <FileCode className="w-3.5 h-3.5 text-orange-600" />
+                    <span className="text-xs font-medium text-orange-700">{filteredFiles.length}</span>
+                  </div>
+                )}
+                {filteredTeam.length > 0 && (
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-teal-50 border border-teal-200">
+                    <Users className="w-3.5 h-3.5 text-teal-600" />
+                    <span className="text-xs font-medium text-teal-700">{filteredTeam.length}</span>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Results */}
-        <ScrollArea className="max-h-[400px]">
-          <div className="p-2">
+        {/* Results with improved styling */}
+        <ScrollArea className="max-h-[480px] min-h-[320px]">
+          <div className="p-4">
             {query.length === 0 ? (
-              /* Recent Searches */
-              <div className="space-y-1">
-                <div className="px-3 py-2">
-                  <div className="flex items-center gap-2 text-xs font-medium text-neutral-500">
-                    <Clock className="w-3.5 h-3.5" />
-                    <span>Recent Searches</span>
+              /* Recent Searches & Quick Actions */
+              <div className="space-y-6">
+                {/* Recent Searches */}
+                <div>
+                  <div className="flex items-center gap-2 px-2 mb-3">
+                    <Clock className="w-4 h-4 text-gray-400" />
+                    <h3 className="text-sm font-semibold text-gray-900">Recent Searches</h3>
+                  </div>
+                  <div className="space-y-1">
+                    {recentSearches.map((search, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => handleRecentSearchClick(search)}
+                        className="group w-full flex items-center justify-between px-4 py-3 rounded-xl hover:bg-gradient-to-r hover:from-zinc-50 hover:to-slate-50 transition-all duration-200 text-left border border-transparent hover:border-zinc-200 hover:shadow-sm"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-lg bg-gray-100 group-hover:bg-gradient-to-br group-hover:from-zinc-800 group-hover:to-zinc-700 flex items-center justify-center transition-all duration-200">
+                            <Hash className="w-4 h-4 text-gray-500 group-hover:text-white transition-colors duration-200" />
+                          </div>
+                          <span className="text-sm font-medium text-gray-700 group-hover:text-gray-900">{search}</span>
+                        </div>
+                        <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-zinc-800 transition-colors" />
+                      </button>
+                    ))}
                   </div>
                 </div>
-                {recentSearches.map((search, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => handleRecentSearchClick(search)}
-                    className="w-full flex items-center justify-between px-3 py-2.5 rounded-md hover:bg-neutral-100 transition-colors text-left"
-                  >
-                    <span className="text-sm text-neutral-700">{search}</span>
-                    <ArrowRight className="w-4 h-4 text-neutral-400" />
-                  </button>
-                ))}
+
+                {/* Quick Actions */}
+                <div>
+                  <div className="flex items-center gap-2 px-2 mb-3">
+                    <TrendingUp className="w-4 h-4 text-gray-400" />
+                    <h3 className="text-sm font-semibold text-gray-900">Quick Actions</h3>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      onClick={() => {
+                        navigate('/app/projects');
+                        onOpenChange(false);
+                      }}
+                      className="group p-4 rounded-xl bg-gradient-to-br from-emerald-50 to-teal-50 hover:from-emerald-100 hover:to-teal-100 border border-emerald-200 hover:border-emerald-300 transition-all duration-200 text-left hover:shadow-md"
+                    >
+                      <Folder className="w-5 h-5 text-emerald-600 mb-2" />
+                      <p className="text-sm font-semibold text-gray-900">All Projects</p>
+                      <p className="text-xs text-gray-600 mt-0.5">Browse all</p>
+                    </button>
+                    <button
+                      onClick={() => {
+                        navigate('/app/team');
+                        onOpenChange(false);
+                      }}
+                      className="group p-4 rounded-xl bg-gradient-to-br from-orange-50 to-amber-50 hover:from-orange-100 hover:to-amber-100 border border-orange-200 hover:border-orange-300 transition-all duration-200 text-left hover:shadow-md"
+                    >
+                      <Users className="w-5 h-5 text-orange-600 mb-2" />
+                      <p className="text-sm font-semibold text-gray-900">Team</p>
+                      <p className="text-xs text-gray-600 mt-0.5">View members</p>
+                    </button>
+                  </div>
+                </div>
               </div>
             ) : totalResults === 0 ? (
-              /* No Results */
-              <div className="py-12 text-center">
-                <Search className="w-12 h-12 text-neutral-300 mx-auto mb-3" />
-                <p className="text-sm font-medium text-neutral-900 mb-1">No results found</p>
-                <p className="text-xs text-neutral-500">Try searching with different keywords</p>
+              /* No Results - Enhanced Empty State */
+              <div className="py-16 text-center">
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center mx-auto mb-4">
+                  <Search className="w-8 h-8 text-gray-400" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">No results found</h3>
+                <p className="text-sm text-gray-500 mb-6 max-w-sm mx-auto">
+                  We couldn't find anything matching "<span className="font-semibold text-gray-700">{query}</span>". Try different keywords.
+                </p>
+                <button
+                  onClick={clearSearch}
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm font-medium text-gray-700 transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                  Clear search
+                </button>
               </div>
             ) : (
-              /* Search Results */
-              <div className="space-y-4">
+              /* Search Results - Enhanced Design */
+              <div className="space-y-6">
                 {/* Projects */}
                 {filteredProjects.length > 0 && (
                   <div>
-                    <div className="px-3 py-2">
-                      <div className="flex items-center gap-2 text-xs font-medium text-neutral-500">
-                        <Folder className="w-3.5 h-3.5" />
-                        <span>Projects</span>
-                        <Badge variant="secondary" className="ml-auto text-xs">
-                          {filteredProjects.length}
-                        </Badge>
+                    <div className="flex items-center gap-2 px-2 mb-3">
+                      <div className="w-6 h-6 rounded-lg bg-emerald-100 flex items-center justify-center">
+                        <Folder className="w-3.5 h-3.5 text-emerald-600" />
                       </div>
+                      <h3 className="text-sm font-semibold text-gray-900">Projects</h3>
+                      <Badge variant="secondary" className="ml-auto text-xs bg-emerald-50 text-emerald-700 border-emerald-200">
+                        {filteredProjects.length}
+                      </Badge>
                     </div>
-                    <div className="space-y-1">
+                    <div className="space-y-1.5">
                       {filteredProjects.map((project, idx) => {
                         const globalIndex = idx;
+                        const isSelected = selectedIndex === globalIndex;
                         return (
                           <button
                             key={project.id}
                             onClick={() => handleSelect(globalIndex)}
                             className={cn(
-                              "w-full flex items-start gap-3 px-3 py-2.5 rounded-md transition-colors text-left",
-                              selectedIndex === globalIndex
-                                ? "bg-blue-50 border border-blue-200"
-                                : "hover:bg-neutral-100"
+                              "group w-full flex items-start gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-left",
+                              isSelected
+                                ? "bg-gradient-to-r from-zinc-900 to-zinc-800 shadow-lg shadow-zinc-900/20 scale-[1.02]"
+                                : "hover:bg-gray-50 border border-transparent hover:border-gray-200 hover:shadow-sm"
                             )}
                           >
-                            <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
-                              <Folder className="w-4 h-4 text-blue-600" />
+                            <div className={cn(
+                              "w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-all duration-200",
+                              isSelected 
+                                ? "bg-white/20" 
+                                : "bg-gradient-to-br from-emerald-500 to-teal-600 group-hover:scale-110"
+                            )}>
+                              <Folder className={cn("w-5 h-5", isSelected ? "text-white" : "text-white")} />
                             </div>
                             <div className="flex-1 min-w-0">
-                              <p className="text-sm font-medium text-neutral-900 truncate">
+                              <p className={cn(
+                                "text-sm font-semibold truncate mb-0.5",
+                                isSelected ? "text-white" : "text-gray-900"
+                              )}>
                                 {project.name}
                               </p>
-                              <p className="text-xs text-neutral-500 truncate">
-                                {project.description} • {project.files} files
+                              <p className={cn(
+                                "text-xs truncate",
+                                isSelected ? "text-white/80" : "text-gray-500"
+                              )}>
+                                {project.description}
                               </p>
+                              <div className="flex items-center gap-2 mt-1.5">
+                                <span className={cn(
+                                  "text-xs font-medium",
+                                  isSelected ? "text-white/90" : "text-gray-600"
+                                )}>
+                                  {project.files} files
+                                </span>
+                              </div>
                             </div>
-                            <ArrowRight className="w-4 h-4 text-neutral-400 flex-shrink-0 mt-1" />
+                            <ArrowRight className={cn(
+                              "w-4 h-4 flex-shrink-0 mt-2 transition-transform duration-200",
+                              isSelected ? "text-white translate-x-1" : "text-gray-400 group-hover:translate-x-1"
+                            )} />
                           </button>
                         );
                       })}
@@ -257,123 +392,166 @@ export const CommandPalette = ({ open, onOpenChange }: CommandPaletteProps) => {
 
                 {/* Files */}
                 {filteredFiles.length > 0 && (
-                  <>
-                    {filteredProjects.length > 0 && <Separator />}
-                    <div>
-                      <div className="px-3 py-2">
-                        <div className="flex items-center gap-2 text-xs font-medium text-neutral-500">
-                          <FileCode className="w-3.5 h-3.5" />
-                          <span>Files</span>
-                          <Badge variant="secondary" className="ml-auto text-xs">
-                            {filteredFiles.length}
-                          </Badge>
-                        </div>
+                  <div>
+                    {filteredProjects.length > 0 && <Separator className="my-4" />}
+                    <div className="flex items-center gap-2 px-2 mb-3">
+                      <div className="w-6 h-6 rounded-lg bg-orange-100 flex items-center justify-center">
+                        <FileCode className="w-3.5 h-3.5 text-orange-600" />
                       </div>
-                      <div className="space-y-1">
-                        {filteredFiles.map((file, idx) => {
-                          const globalIndex = filteredProjects.length + idx;
-                          return (
-                            <button
-                              key={file.id}
-                              onClick={() => handleSelect(globalIndex)}
-                              className={cn(
-                                "w-full flex items-start gap-3 px-3 py-2.5 rounded-md transition-colors text-left",
-                                selectedIndex === globalIndex
-                                  ? "bg-blue-50 border border-blue-200"
-                                  : "hover:bg-neutral-100"
-                              )}
-                            >
-                              <div className="w-8 h-8 rounded-lg bg-neutral-100 flex items-center justify-center flex-shrink-0">
-                                <FileCode className="w-4 h-4 text-neutral-600" />
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium text-neutral-900 truncate">
-                                  {file.name}
-                                </p>
-                                <p className="text-xs text-neutral-500 truncate">
-                                  {file.projectName} • {file.path}
-                                </p>
-                              </div>
-                              <ArrowRight className="w-4 h-4 text-neutral-400 flex-shrink-0 mt-1" />
-                            </button>
-                          );
-                        })}
-                      </div>
+                      <h3 className="text-sm font-semibold text-gray-900">Files</h3>
+                      <Badge variant="secondary" className="ml-auto text-xs bg-orange-50 text-orange-700 border-orange-200">
+                        {filteredFiles.length}
+                      </Badge>
                     </div>
-                  </>
+                    <div className="space-y-1.5">
+                      {filteredFiles.map((file, idx) => {
+                        const globalIndex = filteredProjects.length + idx;
+                        const isSelected = selectedIndex === globalIndex;
+                        return (
+                          <button
+                            key={file.id}
+                            onClick={() => handleSelect(globalIndex)}
+                            className={cn(
+                              "group w-full flex items-start gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-left",
+                              isSelected
+                                ? "bg-gradient-to-r from-orange-600 to-amber-600 shadow-lg shadow-orange-600/20 scale-[1.02]"
+                                : "hover:bg-gray-50 border border-transparent hover:border-gray-200 hover:shadow-sm"
+                            )}
+                          >
+                            <div className={cn(
+                              "w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-all duration-200",
+                              isSelected 
+                                ? "bg-white/20" 
+                                : "bg-gradient-to-br from-orange-500 to-amber-600 group-hover:scale-110"
+                            )}>
+                              <FileCode className={cn("w-5 h-5", isSelected ? "text-white" : "text-white")} />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className={cn(
+                                "text-sm font-semibold truncate mb-0.5 font-mono",
+                                isSelected ? "text-white" : "text-gray-900"
+                              )}>
+                                {file.name}
+                              </p>
+                              <p className={cn(
+                                "text-xs truncate font-mono",
+                                isSelected ? "text-white/80" : "text-gray-500"
+                              )}>
+                                {file.path}
+                              </p>
+                              <p className={cn(
+                                "text-xs truncate mt-0.5",
+                                isSelected ? "text-white/70" : "text-gray-400"
+                              )}>
+                                in {file.projectName}
+                              </p>
+                            </div>
+                            <ArrowRight className={cn(
+                              "w-4 h-4 flex-shrink-0 mt-2 transition-transform duration-200",
+                              isSelected ? "text-white translate-x-1" : "text-gray-400 group-hover:translate-x-1"
+                            )} />
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
                 )}
 
                 {/* Team */}
                 {filteredTeam.length > 0 && (
-                  <>
-                    {(filteredProjects.length > 0 || filteredFiles.length > 0) && <Separator />}
-                    <div>
-                      <div className="px-3 py-2">
-                        <div className="flex items-center gap-2 text-xs font-medium text-neutral-500">
-                          <Users className="w-3.5 h-3.5" />
-                          <span>Team Members</span>
-                          <Badge variant="secondary" className="ml-auto text-xs">
-                            {filteredTeam.length}
-                          </Badge>
-                        </div>
+                  <div>
+                    {(filteredProjects.length > 0 || filteredFiles.length > 0) && <Separator className="my-4" />}
+                    <div className="flex items-center gap-2 px-2 mb-3">
+                      <div className="w-6 h-6 rounded-lg bg-teal-100 flex items-center justify-center">
+                        <Users className="w-3.5 h-3.5 text-teal-600" />
                       </div>
-                      <div className="space-y-1">
-                        {filteredTeam.map((member, idx) => {
-                          const globalIndex = filteredProjects.length + filteredFiles.length + idx;
-                          return (
-                            <button
-                              key={member.id}
-                              onClick={() => handleSelect(globalIndex)}
-                              className={cn(
-                                "w-full flex items-start gap-3 px-3 py-2.5 rounded-md transition-colors text-left",
-                                selectedIndex === globalIndex
-                                  ? "bg-blue-50 border border-blue-200"
-                                  : "hover:bg-neutral-100"
-                              )}
-                            >
-                              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center text-white font-medium text-sm flex-shrink-0">
-                                {member.name.split(' ').map(n => n[0]).join('')}
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium text-neutral-900 truncate">
-                                  {member.name}
-                                </p>
-                                <p className="text-xs text-neutral-500 truncate">
-                                  {member.email} • {member.role}
-                                </p>
-                              </div>
-                              <ArrowRight className="w-4 h-4 text-neutral-400 flex-shrink-0 mt-1" />
-                            </button>
-                          );
-                        })}
-                      </div>
+                      <h3 className="text-sm font-semibold text-gray-900">Team Members</h3>
+                      <Badge variant="secondary" className="ml-auto text-xs bg-teal-50 text-teal-700 border-teal-200">
+                        {filteredTeam.length}
+                      </Badge>
                     </div>
-                  </>
+                    <div className="space-y-1.5">
+                      {filteredTeam.map((member, idx) => {
+                        const globalIndex = filteredProjects.length + filteredFiles.length + idx;
+                        const isSelected = selectedIndex === globalIndex;
+                        return (
+                          <button
+                            key={member.id}
+                            onClick={() => handleSelect(globalIndex)}
+                            className={cn(
+                              "group w-full flex items-start gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-left",
+                              isSelected
+                                ? "bg-gradient-to-r from-teal-600 to-cyan-600 shadow-lg shadow-teal-600/20 scale-[1.02]"
+                                : "hover:bg-gray-50 border border-transparent hover:border-gray-200 hover:shadow-sm"
+                            )}
+                          >
+                            <div className={cn(
+                              "w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold flex-shrink-0 transition-all duration-200",
+                              isSelected 
+                                ? "bg-white/20 text-white" 
+                                : "bg-gradient-to-br from-teal-500 to-cyan-500 text-white group-hover:scale-110"
+                            )}>
+                              {member.name.split(' ').map(n => n[0]).join('')}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className={cn(
+                                "text-sm font-semibold truncate mb-0.5",
+                                isSelected ? "text-white" : "text-gray-900"
+                              )}>
+                                {member.name}
+                              </p>
+                              <p className={cn(
+                                "text-xs truncate",
+                                isSelected ? "text-white/80" : "text-gray-500"
+                              )}>
+                                {member.email}
+                              </p>
+                              <div className="mt-1">
+                                <span className={cn(
+                                  "inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium",
+                                  isSelected 
+                                    ? "bg-white/20 text-white" 
+                                    : "bg-teal-50 text-teal-700"
+                                )}>
+                                  {member.role}
+                                </span>
+                              </div>
+                            </div>
+                            <ArrowRight className={cn(
+                              "w-4 h-4 flex-shrink-0 mt-2 transition-transform duration-200",
+                              isSelected ? "text-white translate-x-1" : "text-gray-400 group-hover:translate-x-1"
+                            )} />
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
                 )}
               </div>
             )}
           </div>
         </ScrollArea>
 
-        {/* Footer */}
-        <div className="p-3 border-t border-neutral-200 bg-neutral-50">
-          <div className="flex items-center justify-between text-xs text-neutral-500">
+        {/* Enhanced Footer */}
+        <div className="px-4 py-3 border-t border-zinc-200 bg-gradient-to-r from-zinc-50 to-slate-100">
+          <div className="flex items-center justify-between text-xs">
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-1.5">
-                <kbd className="px-1.5 py-0.5 bg-white rounded border border-neutral-200">↑</kbd>
-                <kbd className="px-1.5 py-0.5 bg-white rounded border border-neutral-200">↓</kbd>
-                <span>Navigate</span>
+                <div className="flex items-center gap-0.5">
+                  <kbd className="px-1.5 py-1 bg-white rounded border border-zinc-300 shadow-sm font-semibold text-zinc-700 min-w-[24px] text-center">↑</kbd>
+                  <kbd className="px-1.5 py-1 bg-white rounded border border-zinc-300 shadow-sm font-semibold text-zinc-700 min-w-[24px] text-center">↓</kbd>
+                </div>
+                <span className="text-zinc-600 font-medium">to navigate</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <kbd className="px-1.5 py-0.5 bg-white rounded border border-neutral-200">↵</kbd>
-                <span>Select</span>
+                <kbd className="px-1.5 py-1 bg-white rounded border border-zinc-300 shadow-sm font-semibold text-zinc-700 min-w-[24px] text-center">↵</kbd>
+                <span className="text-zinc-600 font-medium">to select</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <kbd className="px-1.5 py-0.5 bg-white rounded border border-neutral-200">Esc</kbd>
-                <span>Close</span>
+                <kbd className="px-1.5 py-1 bg-white rounded border border-zinc-300 shadow-sm font-semibold text-zinc-700">Esc</kbd>
+                <span className="text-zinc-600 font-medium">to close</span>
               </div>
             </div>
-            <span>{totalResults} results</span>
           </div>
         </div>
       </DialogContent>

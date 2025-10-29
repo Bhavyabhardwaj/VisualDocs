@@ -135,7 +135,7 @@ export const ProjectCard = ({ project, onViewDocs, onRegenerate, onShare }: Proj
             initial={{ width: 0 }}
             animate={{ width: `${project.progress}%` }}
             transition={{ duration: 1, ease: 'easeOut' }}
-            className="h-full bg-gradient-to-r from-indigo-500 to-purple-500"
+            className="h-full bg-gradient-to-r from-emerald-500 to-teal-500"
           />
         </div>
       </div>
@@ -148,7 +148,7 @@ export const ProjectCard = ({ project, onViewDocs, onRegenerate, onShare }: Proj
             {project.collaborators.slice(0, 3).map((user, idx) => (
               <div
                 key={user.id}
-                className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 border-2 border-white flex items-center justify-center text-white text-xs font-medium"
+                className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 border-2 border-white flex items-center justify-center text-white text-xs font-medium"
                 title={user.name}
               >
                 {user.avatar ? (

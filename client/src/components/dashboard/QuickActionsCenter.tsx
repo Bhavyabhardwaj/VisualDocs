@@ -29,14 +29,14 @@ export const QuickActionsCenter = ({
       icon: Upload,
       title: 'Upload Codebase',
       description: 'Direct file upload',
-      gradient: 'from-indigo-500 to-purple-500',
+      gradient: 'from-orange-500 to-amber-500',
       onClick: onUploadCodebase
     },
     {
       icon: FileCode,
       title: 'Create from Template',
       description: 'Start with boilerplate',
-      gradient: 'from-cyan-500 to-blue-500',
+      gradient: 'from-emerald-500 to-teal-500',
       onClick: onUseTemplate
     },
     {

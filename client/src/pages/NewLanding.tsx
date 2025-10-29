@@ -210,11 +210,11 @@ export default function NewLanding() {
       {/* Animated gradient orbs background with subtle parallax */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
         <div 
-          className="absolute top-0 left-1/4 w-96 h-96 bg-gradient-to-br from-blue-200/30 to-purple-200/30 rounded-full blur-3xl animate-float will-change-transform"
+          className="absolute top-0 left-1/4 w-96 h-96 bg-gradient-to-br from-emerald-200/30 to-teal-200/30 rounded-full blur-3xl animate-float will-change-transform"
           style={{ transform: `translate3d(0, ${parallaxOffset * 0.05}px, 0)` }}
         ></div>
         <div 
-          className="absolute top-1/3 right-1/4 w-80 h-80 bg-gradient-to-br from-pink-200/30 to-orange-200/30 rounded-full blur-3xl animate-float will-change-transform" 
+          className="absolute top-1/3 right-1/4 w-80 h-80 bg-gradient-to-br from-orange-200/30 to-amber-200/30 rounded-full blur-3xl animate-float will-change-transform" 
           style={{ animationDelay: '2s', animationDuration: '8s', transform: `translate3d(0, ${parallaxOffset * 0.08}px, 0)` }}
         ></div>
         <div 
@@ -326,19 +326,19 @@ export default function NewLanding() {
               <div className="absolute top-[232px] sm:top-[248px] md:top-[264px] lg:top-[320px] left-1/2 transform -translate-x-1/2 z-0 pointer-events-none">
                 {/* Animated floating particles - no parallax to prevent shifting */}
                 <div 
-                  className="absolute -top-20 left-10 w-2 h-2 bg-blue-400 rounded-full animate-float opacity-40" 
+                  className="absolute -top-20 left-10 w-2 h-2 bg-emerald-400 rounded-full animate-float opacity-40" 
                   style={{ animationDuration: '3s' }}
                 ></div>
                 <div 
-                  className="absolute -top-32 right-20 w-3 h-3 bg-purple-400 rounded-full animate-float opacity-30" 
+                  className="absolute -top-32 right-20 w-3 h-3 bg-orange-400 rounded-full animate-float opacity-30" 
                   style={{ animationDuration: '4s', animationDelay: '1s' }}
                 ></div>
                 <div 
-                  className="absolute -top-10 left-1/3 w-1.5 h-1.5 bg-pink-400 rounded-full animate-float opacity-50" 
+                  className="absolute -top-10 left-1/3 w-1.5 h-1.5 bg-amber-400 rounded-full animate-float opacity-50" 
                   style={{ animationDuration: '5s', animationDelay: '0.5s' }}
                 ></div>
                 <div 
-                  className="absolute -top-40 right-1/3 w-2.5 h-2.5 bg-indigo-400 rounded-full animate-float opacity-35" 
+                  className="absolute -top-40 right-1/3 w-2.5 h-2.5 bg-teal-400 rounded-full animate-float opacity-35" 
                   style={{ animationDuration: '6s', animationDelay: '2s' }}
                 ></div>
                 
@@ -356,8 +356,8 @@ export default function NewLanding() {
             {/* Dashboard Preview Section - Right after Hero */}
             <div className="w-full max-w-[960px] lg:w-[960px] pt-2 sm:pt-4 pb-6 sm:pb-8 md:pb-10 px-2 sm:px-4 md:px-6 lg:px-11 flex flex-col justify-center items-center gap-2 relative z-5 my-8 sm:my-12 md:my-16 lg:my-16 mb-0 lg:pb-0 animate-fade-in">
               {/* Floating decorative elements */}
-              <div className="absolute -top-10 -right-10 w-20 h-20 bg-gradient-to-br from-blue-400/20 to-purple-400/20 rounded-full blur-2xl animate-float"></div>
-              <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-gradient-to-br from-pink-400/20 to-orange-400/20 rounded-full blur-2xl animate-float" style={{ animationDelay: '1s' }}></div>
+              <div className="absolute -top-10 -right-10 w-20 h-20 bg-gradient-to-br from-emerald-400/20 to-teal-400/20 rounded-full blur-2xl animate-float"></div>
+              <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-gradient-to-br from-orange-400/20 to-amber-400/20 rounded-full blur-2xl animate-float" style={{ animationDelay: '1s' }}></div>
               
               <div className="w-full max-w-[960px] lg:w-[960px] h-[200px] sm:h-[280px] md:h-[450px] lg:h-[695.55px] bg-white shadow-[0px_0px_0px_0.9056603908538818px_rgba(0,0,0,0.08)] overflow-hidden rounded-[6px] sm:rounded-[8px] lg:rounded-[9.06px] flex flex-col justify-start items-start hover:shadow-2xl transition-all duration-500 group relative">
                 {/* Subtle border glow on hover */}

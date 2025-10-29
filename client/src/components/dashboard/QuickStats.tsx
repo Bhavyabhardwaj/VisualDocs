@@ -75,7 +75,7 @@ export const QuickStats = ({ stats }: QuickStatsProps) => {
         title="Projects Analyzed"
         value={stats.totalProjects}
         trend={{ value: 12, isPositive: true }}
-        gradient="from-indigo-500 to-purple-500"
+        gradient="from-orange-500 to-amber-500"
         index={0}
       />
       <StatCard
@@ -91,7 +91,7 @@ export const QuickStats = ({ stats }: QuickStatsProps) => {
         title="AI Insights"
         value={stats.aiInsights}
         trend={{ value: 5, isPositive: true }}
-        gradient="from-cyan-500 to-blue-500"
+        gradient="from-emerald-500 to-teal-500"
         index={2}
       />
       <StatCard
