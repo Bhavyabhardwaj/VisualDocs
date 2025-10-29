@@ -21,8 +21,8 @@ export const authService = {
       const accessToken = typeof tokenData === 'string' ? tokenData : tokenData.accessToken;
       if (accessToken) {
         console.log('✅ Saving accessToken to localStorage:', accessToken);
-        localStorage.setItem('token', accessToken);
-        console.log('✅ Token saved. Verifying:', localStorage.getItem('token'));
+        localStorage.setItem('authToken', accessToken);
+        console.log('✅ Token saved. Verifying:', localStorage.getItem('authToken'));
       } else {
         console.error('❌ No accessToken found in response!', tokenData);
       }
@@ -42,7 +42,7 @@ export const authService = {
       const accessToken = typeof tokenData === 'string' ? tokenData : tokenData.accessToken;
       if (accessToken) {
         console.log('✅ Saving accessToken to localStorage:', accessToken);
-        localStorage.setItem('token', accessToken);
+        localStorage.setItem('authToken', accessToken);
       }
     }
     return response as any;
@@ -50,7 +50,7 @@ export const authService = {
 
   async logout(): Promise<ApiResponse> {
     const response = await apiClient.post<ApiResponse>('/api/auth/logout');
-    localStorage.removeItem('token');
+    localStorage.removeItem('authToken');
     return response;
   },
 

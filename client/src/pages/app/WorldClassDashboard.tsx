@@ -9,8 +9,6 @@ import {
   TrendingUp,
   Clock,
   GitBranch,
-  Search,
-  Bell,
   Github,
   Upload,
   BarChart3,
@@ -25,10 +23,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Separator } from '@/components/ui/separator';
-import { Input } from '@/components/ui/input';
 import { FileUploadDialog } from '@/components/app/FileUploadDialog';
 import { GitHubImportDialog } from '@/components/app/GitHubImportDialog';
+import { TopNavBar } from '@/components/app/TopNavBar';
 import { projectService } from '@/services/project.service';
 import type { Project } from '@/types/api';
 
@@ -36,7 +33,6 @@ export const WorldClassDashboard = () => {
   const navigate = useNavigate();
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
   const [githubDialogOpen, setGithubDialogOpen] = useState(false);
@@ -67,26 +63,23 @@ export const WorldClassDashboard = () => {
   };
 
   const filteredProjects = projects.filter((project) => {
-    const matchesSearch =
-      project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      project.description?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesFilter = filterStatus === 'all' || project.status === filterStatus;
-    return matchesSearch && matchesFilter;
+    return matchesFilter;
   });
 
   const getStatusBadge = (status: string) => {
     const statusConfig = {
       active: {
         label: 'Ready',
-        className: 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100',
+        className: 'bg-zinc-50 text-zinc-700 border-zinc-200 hover:bg-zinc-100',
       },
       analyzing: {
         label: 'Analyzing',
-        className: 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100',
+        className: 'bg-zinc-50 text-zinc-700 border-zinc-200 hover:bg-zinc-100',
       },
       archived: {
         label: 'Archived',
-        className: 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100',
+        className: 'bg-zinc-50 text-zinc-500 border-zinc-200 hover:bg-zinc-100',
       },
     };
     const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.active;
@@ -99,95 +92,8 @@ export const WorldClassDashboard = () => {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Premium Sticky Header */}
-      <header className="sticky top-0 z-50 border-b border-gray-200 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
-        <div className="mx-auto max-w-[1400px] px-6">
-          <div className="flex h-16 items-center justify-between">
-            {/* Logo & Navigation */}
-            <div className="flex items-center gap-8">
-              <div className="flex items-center gap-2.5">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-purple-600 shadow-sm">
-                  <Sparkles className="h-4 w-4 text-white" />
-                </div>
-                <span className="text-lg font-semibold tracking-tight">VisualDocs</span>
-              </div>
-              <nav className="hidden md:flex items-center gap-1">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="font-medium text-gray-900"
-                  onClick={() => navigate('/app/dashboard')}
-                >
-                  Dashboard
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-gray-600 hover:text-gray-900"
-                  onClick={() => navigate('/app/projects')}
-                >
-                  Projects
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-gray-600 hover:text-gray-900"
-                  onClick={() => navigate('/app/analysis')}
-                >
-                  Analytics
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-gray-600 hover:text-gray-900"
-                  onClick={() => navigate('/app/team')}
-                >
-                  Team
-                </Button>
-              </nav>
-            </div>
-
-            {/* Search & Actions */}
-            <div className="flex items-center gap-3">
-              <div className="hidden lg:block">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                  <Input
-                    placeholder="Search projects..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-64 pl-9 h-9 bg-gray-50 border-gray-200 focus:bg-white transition-colors"
-                  />
-                  <kbd className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 hidden h-5 select-none items-center gap-1 rounded border border-gray-200 bg-white px-1.5 font-mono text-[10px] font-medium text-gray-600 opacity-100 sm:flex">
-                    <span className="text-xs">⌘</span>K
-                  </kbd>
-                </div>
-              </div>
-
-              <Button
-                variant="ghost"
-                size="icon"
-                className="relative hover:bg-gray-100"
-                onClick={() => navigate('/app/settings')}
-              >
-                <Bell className="h-4 w-4" />
-                <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-blue-600 ring-2 ring-white" />
-              </Button>
-
-              <Separator orientation="vertical" className="h-6" />
-
-              <Avatar
-                className="h-8 w-8 cursor-pointer ring-2 ring-transparent hover:ring-gray-200 transition-all"
-                onClick={() => navigate('/app/settings')}
-              >
-                <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-500 text-white text-xs font-medium">
-                  JD
-                </AvatarFallback>
-              </Avatar>
-            </div>
-          </div>
-        </div>
-      </header>
+      {/* Top Navigation Bar - Premium UI */}
+      <TopNavBar />
 
       {/* Main Content */}
       <main className="mx-auto max-w-[1400px] px-6 py-8">
@@ -241,16 +147,16 @@ export const WorldClassDashboard = () => {
             onClick={() => navigate('/app/projects')}
           >
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">
+              <CardTitle className="text-sm font-medium text-zinc-600">
                 Projects Analyzed
               </CardTitle>
-              <div className="rounded-lg bg-blue-50 p-2.5">
-                <FolderGit2 className="h-5 w-5 text-blue-600" />
+              <div className="rounded-lg bg-zinc-100 p-2.5">
+                <FolderGit2 className="h-5 w-5 text-zinc-700" />
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-gray-900">{stats.totalProjects}</div>
-              <div className="mt-2 flex items-center gap-1.5 text-xs text-emerald-600">
+              <div className="text-3xl font-bold text-zinc-900">{stats.totalProjects}</div>
+              <div className="mt-2 flex items-center gap-1.5 text-xs text-zinc-600">
                 <TrendingUp className="h-3.5 w-3.5" />
                 <span className="font-medium">+12% from last month</span>
               </div>
@@ -262,14 +168,14 @@ export const WorldClassDashboard = () => {
             onClick={() => navigate('/app/projects')}
           >
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">Docs Generated</CardTitle>
-              <div className="rounded-lg bg-purple-50 p-2.5">
-                <FileText className="h-5 w-5 text-purple-600" />
+              <CardTitle className="text-sm font-medium text-zinc-600">Docs Generated</CardTitle>
+              <div className="rounded-lg bg-zinc-100 p-2.5">
+                <FileText className="h-5 w-5 text-zinc-700" />
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-gray-900">{stats.docsGenerated}</div>
-              <p className="mt-2 text-xs text-gray-600">Across all projects</p>
+              <div className="text-3xl font-bold text-zinc-900">{stats.docsGenerated}</div>
+              <p className="mt-2 text-xs text-zinc-600">Across all projects</p>
             </CardContent>
           </Card>
 
@@ -294,14 +200,14 @@ export const WorldClassDashboard = () => {
             onClick={() => navigate('/app/team')}
           >
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">Team Members</CardTitle>
-              <div className="rounded-lg bg-emerald-50 p-2.5">
-                <Users className="h-5 w-5 text-emerald-600" />
+              <CardTitle className="text-sm font-medium text-zinc-600">Team Members</CardTitle>
+              <div className="rounded-lg bg-zinc-100 p-2.5">
+                <Users className="h-5 w-5 text-zinc-700" />
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-gray-900">{stats.teamMembers}</div>
-              <p className="mt-2 text-xs text-gray-600">Active collaborators</p>
+              <div className="text-3xl font-bold text-zinc-900">{stats.teamMembers}</div>
+              <p className="mt-2 text-xs text-zinc-600">Active collaborators</p>
             </CardContent>
           </Card>
         </div>
@@ -353,7 +259,6 @@ export const WorldClassDashboard = () => {
               >
                 Analyzing
               </Button>
-              <Separator orientation="vertical" className="h-6 mx-1" />
               <Button variant="outline" size="icon" className="hover:bg-gray-50">
                 <Filter className="h-4 w-4" />
               </Button>
@@ -367,22 +272,22 @@ export const WorldClassDashboard = () => {
               <p className="text-xs text-gray-500 mt-1">This won't take long</p>
             </div>
           ) : filteredProjects.length === 0 ? (
-            <Card className="border-gray-200 border-2 border-dashed bg-gray-50/50">
+            <Card className="border-zinc-200 border-2 border-dashed bg-zinc-50/50">
               <CardContent className="flex flex-col items-center justify-center py-20">
-                <div className="rounded-full bg-gradient-to-br from-blue-50 to-purple-50 p-5 mb-5">
-                  <FolderGit2 className="h-14 w-14 text-gray-400" />
+                <div className="rounded-full bg-zinc-100 p-5 mb-5">
+                  <FolderGit2 className="h-14 w-14 text-zinc-400" />
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                  {searchQuery || filterStatus !== 'all'
+                <h3 className="text-xl font-semibold text-zinc-900 mb-2">
+                  {filterStatus !== 'all'
                     ? 'No projects found'
                     : 'Welcome to VisualDocs!'}
                 </h3>
-                <p className="text-sm text-gray-600 mb-8 text-center max-w-md leading-relaxed">
-                  {searchQuery || filterStatus !== 'all'
-                    ? "Try adjusting your search or filter criteria to find what you're looking for."
+                <p className="text-sm text-zinc-600 mb-8 text-center max-w-md leading-relaxed">
+                  {filterStatus !== 'all'
+                    ? "Try adjusting your filter criteria to find what you're looking for."
                     : 'Transform your codebase into beautiful documentation. Start by importing your first repository from GitHub or uploading project files.'}
                 </p>
-                {!searchQuery && filterStatus === 'all' && (
+                {filterStatus === 'all' && (
                   <div className="flex items-center gap-3">
                     <Button
                       className="gap-2 bg-gray-900 hover:bg-gray-800 shadow-md"
@@ -413,17 +318,17 @@ export const WorldClassDashboard = () => {
                 return (
                   <Card
                     key={project.id}
-                    className="group cursor-pointer border-gray-200 hover:shadow-xl hover:border-gray-300 transition-all duration-300 hover:scale-[1.02]"
+                    className="group cursor-pointer border-zinc-200 hover:shadow-xl hover:border-zinc-300 transition-all duration-300 hover:scale-[1.02]"
                     onClick={() => navigate(`/app/projects/${project.id}`)}
                   >
                     <CardHeader className="pb-3">
                       <div className="flex items-start justify-between mb-3">
-                        <div className="rounded-lg bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 p-2.5 shadow-sm">
+                        <div className="rounded-lg bg-zinc-900 p-2.5 shadow-sm">
                           <FolderGit2 className="h-5 w-5 text-white" />
                         </div>
                         {getStatusBadge(project.status || 'active')}
                       </div>
-                      <CardTitle className="text-lg font-semibold group-hover:text-blue-600 transition-colors leading-snug">
+                      <CardTitle className="text-lg font-semibold group-hover:text-zinc-700 transition-colors leading-snug">
                         {project.name}
                       </CardTitle>
                       <CardDescription className="line-clamp-2 text-sm leading-relaxed mt-1.5">
@@ -431,15 +336,15 @@ export const WorldClassDashboard = () => {
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                      {/* Quality Score with gradient */}
+                      {/* Quality Score */}
                       <div className="space-y-2.5">
                         <div className="flex items-center justify-between text-xs">
-                          <span className="text-gray-600 font-medium">Code Quality</span>
-                          <span className="font-bold text-gray-900">{qualityScore}%</span>
+                          <span className="text-zinc-600 font-medium">Code Quality</span>
+                          <span className="font-bold text-zinc-900">{qualityScore}%</span>
                         </div>
-                        <div className="relative h-2 bg-gray-100 rounded-full overflow-hidden">
+                        <div className="relative h-2 bg-zinc-100 rounded-full overflow-hidden">
                           <div
-                            className="absolute inset-y-0 left-0 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full transition-all duration-500"
+                            className="absolute inset-y-0 left-0 bg-zinc-900 rounded-full transition-all duration-500"
                             style={{ width: `${qualityScore}%` }}
                           />
                         </div>

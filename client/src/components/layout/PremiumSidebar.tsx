@@ -66,12 +66,12 @@ export const PremiumSidebar = () => {
   const handleLogout = async () => {
     try {
       await authService.logout();
-      localStorage.removeItem('token');
+      localStorage.removeItem('authToken');
       navigate('/login');
     } catch (error) {
       console.error('Logout failed:', error);
       // Still navigate to login even if API fails
-      localStorage.removeItem('token');
+      localStorage.removeItem('authToken');
       navigate('/login');
     }
   };

@@ -67,19 +67,19 @@ export const UserMenu = () => {
         </button>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent align="end" className="w-64 p-2">
+      <DropdownMenuContent align="end" className="w-64 p-2 bg-white border-zinc-200">
         {/* User Info Section */}
-        <div className="px-3 py-2 mb-2">
+        <div className="px-3 py-2 mb-2 bg-white">
           <p className="text-sm font-semibold text-zinc-900">{user?.name || 'User'}</p>
           <p className="text-xs text-zinc-500 truncate">{user?.email || 'user@example.com'}</p>
         </div>
 
-        <DropdownMenuSeparator className="bg-zinc-100" />
+        <DropdownMenuSeparator className="bg-zinc-200" />
 
         {/* Profile */}
         <DropdownMenuItem 
-          onClick={() => navigate('/settings/profile')}
-          className="flex items-center gap-3 px-3 py-2 cursor-pointer rounded-md hover:bg-zinc-50 focus:bg-zinc-50"
+          onClick={() => navigate('/app/settings')}
+          className="flex items-center gap-3 px-3 py-2 cursor-pointer rounded-md hover:bg-zinc-100 focus:bg-zinc-100 text-zinc-900 bg-white"
         >
           <User className="w-4 h-4 text-zinc-600" />
           <span className="text-sm text-zinc-900">Profile Settings</span>
@@ -87,8 +87,8 @@ export const UserMenu = () => {
 
         {/* Team Settings */}
         <DropdownMenuItem 
-          onClick={() => navigate('/settings/team')}
-          className="flex items-center gap-3 px-3 py-2 cursor-pointer rounded-md hover:bg-zinc-50 focus:bg-zinc-50"
+          onClick={() => navigate('/app/team')}
+          className="flex items-center gap-3 px-3 py-2 cursor-pointer rounded-md hover:bg-zinc-100 focus:bg-zinc-100 text-zinc-900 bg-white"
         >
           <TeamIcon className="w-4 h-4 text-zinc-600" />
           <span className="text-sm text-zinc-900">Team Settings</span>
@@ -96,14 +96,14 @@ export const UserMenu = () => {
 
         {/* Billing */}
         <DropdownMenuItem 
-          onClick={() => navigate('/settings/billing')}
-          className="flex items-center gap-3 px-3 py-2 cursor-pointer rounded-md hover:bg-zinc-50 focus:bg-zinc-50"
+          onClick={() => navigate('/app/settings')}
+          className="flex items-center gap-3 px-3 py-2 cursor-pointer rounded-md hover:bg-zinc-100 focus:bg-zinc-100 text-zinc-900 bg-white"
         >
           <CreditCard className="w-4 h-4 text-zinc-600" />
           <span className="text-sm text-zinc-900">Billing</span>
         </DropdownMenuItem>
 
-        <DropdownMenuSeparator className="bg-zinc-100" />
+        <DropdownMenuSeparator className="bg-zinc-200" />
 
         {/* Keyboard Shortcuts */}
         <DropdownMenuItem 
@@ -111,7 +111,7 @@ export const UserMenu = () => {
             setIsOpen(false);
             setShortcutsModalOpen(true);
           }}
-          className="flex items-center gap-3 px-3 py-2 cursor-pointer rounded-md hover:bg-zinc-50 focus:bg-zinc-50"
+          className="flex items-center gap-3 px-3 py-2 cursor-pointer rounded-md hover:bg-zinc-100 focus:bg-zinc-100 text-zinc-900 bg-white"
         >
           <Keyboard className="w-4 h-4 text-zinc-600" />
           <span className="text-sm text-zinc-900">Keyboard Shortcuts</span>
@@ -121,18 +121,18 @@ export const UserMenu = () => {
         {/* Help & Support */}
         <DropdownMenuItem 
           onClick={() => navigate('/help')}
-          className="flex items-center gap-3 px-3 py-2 cursor-pointer rounded-md hover:bg-zinc-50 focus:bg-zinc-50"
+          className="flex items-center gap-3 px-3 py-2 cursor-pointer rounded-md hover:bg-zinc-100 focus:bg-zinc-100 text-zinc-900 bg-white"
         >
           <HelpCircle className="w-4 h-4 text-zinc-600" />
           <span className="text-sm text-zinc-900">Help & Support</span>
         </DropdownMenuItem>
 
-        <DropdownMenuSeparator className="bg-zinc-100" />
+        <DropdownMenuSeparator className="bg-zinc-200" />
 
         {/* Log Out */}
         <DropdownMenuItem 
           onClick={handleLogout}
-          className="flex items-center gap-3 px-3 py-2 cursor-pointer rounded-md hover:bg-red-50 focus:bg-red-50"
+          className="flex items-center gap-3 px-3 py-2 cursor-pointer rounded-md hover:bg-red-50 focus:bg-red-50 bg-white"
         >
           <LogOut className="w-4 h-4 text-red-600" />
           <span className="text-sm text-red-600 font-medium">Log Out</span>

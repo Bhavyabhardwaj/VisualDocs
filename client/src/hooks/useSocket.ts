@@ -6,7 +6,7 @@ export function useSocket() {
 
   useEffect(() => {
     // Connect socket when component mounts
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('authToken');
     if (token) {
       socketRef.current.connect(token);
     }

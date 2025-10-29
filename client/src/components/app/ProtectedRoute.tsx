@@ -12,8 +12,8 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
 
   useEffect(() => {
     // Check for token on mount and when location changes
-    const token = localStorage.getItem('token');
-    console.log('🔒 ProtectedRoute checking token:', token);
+    const token = localStorage.getItem('authToken');
+    console.log('🔒 ProtectedRoute checking token:', token ? 'Found' : 'Not found');
     console.log('🔒 Current path:', location.pathname);
     setIsAuthenticated(!!token);
   }, [location.pathname]);

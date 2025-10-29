@@ -18,7 +18,7 @@ class ApiClient {
     // Request interceptor - Add auth token
     this.client.interceptors.request.use(
       (config) => {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('authToken');
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
         }
@@ -36,7 +36,7 @@ class ApiClient {
           // But only if we're not already on login/register pages
           const currentPath = window.location.pathname;
           if (!currentPath.includes('/login') && !currentPath.includes('/register')) {
-            localStorage.removeItem('token');
+            localStorage.removeItem('authToken');
             window.location.href = '/login';
           }
         }
