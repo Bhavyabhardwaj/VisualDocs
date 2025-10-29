@@ -14,6 +14,7 @@ import { ForgotPassword } from './pages/ForgotPassword';
 
 // App Pages - World-Class Platform
 import { RealDashboard } from '@/pages/app/RealDashboard';
+import { WorldClassDashboard } from '@/pages/app/WorldClassDashboard';
 import { RealProjects } from '@/pages/app/RealProjects';
 import { ShadcnProjectDetail } from '@/pages/app/ShadcnProjectDetail';
 import { LiveCollaboration } from '@/pages/app/LiveCollaboration';
@@ -37,6 +38,13 @@ function App() {
             
             {/* Dashboard - World-Class Project Command Center */}
             <Route path="/app/dashboard" element={
+              <ProtectedRoute>
+                <WorldClassDashboard />
+              </ProtectedRoute>
+            } />
+            
+            {/* Alternative Dashboard (Original) */}
+            <Route path="/app/dashboard-original" element={
               <ProtectedRoute>
                 <RealDashboard />
               </ProtectedRoute>
