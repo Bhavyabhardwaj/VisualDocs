@@ -5,6 +5,7 @@ import { ErrorBoundary } from './components/app/ErrorBoundary';
 import { ProtectedRoute } from '@/components/app/ProtectedRoute';
 import { AppLayout } from '@/components/app/AppLayout';
 import { Toaster } from '@/components/ui/toaster';
+import { Toaster as Sonner } from 'sonner';
 
 // Marketing Pages
 import NewLanding from './pages/NewLanding';
@@ -120,6 +121,7 @@ function App() {
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
           <Toaster />
+          <Sonner />
         </Router>
         </AuthProvider>
       </ThemeProvider>

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import { AppSidebar } from './AppSidebar';
-import { AppTopbar } from './AppTopbar';
+import { TopNavBar } from './TopNavBar';
 
 interface AppLayoutProps {
   breadcrumbs?: Array<{
@@ -41,10 +41,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ breadcrumbs }) => {
         {/* Main Content */}
         <div className="flex-1 flex flex-col overflow-hidden">
           {/* Topbar */}
-          <AppTopbar 
-            onMenuToggle={() => setMobileMenuOpen(!mobileMenuOpen)}
-            breadcrumbs={breadcrumbs}
-          />
+          <TopNavBar />
 
           {/* Main Content Area */}
           <main className="flex-1 overflow-y-auto bg-light-bg dark:bg-dark-bg transition-theme">
