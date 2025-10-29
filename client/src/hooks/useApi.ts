@@ -8,11 +8,17 @@ import {
   projectsApi,
   analysisApi,
   diagramsApi,
+  activityApi,
+  teamApi,
+  searchApi,
   type Project,
   type Analysis,
   type Diagram,
   type ProjectFile,
   type PaginationParams,
+  type Activity,
+  type TeamMember,
+  type SearchResult,
 } from '@/lib/api';
 
 // ============================================
@@ -456,4 +462,187 @@ export const useGenerateDiagram = () => {
   };
 
   return { generateDiagram, isLoading, error };
+};
+
+// ============================================
+// ACTIVITY HOOKS
+// ============================================
+
+export const useProjectActivity = (projectId: string | undefined) => {
+  const [activities, setActivities] = useState<Activity[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchActivities = useCallback(async () => {
+    if (!projectId) {
+      setIsLoading(false);
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const response = await activityApi.getProjectActivity(projectId);
+      
+      if (response.success && response.data) {
+        setActivities(Array.isArray(response.data) ? response.data : []);
+      } else {
+        setError(response.error || 'Failed to fetch activities');
+      }
+    } catch (err: any) {
+      setError(err.message || 'Failed to fetch activities');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [projectId]);
+
+  useEffect(() => {
+    fetchActivities();
+  }, [fetchActivities]);
+
+  return { activities, isLoading, error, refetch: fetchActivities };
+};
+
+export const useUserActivity = () => {
+  const [activities, setActivities] = useState<Activity[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchActivities = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const response = await activityApi.getUserActivity();
+      
+      if (response.success && response.data) {
+        setActivities(Array.isArray(response.data) ? response.data : []);
+      } else {
+        setError(response.error || 'Failed to fetch notifications');
+      }
+    } catch (err: any) {
+      setError(err.message || 'Failed to fetch notifications');
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchActivities();
+  }, [fetchActivities]);
+
+  return { activities, isLoading, error, refetch: fetchActivities };
+};
+
+// ============================================
+// TEAM HOOKS
+// ============================================
+
+export const useTeamMembers = (teamId: string | undefined) => {
+  const [members, setMembers] = useState<TeamMember[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchMembers = useCallback(async () => {
+    if (!teamId) {
+      setIsLoading(false);
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const response = await teamApi.getTeamMembers(teamId);
+      
+      if (response.success && response.data) {
+        setMembers(response.data.members);
+      } else {
+        setError(response.error || 'Failed to fetch team members');
+      }
+    } catch (err: any) {
+      setError(err.message || 'Failed to fetch team members');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [teamId]);
+
+  useEffect(() => {
+    fetchMembers();
+  }, [fetchMembers]);
+
+  return { members, isLoading, error, refetch: fetchMembers };
+};
+
+export const useInviteTeamMember = () => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const inviteMember = async (teamId: string, data: { email: string; role: string }) => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const response = await teamApi.inviteTeamMember(teamId, data);
+      
+      if (response.success) {
+        return response.data;
+      } else {
+        throw new Error(response.error || 'Failed to invite team member');
+      }
+    } catch (err: any) {
+      setError(err.message || 'Failed to invite team member');
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return { inviteMember, isLoading, error };
+};
+
+// ============================================
+// SEARCH HOOKS
+// ============================================
+
+export const useSearch = (query: string, filters?: { type?: string; limit?: number }) => {
+  const [results, setResults] = useState<SearchResult[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const performSearch = useCallback(async () => {
+    if (!query || query.length < 2) {
+      setResults([]);
+      setIsLoading(false);
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const response = await searchApi.search(query, filters);
+      
+      if (response.success && response.data) {
+        setResults(response.data.results);
+      } else {
+        setError(response.error || 'Failed to search');
+      }
+    } catch (err: any) {
+      setError(err.message || 'Failed to search');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [query, filters]);
+
+  useEffect(() => {
+    const debounceTimer = setTimeout(() => {
+      performSearch();
+    }, 300); // Debounce search
+
+    return () => clearTimeout(debounceTimer);
+  }, [performSearch]);
+
+  return { results, isLoading, error, refetch: performSearch };
 };

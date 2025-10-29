@@ -92,9 +92,9 @@ async function apiRequest<T = any>(
 ): Promise<ApiResponse<T>> {
   const token = getAuthToken();
   
-  const headers: HeadersInit = {
+  const headers: Record<string, string> = {
     'Content-Type': 'application/json',
-    ...(options.headers || {}),
+    ...(options.headers as Record<string, string> || {}),
   };
 
   if (token) {
@@ -128,7 +128,7 @@ async function apiUpload<T = any>(
 ): Promise<ApiResponse<T>> {
   const token = getAuthToken();
   
-  const headers: HeadersInit = {};
+  const headers: Record<string, string> = {};
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
   }
@@ -425,6 +425,107 @@ export const publicApi = {
     apiRequest('/api/public/docs'),
 };
 
+// ============================================
+// ACTIVITY API
+// ============================================
+
+export interface Activity {
+  id: string;
+  type: string;
+  user: {
+    id: string;
+    name: string;
+    avatar?: string;
+  };
+  action: string;
+  target: string;
+  timestamp: string;
+  metadata?: any;
+}
+
+export const activityApi = {
+  // Get project activity
+  getProjectActivity: (projectId: string) =>
+    apiRequest<Activity[]>(`/api/activity/project/${projectId}`),
+
+  // Get user activity (notifications)
+  getUserActivity: () =>
+    apiRequest<Activity[]>('/api/activity/user'),
+
+  // Get team activity
+  getTeamActivity: (teamId: string) =>
+    apiRequest<Activity[]>(`/api/activity/team/${teamId}`),
+};
+
+// ============================================
+// TEAM API
+// ============================================
+
+export interface TeamMember {
+  id: string;
+  name: string;
+  email: string;
+  avatar?: string;
+  role: 'owner' | 'admin' | 'member' | 'viewer';
+  status: 'active' | 'pending' | 'inactive';
+  joinedAt: string;
+}
+
+export const teamApi = {
+  // Get team members
+  getTeamMembers: (teamId: string) =>
+    apiRequest<{ members: TeamMember[] }>(`/api/teams/${teamId}/members`),
+
+  // Invite team member
+  inviteTeamMember: (teamId: string, data: { email: string; role: string }) =>
+    apiRequest(`/api/teams/${teamId}/invite`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  // Remove team member
+  removeTeamMember: (teamId: string, userId: string) =>
+    apiRequest(`/api/teams/${teamId}/members/${userId}`, {
+      method: 'DELETE',
+    }),
+
+  // Get team activity
+  getTeamActivity: (teamId: string) =>
+    apiRequest<Activity[]>(`/api/teams/${teamId}/activity`),
+};
+
+// ============================================
+// SEARCH API
+// ============================================
+
+export interface SearchResult {
+  id: string;
+  type: 'project' | 'file' | 'user' | 'team';
+  title: string;
+  description?: string;
+  icon?: string;
+  url?: string;
+  metadata?: any;
+}
+
+export const searchApi = {
+  // Global search
+  search: (query: string, filters?: { type?: string; limit?: number }) => {
+    const params = new URLSearchParams({ q: query });
+    if (filters?.type) params.append('type', filters.type);
+    if (filters?.limit) params.append('limit', filters.limit.toString());
+    return apiRequest<{ results: SearchResult[] }>(`/api/search?${params.toString()}`);
+  },
+
+  // Search projects
+  searchProjects: (query: string) =>
+    apiRequest<{ projects: Project[] }>(`/api/search/projects?q=${encodeURIComponent(query)}`),
+
+  // Search files
+  searchFiles: (projectId: string, query: string) =>
+    apiRequest<{ files: ProjectFile[] }>(`/api/search/files?projectId=${projectId}&q=${encodeURIComponent(query)}`),
+};
+
 // Export a default API client object
 export default {
   auth: authApi,
@@ -433,4 +534,7 @@ export default {
   diagrams: diagramsApi,
   oauth: oauthApi,
   public: publicApi,
+  activity: activityApi,
+  team: teamApi,
+  search: searchApi,
 };

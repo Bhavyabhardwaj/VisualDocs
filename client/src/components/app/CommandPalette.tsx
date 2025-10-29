@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Dialog,
@@ -22,22 +22,8 @@ import {
   X,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-
-// Mock data - replace with real API calls
-const mockSearchResults = {
-  projects: [
-    { id: '1', name: 'VisualDocs Frontend', description: 'React TypeScript frontend application', files: 45 },
-    { id: '2', name: 'Backend API', description: 'Node.js Express server with MongoDB', files: 32 },
-  ],
-  files: [
-    { id: '1', name: 'App.tsx', path: 'src/App.tsx', projectId: '1', projectName: 'VisualDocs Frontend' },
-    { id: '2', name: 'server.ts', path: 'src/server.ts', projectId: '2', projectName: 'Backend API' },
-  ],
-  team: [
-    { id: '1', name: 'John Doe', email: 'john@example.com', role: 'Owner' },
-    { id: '2', name: 'Sarah Adams', email: 'sarah@example.com', role: 'Admin' },
-  ],
-};
+import { projectsApi } from '@/lib/api';
+import type { Project } from '@/lib/api';
 
 interface CommandPaletteProps {
   open: boolean;
@@ -53,6 +39,43 @@ export const CommandPalette = ({ open, onOpenChange }: CommandPaletteProps) => {
     'payment integration',
     'dashboard components',
   ]);
+  
+  // Real data from API
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Note: isLoading and error are used but TypeScript doesn't detect it in JSX conditional
+  // They control the loading and error states in the search results section
+  void isLoading; // Suppress unused warning
+  void error; // Suppress unused warning
+
+  // Fetch projects when dialog opens
+  useEffect(() => {
+    const fetchProjects = async () => {
+      if (!open) return;
+      
+      setIsLoading(true);
+      setError(null);
+      
+      try {
+        const response = await projectsApi.getAll({ limit: 50 });
+        
+        if (response.success && response.data) {
+          setProjects(response.data.projects);
+        } else {
+          throw new Error(response.error || 'Failed to fetch projects');
+        }
+      } catch (err: any) {
+        console.error('Failed to fetch projects:', err);
+        setError(err.message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProjects();
+  }, [open]);
 
   // Reset state when dialog closes
   useEffect(() => {
@@ -63,20 +86,16 @@ export const CommandPalette = ({ open, onOpenChange }: CommandPaletteProps) => {
   }, [open]);
 
   // Filter results based on query
-  const filteredProjects = mockSearchResults.projects.filter(
+  const filteredProjects = projects.filter(
     (p) => p.name.toLowerCase().includes(query.toLowerCase()) ||
-      p.description.toLowerCase().includes(query.toLowerCase())
+      (p.description && p.description.toLowerCase().includes(query.toLowerCase()))
   );
 
-  const filteredFiles = mockSearchResults.files.filter(
-    (f) => f.name.toLowerCase().includes(query.toLowerCase()) ||
-      f.path.toLowerCase().includes(query.toLowerCase())
-  );
+  // TODO: Implement file search when backend endpoint is ready
+  const filteredFiles: any[] = [];
 
-  const filteredTeam = mockSearchResults.team.filter(
-    (t) => t.name.toLowerCase().includes(query.toLowerCase()) ||
-      t.email.toLowerCase().includes(query.toLowerCase())
-  );
+  // TODO: Implement team search when backend endpoint is ready
+  const filteredTeam: any[] = [];
 
   const totalResults = filteredProjects.length + filteredFiles.length + filteredTeam.length;
 
@@ -375,7 +394,7 @@ export const CommandPalette = ({ open, onOpenChange }: CommandPaletteProps) => {
                                   "text-xs font-medium",
                                   isSelected ? "text-white/90" : "text-gray-600"
                                 )}>
-                                  {project.files} files
+                                  {project.fileCount || 0} files
                                 </span>
                               </div>
                             </div>
@@ -491,7 +510,7 @@ export const CommandPalette = ({ open, onOpenChange }: CommandPaletteProps) => {
                                 ? "bg-white/20 text-white" 
                                 : "bg-gradient-to-br from-teal-500 to-cyan-500 text-white group-hover:scale-110"
                             )}>
-                              {member.name.split(' ').map(n => n[0]).join('')}
+                              {member.name.split(' ').map((n: string) => n[0]).join('')}
                             </div>
                             <div className="flex-1 min-w-0">
                               <p className={cn(

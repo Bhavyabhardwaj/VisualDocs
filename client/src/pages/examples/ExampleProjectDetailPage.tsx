@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { TopNavBar } from '@/components/app/TopNavBar';
 import { CollaborationBar } from '@/components/app/CollaborationBar';
-import { ComprehensiveActivityFeed, useMockActivityData } from '@/components/app/ComprehensiveActivityFeed';
+import { ComprehensiveActivityFeed } from '@/components/app/ComprehensiveActivityFeed';
 import { ShareModal } from '@/components/app/ShareModal';
 import { ExportModal } from '@/components/app/ExportModal';
 import { EmptyStateCard } from '@/components/app/EmptyStateCard';
@@ -28,9 +28,9 @@ export const ExampleProjectDetailPage = () => {
   
   // Mock data - replace with real API calls
   const projectId = '123';
+  const teamId = '456'; // Optional team ID for sharing
   const projectName = 'VisualDocs Frontend';
   const hasProjects = true; // Set to false to see empty state
-  const activities = useMockActivityData();
 
   const handleShare = () => {
     setShareModalOpen(true);
@@ -137,7 +137,7 @@ export const ExampleProjectDetailPage = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <ComprehensiveActivityFeed activities={activities} maxHeight="400px" />
+                <ComprehensiveActivityFeed projectId={projectId} maxHeight="400px" />
               </CardContent>
             </Card>
           </>
@@ -166,14 +166,16 @@ export const ExampleProjectDetailPage = () => {
         open={shareModalOpen}
         onOpenChange={setShareModalOpen}
         projectId={projectId}
+        teamId={teamId}
         projectName={projectName}
       />
 
       <ExportModal
-        open={exportModalOpen}
-        onOpenChange={setExportModalOpen}
+        isOpen={exportModalOpen}
+        onClose={() => setExportModalOpen(false)}
         projectId={projectId}
-        projectName={projectName}
+        title={projectName}
+        type="analysis"
       />
 
       {/* 

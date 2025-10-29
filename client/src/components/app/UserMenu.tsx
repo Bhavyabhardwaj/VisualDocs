@@ -1,19 +1,17 @@
 import { useState } from 'react';
 import { 
   User, 
-  Settings, 
   CreditCard, 
   Keyboard, 
   HelpCircle, 
   LogOut,
-  Users,
-  ChevronDown
+  ChevronDown,
+  Users as TeamIcon,
 } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
@@ -92,7 +90,7 @@ export const UserMenu = () => {
           onClick={() => navigate('/settings/team')}
           className="flex items-center gap-3 px-3 py-2 cursor-pointer rounded-md hover:bg-zinc-50 focus:bg-zinc-50"
         >
-          <Users className="w-4 h-4 text-zinc-600" />
+          <TeamIcon className="w-4 h-4 text-zinc-600" />
           <span className="text-sm text-zinc-900">Team Settings</span>
         </DropdownMenuItem>
 

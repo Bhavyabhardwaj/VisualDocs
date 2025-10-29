@@ -1,22 +1,23 @@
 import React, { useState } from 'react';
-import { Button } from '@/components/ui/Button';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
+import { Button } from '@/components/ui/button';
 import {
   Download,
   FileText,
   Image,
   Code,
   Share,
-  Link,
   Mail,
   X,
   Check,
   Copy
 } from 'lucide-react';
+import { analysisApi } from '@/lib/api';
+import { toast } from 'sonner';
 
 interface ExportModalProps {
   isOpen: boolean;
   onClose: () => void;
+  projectId: string;
   title: string;
   type: 'analysis' | 'diagram';
 }
@@ -34,19 +35,52 @@ const exportFormats = {
   ]
 };
 
-export const ExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose, title, type }) => {
+export const ExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose, projectId, title, type }) => {
   const [selectedFormat, setSelectedFormat] = useState<string>('');
   const [isExporting, setIsExporting] = useState(false);
-  const [shareUrl] = useState('https://visualdocs.com/shared/abc123');
+  const [shareUrl] = useState(`${window.location.origin}/shared/${projectId}`);
   const [copied, setCopied] = useState(false);
 
   const handleExport = async () => {
+    if (!selectedFormat) {
+      toast.error('Please select an export format');
+      return;
+    }
+
     setIsExporting(true);
-    // Simulate export
-    setTimeout(() => {
+    
+    try {
+      // Map format to backend format parameter
+      let format: 'json' | 'pdf' | 'markdown' = 'json';
+      if (selectedFormat === 'pdf') format = 'pdf';
+      else if (selectedFormat === 'csv') format = 'markdown'; // CSV not yet supported, use markdown
+      else if (selectedFormat === 'json') format = 'json';
+      
+      const response = await analysisApi.export(projectId, format);
+      
+      if (response.success && response.data) {
+        // Create download link
+        const blob = new Blob([JSON.stringify(response.data, null, 2)], { type: 'application/json' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${title.replace(/\s+/g, '-').toLowerCase()}-${format}.${format}`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+        
+        toast.success(`Export completed successfully`);
+        onClose();
+      } else {
+        throw new Error(response.error || 'Export failed');
+      }
+    } catch (error: any) {
+      console.error('Export error:', error);
+      toast.error(error.message || 'Failed to export. Please try again.');
+    } finally {
       setIsExporting(false);
-      onClose();
-    }, 2000);
+    }
   };
 
   const copyToClipboard = async () => {
@@ -77,36 +111,34 @@ export const ExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose, title
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {exportFormats[type].map((format) => (
-                <Card
+                <div
                   key={format.id}
-                  variant={selectedFormat === format.id ? 'elevated' : 'default'}
-                  hover
-                  className={`cursor-pointer ${
-                    selectedFormat === format.id ? 'ring-2 ring-primary-500' : ''
+                  className={`p-4 text-center rounded-lg border-2 cursor-pointer transition-all ${
+                    selectedFormat === format.id 
+                      ? 'border-emerald-500 bg-emerald-50 shadow-md' 
+                      : 'border-zinc-200 hover:border-zinc-300 hover:shadow-sm'
                   }`}
                   onClick={() => setSelectedFormat(format.id)}
                 >
-                  <CardContent className="p-4 text-center">
-                    <format.icon className="w-8 h-8 text-primary-500 mx-auto mb-2" />
-                    <h4 className="font-medium text-light-text dark:text-dark-text mb-1">
-                      {format.name}
-                    </h4>
-                    <p className="text-xs text-light-text-secondary dark:text-dark-text-secondary">
-                      {format.description}
-                    </p>
-                  </CardContent>
-                </Card>
+                  <format.icon className="w-8 h-8 text-emerald-600 mx-auto mb-2" />
+                  <h4 className="font-medium text-zinc-900 mb-1">
+                    {format.name}
+                  </h4>
+                  <p className="text-xs text-zinc-600">
+                    {format.description}
+                  </p>
+                </div>
               ))}
             </div>
             
             {selectedFormat && (
               <div className="mt-4 flex justify-end">
                 <Button
-                  icon={<Download className="w-4 h-4" />}
                   onClick={handleExport}
-                  loading={isExporting}
                   disabled={isExporting}
+                  className="gap-2"
                 >
+                  <Download className="w-4 h-4" />
                   {isExporting ? 'Exporting...' : `Export ${selectedFormat.toUpperCase()}`}
                 </Button>
               </div>
@@ -120,16 +152,16 @@ export const ExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose, title
             </h3>
             
             <div className="flex items-center space-x-2 mb-4">
-              <div className="flex-1 px-3 py-2 bg-light-bg-secondary dark:bg-dark-bg-tertiary rounded-md border app-border font-mono text-sm">
+              <div className="flex-1 px-3 py-2 bg-zinc-50 rounded-md border border-zinc-200 font-mono text-sm">
                 {shareUrl}
               </div>
               <Button
                 variant="outline"
                 size="sm"
-                icon={copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                 onClick={copyToClipboard}
-                className={copied ? 'text-success-600' : ''}
+                className={`gap-2 ${copied ? 'text-green-600' : ''}`}
               >
+                {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                 {copied ? 'Copied!' : 'Copy'}
               </Button>
             </div>
@@ -138,16 +170,18 @@ export const ExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose, title
               <Button
                 variant="outline"
                 size="sm"
-                icon={<Mail className="w-4 h-4" />}
                 onClick={() => window.open(`mailto:?subject=${title}&body=Check out this analysis: ${shareUrl}`)}
+                className="gap-2"
               >
+                <Mail className="w-4 h-4" />
                 Email
               </Button>
               <Button
                 variant="outline"
                 size="sm"
-                icon={<Share className="w-4 h-4" />}
+                className="gap-2"
               >
+                <Share className="w-4 h-4" />
                 More Options
               </Button>
             </div>

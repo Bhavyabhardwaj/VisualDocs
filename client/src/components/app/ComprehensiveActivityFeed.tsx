@@ -3,13 +3,27 @@ import {
   FileUp, 
   Sparkles, 
   Share2, 
-  FileCode, 
   MessageSquare,
   GitBranch,
   Download,
-  Users
+  Users,
+  Loader2
 } from 'lucide-react';
 import { ScrollArea } from '../ui/scroll-area';
+import { useProjectActivity } from '@/hooks/useApi';
+import type { Activity as APIActivity } from '@/lib/api';
+
+// Map API activity types to our simplified types
+const mapActivityType = (apiType: string): 'upload' | 'analysis' | 'share' | 'export' | 'comment' | 'diagram' | 'team' => {
+  if (apiType.includes('upload') || apiType.includes('file')) return 'upload';
+  if (apiType.includes('analysis')) return 'analysis';
+  if (apiType.includes('share')) return 'share';
+  if (apiType.includes('export')) return 'export';
+  if (apiType.includes('comment')) return 'comment';
+  if (apiType.includes('diagram')) return 'diagram';
+  if (apiType.includes('team') || apiType.includes('collaboration')) return 'team';
+  return 'upload'; // default
+};
 
 export interface Activity {
   id: string;
@@ -24,7 +38,7 @@ export interface Activity {
 }
 
 interface ActivityFeedProps {
-  activities: Activity[];
+  projectId: string;
   maxHeight?: string;
 }
 
@@ -66,7 +80,48 @@ const getActivityIconColor = (type: Activity['type']) => {
   }
 };
 
-export const ComprehensiveActivityFeed = ({ activities, maxHeight = '400px' }: ActivityFeedProps) => {
+export const ComprehensiveActivityFeed = ({ projectId, maxHeight = '400px' }: ActivityFeedProps) => {
+  const { activities: apiActivities, isLoading, error, refetch } = useProjectActivity(projectId);
+
+  // Map API activities to component activities
+  const activities: Activity[] = apiActivities.map((apiActivity: APIActivity) => ({
+    id: apiActivity.id,
+    type: mapActivityType(apiActivity.type),
+    user: apiActivity.user,
+    action: apiActivity.action,
+    target: apiActivity.target,
+    timestamp: new Date(apiActivity.timestamp)
+  }));
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 px-4">
+        <Loader2 className="w-8 h-8 text-zinc-400 animate-spin mb-3" />
+        <p className="text-sm text-zinc-600">Loading activity...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 px-4">
+        <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center mb-3">
+          <Sparkles className="w-6 h-6 text-red-500" />
+        </div>
+        <p className="text-sm font-medium text-zinc-900 mb-1">Failed to load activity</p>
+        <p className="text-xs text-zinc-500 text-center max-w-sm mb-3">
+          {error}
+        </p>
+        <button 
+          onClick={() => refetch()}
+          className="text-xs text-emerald-600 hover:text-emerald-700 font-medium"
+        >
+          Try again
+        </button>
+      </div>
+    );
+  }
+
   if (activities.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-12 px-4">
@@ -130,57 +185,4 @@ export const ComprehensiveActivityFeed = ({ activities, maxHeight = '400px' }: A
       </div>
     </ScrollArea>
   );
-};
-
-// Hook to generate mock activity data (replace with real API call)
-export const useMockActivityData = (): Activity[] => {
-  return [
-    {
-      id: '1',
-      type: 'upload',
-      user: { name: 'You' },
-      action: 'uploaded files to',
-      target: 'VisualDocs Frontend',
-      timestamp: new Date(Date.now() - 1000 * 60 * 5), // 5 min ago
-    },
-    {
-      id: '2',
-      type: 'analysis',
-      user: { name: 'AI Assistant' },
-      action: 'completed analysis for',
-      target: 'Backend API',
-      timestamp: new Date(Date.now() - 1000 * 60 * 15), // 15 min ago
-    },
-    {
-      id: '3',
-      type: 'comment',
-      user: { name: 'Sarah Johnson' },
-      action: 'commented on',
-      target: 'Authentication Module',
-      timestamp: new Date(Date.now() - 1000 * 60 * 30), // 30 min ago
-    },
-    {
-      id: '4',
-      type: 'diagram',
-      user: { name: 'Mike Chen' },
-      action: 'created diagram',
-      target: 'System Architecture',
-      timestamp: new Date(Date.now() - 1000 * 60 * 60), // 1 hour ago
-    },
-    {
-      id: '5',
-      type: 'export',
-      user: { name: 'You' },
-      action: 'exported',
-      target: 'Documentation (PDF)',
-      timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2), // 2 hours ago
-    },
-    {
-      id: '6',
-      type: 'team',
-      user: { name: 'Emily Davis' },
-      action: 'joined the workspace',
-      timestamp: new Date(Date.now() - 1000 * 60 * 60 * 5), // 5 hours ago
-    },
-  ];
 };

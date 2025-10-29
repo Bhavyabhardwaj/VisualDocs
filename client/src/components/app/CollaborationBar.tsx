@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
-import { Users, MessageSquare, Phone } from 'lucide-react';
+import { MessageSquare, Phone } from 'lucide-react';
 import { Button } from '../ui/button';
 import { toast } from 'sonner';
+import { projectsApi } from '@/lib/api';
 
 interface CollaboratorPresence {
   id: string;
   name: string;
+  email?: string;
   avatar?: string;
   status: 'viewing' | 'editing';
   cursor?: { x: number; y: number };
@@ -16,35 +18,51 @@ interface CollaborationBarProps {
   projectName: string;
 }
 
-export const CollaborationBar = ({ projectId, projectName }: CollaborationBarProps) => {
-  const [collaborators, setCollaborators] = useState<CollaboratorPresence[]>([
-    {
-      id: '1',
-      name: 'You',
-      status: 'editing',
-    },
-    {
-      id: '2',
-      name: 'Sarah Johnson',
-      status: 'viewing',
-    },
-    {
-      id: '3',
-      name: 'Mike Chen',
-      status: 'editing',
-    },
-  ]);
-
-  const [unreadComments, setUnreadComments] = useState(5);
+export const CollaborationBar = ({ projectId }: CollaborationBarProps) => {
+  const [collaborators, setCollaborators] = useState<CollaboratorPresence[]>([]);
+  const [unreadComments] = useState(0); // TODO: Fetch from API
 
   useEffect(() => {
+    const fetchCollaborators = async () => {
+      try {
+        const response = await projectsApi.getCollaborators(projectId);
+        
+        if (response.success && response.data) {
+          // Map backend collaborators to our format
+          const mappedCollaborators: CollaboratorPresence[] = response.data.map((collab: any) => ({
+            id: collab.id,
+            name: collab.name,
+            email: collab.email,
+            avatar: collab.avatar,
+            status: 'viewing' as const, // Default to viewing, would be updated via WebSocket
+          }));
+          
+          setCollaborators(mappedCollaborators);
+        } else {
+          throw new Error(response.error || 'Failed to fetch collaborators');
+        }
+      } catch (err: any) {
+        console.error('Failed to fetch collaborators:', err);
+        // Set current user as only collaborator on error
+        setCollaborators([{ id: 'me', name: 'You', status: 'editing' }]);
+      }
+    };
+
+    fetchCollaborators();
+
     // TODO: Connect to WebSocket for real-time collaboration
-    // const ws = new WebSocket(`ws://localhost:3000/collaboration/${projectId}`);
+    // const ws = new WebSocket(`ws://localhost:3004/collaboration/${projectId}`);
     
     // ws.onmessage = (event) => {
     //   const data = JSON.parse(event.data);
     //   if (data.type === 'user_joined') {
     //     setCollaborators(prev => [...prev, data.user]);
+    //   } else if (data.type === 'user_left') {
+    //     setCollaborators(prev => prev.filter(c => c.id !== data.userId));
+    //   } else if (data.type === 'user_status_changed') {
+    //     setCollaborators(prev => prev.map(c =>
+    //       c.id === data.userId ? { ...c, status: data.status } : c
+    //     ));
     //   }
     // };
 

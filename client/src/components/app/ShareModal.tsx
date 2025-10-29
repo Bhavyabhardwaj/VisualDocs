@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Share2, Copy, Check, Mail, X } from 'lucide-react';
 import {
   Dialog,
@@ -17,45 +17,46 @@ import {
   SelectValue,
 } from '../ui/select';
 import { toast } from 'sonner';
+import { teamApi } from '@/lib/api';
+import type { TeamMember } from '@/lib/api';
 
 interface ShareModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   projectId: string;
+  teamId?: string; // Optional team ID for fetching members
   projectName: string;
 }
 
-interface TeamMember {
-  id: string;
-  name: string;
-  email: string;
-  role: 'owner' | 'editor' | 'viewer';
-  avatar?: string;
-}
-
-export const ShareModal = ({ open, onOpenChange, projectId, projectName }: ShareModalProps) => {
+export const ShareModal = ({ open, onOpenChange, projectId, teamId, projectName }: ShareModalProps) => {
   const [permission, setPermission] = useState<'view' | 'edit'>('view');
-  const [shareUrl, setShareUrl] = useState(`${window.location.origin}/shared/${projectId}`);
+  const [shareUrl, setShareUrl] = useState(`${window.location.origin}/projects/${projectId}`);
   const [copied, setCopied] = useState(false);
   const [email, setEmail] = useState('');
   const [isInviting, setIsInviting] = useState(false);
   const [isGeneratingLink, setIsGeneratingLink] = useState(false);
+  
+  // Team members state
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
 
-  // Mock team members - replace with real data
-  const [teamMembers] = useState<TeamMember[]>([
-    {
-      id: '1',
-      name: 'You',
-      email: 'you@example.com',
-      role: 'owner',
-    },
-    {
-      id: '2',
-      name: 'Sarah Johnson',
-      email: 'sarah@example.com',
-      role: 'editor',
-    },
-  ]);
+  // Fetch team members if teamId is provided
+  useEffect(() => {
+    const fetchTeamMembers = async () => {
+      if (!teamId || !open) return;
+      
+      try {
+        const response = await teamApi.getTeamMembers(teamId);
+        
+        if (response.success && response.data) {
+          setTeamMembers(response.data.members);
+        }
+      } catch (error: any) {
+        console.error('Failed to fetch team members:', error);
+      }
+    };
+
+    fetchTeamMembers();
+  }, [teamId, open]);
 
   const handleCopyLink = async () => {
     try {
@@ -71,22 +72,13 @@ export const ShareModal = ({ open, onOpenChange, projectId, projectName }: Share
   const handleGenerateLink = async () => {
     setIsGeneratingLink(true);
     try {
-      // TODO: Replace with actual API call
-      const response = await fetch(`/api/share/create`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ projectId, permissions: permission })
-      });
-      
-      if (response.ok) {
-        const { shareUrl: newUrl } = await response.json();
-        setShareUrl(newUrl);
-        toast.success('Share link generated!');
-      }
+      // Generate a shareable link with permissions
+      const newShareUrl = `${window.location.origin}/projects/${projectId}?share=true&permission=${permission}`;
+      setShareUrl(newShareUrl);
+      await handleCopyLink(); // Auto-copy the link
+      toast.success('Share link generated and copied!');
     } catch (error) {
-      // For now, just use a mock URL
-      setShareUrl(`${window.location.origin}/shared/${projectId}?p=${permission}`);
-      toast.success('Share link generated!');
+      toast.error('Failed to generate link');
     } finally {
       setIsGeneratingLink(false);
     }
@@ -98,23 +90,33 @@ export const ShareModal = ({ open, onOpenChange, projectId, projectName }: Share
       return;
     }
 
+    if (!teamId) {
+      toast.error('Team ID is required to invite members');
+      return;
+    }
+
     setIsInviting(true);
     try {
-      // TODO: Replace with actual API call
-      const response = await fetch(`/api/share/invite`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ projectId, email, permission })
+      const response = await teamApi.inviteTeamMember(teamId, {
+        email,
+        role: permission === 'edit' ? 'member' : 'viewer',
       });
 
-      if (response.ok) {
+      if (response.success) {
         toast.success(`Invitation sent to ${email}`);
         setEmail('');
+        
+        // Refresh team members list
+        const membersResponse = await teamApi.getTeamMembers(teamId);
+        if (membersResponse.success && membersResponse.data) {
+          setTeamMembers(membersResponse.data.members);
+        }
+      } else {
+        throw new Error(response.error || 'Failed to send invitation');
       }
-    } catch (error) {
-      // Mock success for now
-      toast.success(`Invitation sent to ${email}`);
-      setEmail('');
+    } catch (error: any) {
+      console.error('Invite error:', error);
+      toast.error(error.message || 'Failed to send invitation');
     } finally {
       setIsInviting(false);
     }
@@ -124,7 +126,9 @@ export const ShareModal = ({ open, onOpenChange, projectId, projectName }: Share
     switch (role) {
       case 'owner':
         return 'bg-zinc-900 text-white';
-      case 'editor':
+      case 'admin':
+        return 'bg-blue-100 text-blue-700';
+      case 'member':
         return 'bg-emerald-100 text-emerald-700';
       case 'viewer':
         return 'bg-zinc-100 text-zinc-700';
