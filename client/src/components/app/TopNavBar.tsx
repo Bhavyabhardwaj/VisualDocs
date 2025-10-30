@@ -1,7 +1,7 @@
 import { Search, Settings } from 'lucide-react';
 import { UserMenu } from './UserMenu';
 import { NotificationsMenu } from './NotificationsMenu';
-import { CommandPalette } from './CommandPalette';
+import { ImprovedCommandPalette } from './ImprovedCommandPalette';
 import { KeyboardShortcutsModal } from './KeyboardShortcutsModal';
 import { useState, useEffect } from 'react';
 
@@ -37,20 +37,20 @@ export const TopNavBar = () => {
 
   return (
     <>
-      <div className="h-14 border-b border-zinc-200 bg-white flex items-center justify-between px-4 lg:px-6">
+      <div className="fixed top-0 left-0 right-0 z-50 h-16 border-b border-neutral-200 bg-white flex items-center justify-between px-4 lg:px-6">
         {/* Left: Logo */}
         <div className="flex items-center gap-4">
-          <h1 className="text-lg font-semibold text-zinc-900">VisualDocs</h1>
+          <h1 className="text-lg font-semibold text-brand-primary">VisualDocs</h1>
         </div>
 
         {/* Center: Search (Desktop) */}
         <button
           onClick={() => setCommandPaletteOpen(true)}
-          className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-zinc-50 hover:bg-zinc-100 border border-zinc-200 rounded-lg transition-colors max-w-md w-full"
+          className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-brand-bg hover:bg-neutral-100 border border-neutral-200 rounded-lg transition-colors max-w-md w-full"
         >
-          <Search className="w-4 h-4 text-zinc-400" />
-          <span className="text-sm text-zinc-500 flex-1 text-left">Search projects, files...</span>
-          <kbd className="hidden lg:inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-white border border-zinc-200 rounded text-xs text-zinc-600 font-mono">
+          <Search className="w-4 h-4 text-neutral-400" />
+          <span className="text-sm text-neutral-500 flex-1 text-left">Search projects, files...</span>
+          <kbd className="hidden lg:inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-white border border-neutral-200 rounded text-xs text-neutral-600 font-mono">
             <span>⌘</span>
             <span>K</span>
           </kbd>
@@ -61,9 +61,9 @@ export const TopNavBar = () => {
           {/* Search Button (Mobile) */}
           <button
             onClick={() => setCommandPaletteOpen(true)}
-            className="md:hidden p-2 rounded-lg hover:bg-zinc-50 transition-colors"
+            className="md:hidden p-2 rounded-lg hover:bg-brand-bg transition-colors"
           >
-            <Search className="w-5 h-5 text-zinc-600" />
+            <Search className="w-5 h-5 text-neutral-600" />
           </button>
 
           {/* Notifications */}
@@ -71,11 +71,11 @@ export const TopNavBar = () => {
 
           {/* Settings */}
           <button 
-            className="p-2 rounded-lg hover:bg-zinc-50 transition-colors"
+            className="p-2 rounded-lg hover:bg-brand-bg transition-colors"
             onClick={() => setShortcutsModalOpen(true)}
             title="Settings & Shortcuts"
           >
-            <Settings className="w-5 h-5 text-zinc-600" />
+            <Settings className="w-5 h-5 text-neutral-600" />
           </button>
 
           {/* User Menu */}
@@ -84,7 +84,7 @@ export const TopNavBar = () => {
       </div>
 
       {/* Command Palette */}
-      <CommandPalette open={commandPaletteOpen} onOpenChange={setCommandPaletteOpen} />
+      <ImprovedCommandPalette open={commandPaletteOpen} onOpenChange={setCommandPaletteOpen} />
       
       {/* Keyboard Shortcuts Modal */}
       <KeyboardShortcutsModal open={shortcutsModalOpen} onOpenChange={setShortcutsModalOpen} />

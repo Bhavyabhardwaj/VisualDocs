@@ -77,6 +77,7 @@ export const ShadcnProjectDetail = () => {
   useEffect(() => {
     if (id) {
       loadProject();
+      loadExistingAnalysis();
       handleLoadDiagrams();
     }
   }, [id]);
@@ -175,6 +176,34 @@ export const ShadcnProjectDetail = () => {
       console.error('Failed to load project:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadExistingAnalysis = async () => {
+    if (!id) return;
+    
+    try {
+      console.log('🔍 Loading existing analysis for project:', id);
+      const response = await analysisService.getProjectAnalysis(id);
+      
+      if (response.data) {
+        console.log('✅ Found existing analysis:', response.data);
+        setAnalysis(response.data);
+        
+        toast({
+          title: 'Analysis Loaded',
+          description: 'Previous analysis results have been loaded.',
+        });
+      } else {
+        console.log('ℹ️ No existing analysis found');
+      }
+    } catch (error: any) {
+      // If 404, no existing analysis - that's okay
+      if (error?.response?.status === 404) {
+        console.log('ℹ️ No previous analysis exists for this project');
+      } else {
+        console.error('Failed to load existing analysis:', error);
+      }
     }
   };
 

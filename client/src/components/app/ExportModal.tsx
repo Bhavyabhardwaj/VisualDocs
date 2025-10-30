@@ -11,8 +11,9 @@ import {
   Check,
   Copy
 } from 'lucide-react';
-import { analysisApi } from '@/lib/api';
-import { toast } from 'sonner';
+import { analysisService } from '@/services/analysis.service';
+import { diagramService } from '@/services/diagram.service';
+import { useToast } from '@/components/ui/use-toast';
 
 interface ExportModalProps {
   isOpen: boolean;
@@ -40,44 +41,59 @@ export const ExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose, proje
   const [isExporting, setIsExporting] = useState(false);
   const [shareUrl] = useState(`${window.location.origin}/shared/${projectId}`);
   const [copied, setCopied] = useState(false);
+  const { toast } = useToast();
 
   const handleExport = async () => {
     if (!selectedFormat) {
-      toast.error('Please select an export format');
+      toast({
+        title: 'Error',
+        description: 'Please select an export format',
+        variant: 'destructive',
+      });
       return;
     }
 
     setIsExporting(true);
     
     try {
-      // Map format to backend format parameter
-      let format: 'json' | 'pdf' | 'markdown' = 'json';
-      if (selectedFormat === 'pdf') format = 'pdf';
-      else if (selectedFormat === 'csv') format = 'markdown'; // CSV not yet supported, use markdown
-      else if (selectedFormat === 'json') format = 'json';
-      
-      const response = await analysisApi.export(projectId, format);
-      
-      if (response.success && response.data) {
+      if (type === 'analysis') {
+        // Map format to backend format parameter
+        let format: 'json' | 'pdf' | 'markdown' = 'json';
+        if (selectedFormat === 'pdf') format = 'pdf';
+        else if (selectedFormat === 'csv') format = 'markdown';
+        else if (selectedFormat === 'json') format = 'json';
+        
+        const blob = await analysisService.exportAnalysis(projectId, format);
+        
         // Create download link
-        const blob = new Blob([JSON.stringify(response.data, null, 2)], { type: 'application/json' });
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `${title.replace(/\s+/g, '-').toLowerCase()}-${format}.${format}`;
+        a.download = `${title.replace(/\s+/g, '-').toLowerCase()}-analysis.${format === 'json' ? 'json' : format === 'markdown' ? 'md' : 'pdf'}`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
         window.URL.revokeObjectURL(url);
         
-        toast.success(`Export completed successfully`);
+        toast({
+          title: 'Success',
+          description: `Export completed successfully`,
+        });
         onClose();
-      } else {
-        throw new Error(response.error || 'Export failed');
+      } else if (type === 'diagram') {
+        // For diagrams, we'll export based on format
+        toast({
+          title: 'Info',
+          description: 'Diagram export coming soon!',
+        });
       }
     } catch (error: any) {
       console.error('Export error:', error);
-      toast.error(error.message || 'Failed to export. Please try again.');
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to export. Please try again.',
+        variant: 'destructive',
+      });
     } finally {
       setIsExporting(false);
     }

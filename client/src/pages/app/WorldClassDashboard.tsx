@@ -26,6 +26,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { FileUploadDialog } from '@/components/app/FileUploadDialog';
 import { GitHubImportDialog } from '@/components/app/GitHubImportDialog';
 import { TopNavBar } from '@/components/app/TopNavBar';
+import { UnifiedSidebar } from '@/components/app/UnifiedSidebar';
 import { projectService } from '@/services/project.service';
 import type { Project } from '@/types/api';
 
@@ -91,33 +92,37 @@ export const WorldClassDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-brand-bg">
       {/* Top Navigation Bar - Premium UI */}
       <TopNavBar />
 
-      {/* Main Content */}
-      <main className="mx-auto max-w-[1400px] px-6 py-8">
-        {/* Page Header with Quick Actions */}
-        <div className="mb-8">
-          <div className="flex items-start justify-between">
-            <div>
-              <h1 className="text-3xl font-semibold tracking-tight text-gray-900">Dashboard</h1>
-              <p className="mt-2 text-sm text-gray-600">
-                Welcome back! Here's what's happening with your projects today.
-              </p>
-            </div>
-            <div className="flex items-center gap-3">
-              <Button
-                variant="outline"
-                size="sm"
-                className="gap-2 hover:bg-gray-50"
-                onClick={() => {
-                  setSelectedProjectId(projects.length > 0 ? projects[0].id : null);
-                  setUploadDialogOpen(true);
-                }}
-              >
-                <Upload className="h-4 w-4" />
-                Upload Files
+      {/* Unified Sidebar Navigation */}
+      <UnifiedSidebar />
+
+      {/* Main Content with Sidebar Offset */}
+      <main className="ml-64 pt-16">
+        <div className="mx-auto max-w-[1400px] px-6 py-8">
+          {/* Page Header with Quick Actions */}
+          <div className="mb-8">
+            <div className="flex items-start justify-between">
+              <div>
+                <h1 className="text-3xl font-semibold tracking-tight text-brand-primary">Dashboard</h1>
+                <p className="mt-2 text-sm text-neutral-600">
+                  Welcome back! Here's what's happening with your projects today.
+                </p>
+              </div>
+              <div className="flex items-center gap-3">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-2 border-neutral-300 hover:bg-brand-bg"
+                  onClick={() => {
+                    setSelectedProjectId(projects.length > 0 ? projects[0].id : null);
+                    setUploadDialogOpen(true);
+                  }}
+                >
+                  <Upload className="h-4 w-4" />
+                  Upload Files
               </Button>
               <Button
                 variant="outline"
@@ -483,6 +488,7 @@ export const WorldClassDashboard = () => {
             </Card>
           </div>
         )}
+        </div>
       </main>
 
       {/* Dialogs */}

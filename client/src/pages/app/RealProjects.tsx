@@ -113,28 +113,27 @@ export const RealProjects = () => {
 
   return (
     <PremiumLayout>
-      <div className="min-h-screen bg-white">
-        {/* Header */}
-        <div className="border-b border-neutral-200 bg-white">
-          <div className="mx-auto px-8 py-8">
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h1 className="text-3xl font-semibold tracking-tight text-neutral-900">Projects</h1>
-                <p className="text-neutral-600 mt-2 text-[15px]">
-                  Manage and analyze your codebase projects
-                </p>
-              </div>
-              <div className="flex items-center gap-3">
-                <Button variant="outline" onClick={() => setGithubDialogOpen(true)} className="h-9 text-sm">
-                  <Github className="w-4 h-4 mr-2" />
-                  Import from GitHub
-                </Button>
-                <Button onClick={() => setUploadDialogOpen(true)} className="h-9 text-sm">
-                  <Upload className="w-4 h-4 mr-2" />
-                  Upload Files
-                </Button>
-              </div>
+      <div className="mx-auto max-w-[1400px] px-6 py-8">
+        {/* Page Header */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h1 className="text-3xl font-semibold tracking-tight text-brand-primary">Projects</h1>
+              <p className="text-neutral-600 mt-2 text-[15px]">
+                Manage and analyze your codebase projects
+              </p>
             </div>
+            <div className="flex items-center gap-3">
+              <Button variant="outline" onClick={() => setGithubDialogOpen(true)} className="h-9 text-sm border-neutral-300">
+                <Github className="w-4 h-4 mr-2" />
+                Import from GitHub
+              </Button>
+              <Button onClick={() => setUploadDialogOpen(true)} className="h-9 text-sm bg-brand-primary hover:bg-brand-secondary">
+                <Upload className="w-4 h-4 mr-2" />
+                Upload Files
+              </Button>
+            </div>
+          </div>
 
           {/* Filters and Search */}
           <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
@@ -511,7 +510,6 @@ export const RealProjects = () => {
             </div>
           </Card>
         )}
-      </div>
       </div>
 
       {/* Dialogs */}
