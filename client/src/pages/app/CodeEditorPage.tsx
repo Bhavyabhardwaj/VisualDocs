@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import Editor from '@monaco-editor/react';
 import { io, Socket } from 'socket.io-client';
@@ -11,14 +11,8 @@ import {
   Save,
   Users,
   Code2,
-  Download,
-  Play,
-  X,
-  Search,
-  Settings,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useToast } from '@/components/ui/use-toast';
@@ -186,11 +180,11 @@ export default function CodeEditorPage() {
     const root: FileNode[] = [];
     const folderMap: Record<string, FileNode> = {};
 
-    fileList.forEach((file) => {
+    fileList.forEach((file: any) => {
       const parts = file.path.split('/');
       let currentLevel = root;
 
-      parts.forEach((part, index) => {
+      parts.forEach((part: string, index: number) => {
         const isFile = index === parts.length - 1;
         const currentPath = parts.slice(0, index + 1).join('/');
 

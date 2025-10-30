@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   TrendingUp, TrendingDown, AlertCircle, CheckCircle2, Zap,
   FileText, Code, GitBranch, Users, Clock, Download, Filter,
@@ -33,68 +34,75 @@ interface Issue {
   line: number;
   category: string;
   suggestion: string;
+  codeSnippet?: string;
+  aiSuggestion?: {
+    title: string;
+    description: string;
+    fixCode?: string;
+    reasoning: string;
+  };
 }
 
 export const AIAnalysisDashboard = () => {
   const [timeRange, setTimeRange] = useState('7d');
+  const [projectId, setProjectId] = useState<string | null>(null);
+  const [analysisData, setAnalysisData] = useState<any>(null);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
-  const qualityMetrics: QualityMetric[] = [
-    { name: 'Documentation Coverage', score: 87, change: 12, status: 'improving' },
-    { name: 'Code Complexity', score: 72, change: -5, status: 'declining' },
-    { name: 'Test Coverage', score: 94, change: 3, status: 'improving' },
-    { name: 'Type Safety', score: 91, change: 0, status: 'stable' },
-    { name: 'Performance Score', score: 78, change: 8, status: 'improving' },
-    { name: 'Security Score', score: 85, change: 2, status: 'improving' },
-  ];
+  // Load first project on mount
+  useEffect(() => {
+    const loadProject = async () => {
+      try {
+        const token = localStorage.getItem('authToken');
+        const response = await fetch('http://localhost:3004/api/projects', {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await response.json();
+        if (data.projects && data.projects.length > 0) {
+          setProjectId(data.projects[0].id);
+          loadAnalysis(data.projects[0].id);
+        }
+      } catch (error) {
+        console.error('Failed to load projects:', error);
+      }
+    };
+    loadProject();
+  }, []);
 
-  const issues: Issue[] = [
-    {
-      id: '1',
-      severity: 'critical',
-      title: 'Potential memory leak in useEffect hook',
-      file: 'Dashboard.tsx',
-      line: 145,
-      category: 'Performance',
-      suggestion: 'Add cleanup function to prevent memory leaks'
-    },
-    {
-      id: '2',
-      severity: 'high',
-      title: 'Missing error boundary for async operations',
-      file: 'ProjectList.tsx',
-      line: 89,
-      category: 'Reliability',
-      suggestion: 'Wrap async calls with try-catch or error boundary'
-    },
-    {
-      id: '3',
-      severity: 'medium',
-      title: 'Unused imports detected',
-      file: 'utils.ts',
-      line: 12,
-      category: 'Code Quality',
-      suggestion: 'Remove unused imports to reduce bundle size'
-    },
-    {
-      id: '4',
-      severity: 'medium',
-      title: 'Component complexity exceeds threshold',
-      file: 'ProjectDetail.tsx',
-      line: 0,
-      category: 'Maintainability',
-      suggestion: 'Consider breaking down into smaller components'
-    },
-    {
-      id: '5',
-      severity: 'low',
-      title: 'Missing JSDoc comments',
-      file: 'api.service.ts',
-      line: 34,
-      category: 'Documentation',
-      suggestion: 'Add JSDoc comments for better code documentation'
-    },
-  ];
+  // Load analysis data
+  const loadAnalysis = async (pid: string) => {
+    try {
+      const token = localStorage.getItem('authToken');
+      const response = await fetch(`http://localhost:3004/api/code-analysis/${pid}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setAnalysisData(data.analysis);
+      }
+    } catch (error) {
+      console.log('No analysis data yet');
+    }
+  };
+
+  // Get quality metrics from analysis data
+  const qualityMetrics: QualityMetric[] = analysisData?.qualityMetrics || [];
+
+  // Get issues from analysis data (no fallback mock data)
+  const issues: Issue[] = analysisData?.issues || [];
+
+  // Calculate stats from real data
+  const totalIssues = analysisData?.totalIssues || 0;
+  const criticalIssues = analysisData?.criticalIssues || 0;
+  const highIssues = analysisData?.highIssues || 0;
+  const mediumIssues = analysisData?.mediumIssues || 0;
+  const lowIssues = analysisData?.lowIssues || 0;
+  
+  // Calculate overall quality score from analysis
+  const overallQuality = analysisData?.overallQuality || 0;
+  const aiSuggestionsCount = issues.filter(issue => issue.suggestion).length;
+  const analysisTime = analysisData?.analysisTime || '0s';
 
   const getSeverityConfig = (severity: string) => {
     const configs = {
@@ -120,46 +128,168 @@ export const AIAnalysisDashboard = () => {
     }, 2000);
   };
 
-  const handleRunAnalysis = () => {
+  const handleRunAnalysis = async () => {
+    if (!projectId) {
+      toast({
+        title: "No Project",
+        description: "Please create a project first",
+        variant: "destructive",
+      });
+      return;
+    }
+
     toast({
       title: "Analysis Started",
       description: "AI is analyzing your codebase for issues and improvements...",
     });
-    // TODO: Implement actual analysis functionality
-    setTimeout(() => {
+
+    try {
+      const token = localStorage.getItem('authToken');
+      const response = await fetch(`http://localhost:3004/api/code-analysis/${projectId}/analyze`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) throw new Error('Analysis failed');
+
+      const data = await response.json();
+      setAnalysisData(data.analysis);
+
       toast({
         title: "Analysis Complete",
-        description: "Found 24 issues and 47 AI suggestions!",
+        description: `Found ${data.analysis.totalIssues} issues with ${data.analysis.criticalIssues} critical!`,
       });
-    }, 3000);
+    } catch (error) {
+      toast({
+        title: "Analysis Failed",
+        description: error instanceof Error ? error.message : 'Unknown error',
+        variant: "destructive",
+      });
+    }
   };
 
   const handleViewCode = (file: string, line: number) => {
+    console.log('handleViewCode called:', { file, line, projectId });
+    
+    if (!projectId) {
+      toast({
+        title: "No Project",
+        description: "Please select a project first",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Navigate to code editor with file and line
+    navigate(`/app/editor/${projectId}?file=${encodeURIComponent(file)}&line=${line}`);
+    
     toast({
-      title: "Opening Code",
-      description: `${file}:${line}`,
+      title: "Opening Editor",
+      description: `Opening ${file} at line ${line}`,
     });
-    console.log(`Opening: ${file}:${line}`);
   };
 
-  const handleApplyFix = (issueTitle: string) => {
+  const handleApplyFix = async (issueId: string, issueTitle: string, file: string, originalCode: string, fixCode: string) => {
+    console.log('handleApplyFix called:', { issueId, issueTitle, file, projectId });
+    
+    if (!projectId) {
+      toast({
+        title: "No Project",
+        description: "Please select a project first",
+        variant: "destructive",
+      });
+      return;
+    }
+
     toast({
       title: "Applying Fix",
       description: `AI is fixing: ${issueTitle}`,
     });
-    setTimeout(() => {
+
+    try {
+      const token = localStorage.getItem('authToken');
+      const response = await fetch(
+        `http://localhost:3004/api/code-analysis/${projectId}/issues/${issueId}/apply`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ file, originalCode, fixCode }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to apply fix');
+      }
+
       toast({
         title: "Fix Applied",
         description: "Code has been updated successfully!",
       });
-    }, 1500);
+
+      // Reload analysis
+      await loadAnalysis(projectId);
+    } catch (error) {
+      console.error('Apply fix error:', error);
+      toast({
+        title: "Failed to Apply Fix",
+        description: error instanceof Error ? error.message : 'Unknown error',
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleIgnoreIssue = (issueTitle: string) => {
-    toast({
-      title: "Issue Ignored",
-      description: `"${issueTitle}" will not be shown again.`,
-    });
+  const handleIgnoreIssue = async (issueId: string, issueTitle: string) => {
+    console.log('handleIgnoreIssue called:', { issueId, issueTitle, projectId });
+    
+    if (!projectId) {
+      toast({
+        title: "No Project",
+        description: "Please select a project first",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('authToken');
+      const response = await fetch(
+        `http://localhost:3004/api/code-analysis/${projectId}/issues/${issueId}/ignore`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to ignore issue');
+      }
+
+      toast({
+        title: "Issue Ignored",
+        description: `"${issueTitle}" will not be shown again.`,
+      });
+
+      // Reload analysis
+      await loadAnalysis(projectId);
+    } catch (error) {
+      console.error('Ignore issue error:', error);
+      toast({
+        title: "Failed to Ignore",
+        description: error instanceof Error ? error.message : 'Unknown error',
+        variant: "destructive",
+      });
+    }
   };
 
   const handleGenerateImprovementPlan = () => {
@@ -247,10 +377,10 @@ export const AIAnalysisDashboard = () => {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-neutral-900">84%</div>
+              <div className="text-3xl font-bold text-neutral-900">{overallQuality}%</div>
               <div className="mt-2 flex items-center gap-1.5 text-xs text-emerald-600">
                 <TrendingUp className="h-3.5 w-3.5" />
-                <span className="font-medium">+5.2% from last week</span>
+                <span className="font-medium">Based on analysis</span>
               </div>
             </CardContent>
           </Card>
@@ -263,10 +393,11 @@ export const AIAnalysisDashboard = () => {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-neutral-900">24</div>
-              <div className="mt-2 flex items-center gap-1.5 text-xs text-red-600">
-                <TrendingDown className="h-3.5 w-3.5" />
-                <span className="font-medium">-12% from last week</span>
+              <div className="text-3xl font-bold text-neutral-900">{totalIssues}</div>
+              <div className="mt-2 flex items-center gap-1.5 text-xs text-neutral-600">
+                <span className="font-medium">
+                  {criticalIssues} critical, {highIssues} high
+                </span>
               </div>
             </CardContent>
           </Card>
@@ -279,7 +410,7 @@ export const AIAnalysisDashboard = () => {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-brand-primary">47</div>
+              <div className="text-3xl font-bold text-brand-primary">{aiSuggestionsCount}</div>
               <p className="mt-2 text-xs text-neutral-600">Ready to implement</p>
             </CardContent>
           </Card>
@@ -292,8 +423,8 @@ export const AIAnalysisDashboard = () => {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-brand-primary">2.4s</div>
-              <p className="mt-2 text-xs text-neutral-600">Average scan time</p>
+              <div className="text-3xl font-bold text-brand-primary">{analysisTime}</div>
+              <p className="mt-2 text-xs text-neutral-600">Last scan duration</p>
             </CardContent>
           </Card>
         </div>
@@ -324,6 +455,16 @@ export const AIAnalysisDashboard = () => {
                 </div>
               </CardHeader>
               <CardContent>
+                {qualityMetrics.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center text-center py-8">
+                    <div className="rounded-full bg-neutral-100 p-3 mb-3">
+                      <BarChart3 className="h-6 w-6 text-neutral-400" />
+                    </div>
+                    <p className="text-sm text-neutral-600">
+                      No quality metrics available. Run an analysis to see metrics.
+                    </p>
+                  </div>
+                ) : (
                 <div className="space-y-5">
                   {qualityMetrics.map((metric) => (
                     <div key={metric.name}>
@@ -360,6 +501,7 @@ export const AIAnalysisDashboard = () => {
                     </div>
                   ))}
                 </div>
+                )}
               </CardContent>
             </Card>
 
@@ -390,6 +532,28 @@ export const AIAnalysisDashboard = () => {
               </CardHeader>
               <CardContent>
                 <ScrollArea className="h-[500px] pr-4">
+                  {issues.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center h-full text-center py-12">
+                      <div className="rounded-full bg-neutral-100 p-4 mb-4">
+                        <CheckCircle2 className="h-8 w-8 text-neutral-400" />
+                      </div>
+                      <h3 className="text-lg font-semibold text-neutral-900 mb-2">No Issues Found</h3>
+                      <p className="text-sm text-neutral-600 max-w-md mb-4">
+                        {analysisData 
+                          ? "Your code looks great! No issues detected in the latest analysis."
+                          : "Run an analysis to detect issues in your code."}
+                      </p>
+                      {!analysisData && (
+                        <Button 
+                          onClick={handleRunAnalysis}
+                          className="gap-2 bg-brand-primary hover:bg-brand-secondary"
+                        >
+                          <Sparkles className="h-4 w-4" />
+                          Run First Analysis
+                        </Button>
+                      )}
+                    </div>
+                  ) : (
                   <div className="space-y-3">
                     {issues.map((issue) => {
                       const config = getSeverityConfig(issue.severity);
@@ -447,7 +611,13 @@ export const AIAnalysisDashboard = () => {
                                   size="sm" 
                                   variant="outline" 
                                   className="h-7 text-xs gap-1.5 border-neutral-300 hover:bg-brand-bg"
-                                  onClick={() => handleApplyFix(issue.title)}
+                                  onClick={() => handleApplyFix(
+                                    issue.id,
+                                    issue.title,
+                                    issue.file,
+                                    issue.codeSnippet || '',
+                                    issue.aiSuggestion?.fixCode || ''
+                                  )}
                                 >
                                   <Zap className="h-3 w-3" />
                                   Apply Fix
@@ -456,7 +626,7 @@ export const AIAnalysisDashboard = () => {
                                   size="sm" 
                                   variant="ghost" 
                                   className="h-7 text-xs text-neutral-500 hover:bg-neutral-50"
-                                  onClick={() => handleIgnoreIssue(issue.title)}
+                                  onClick={() => handleIgnoreIssue(issue.id, issue.title)}
                                 >
                                   Ignore
                                 </Button>
@@ -467,6 +637,7 @@ export const AIAnalysisDashboard = () => {
                       );
                     })}
                   </div>
+                  )}
                 </ScrollArea>
               </CardContent>
             </Card>

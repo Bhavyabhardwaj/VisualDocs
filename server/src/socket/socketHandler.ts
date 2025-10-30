@@ -91,6 +91,52 @@ class SocketManager {
         socket.on('cursor-move', (data: CursorMovePayload) => {
             this.handleCursorPosition(socket, data);
         });
+
+        // Code editor collaboration events
+        socket.on('file:open', (data: { fileId: string; fileName: string }) => {
+            const user = socket.user!;
+            socket.to(`project-${data.fileId}`).emit('file:opened', {
+                userId: user.userId,
+                userName: user.name,
+                fileName: data.fileName,
+            });
+        });
+
+        socket.on('code:change', (data: { fileId: string; changes: any; timestamp: number }) => {
+            const user = socket.user!;
+            // Broadcast code changes to other users in the same file
+            socket.to(`project-${data.fileId}`).emit('code:change', {
+                userId: user.userId,
+                changes: data.changes,
+                timestamp: data.timestamp,
+            });
+        });
+
+        socket.on('cursor:update', (data: { line: number; column: number }) => {
+            const user = socket.user!;
+            const userPresence = this.connectedUsers.get(user.userId);
+            if (userPresence && userPresence.projectId) {
+                // Broadcast cursor position to other users in the same project
+                socket.to(`project-${userPresence.projectId}`).emit('cursor:update', {
+                    userId: user.userId,
+                    position: { line: data.line, column: data.column },
+                });
+            }
+        });
+
+        socket.on('file:saved', (data: { fileId: string; fileName: string }) => {
+            const user = socket.user!;
+            const userPresence = this.connectedUsers.get(user.userId);
+            if (userPresence && userPresence.projectId) {
+                // Notify other users about file save
+                socket.to(`project-${userPresence.projectId}`).emit('file:saved', {
+                    userId: user.userId,
+                    userName: user.name,
+                    fileName: data.fileName,
+                });
+            }
+        });
+
         // handle disconnection
         socket.on('disconnect', (reason) => {
             this.handleDisconnection(socket, reason);

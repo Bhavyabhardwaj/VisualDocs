@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 import { PageLoading } from './LoadingStates';
 
 interface ProtectedRouteProps {
@@ -8,26 +9,23 @@ interface ProtectedRouteProps {
 
 export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   const location = useLocation();
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const { isAuthenticated, isLoading } = useAuth();
 
-  useEffect(() => {
-    // Check for token on mount and when location changes
-    const token = localStorage.getItem('authToken');
-    console.log('🔒 ProtectedRoute checking token:', token ? 'Found' : 'Not found');
-    console.log('🔒 Current path:', location.pathname);
-    setIsAuthenticated(!!token);
-  }, [location.pathname]);
+  console.log('🔒 ProtectedRoute state:', { isAuthenticated, isLoading, path: location.pathname });
 
-  // Still loading/checking
-  if (isAuthenticated === null) {
+  // Still loading authentication state
+  if (isLoading) {
     return <PageLoading message="Checking authentication..." />;
   }
 
+  // Not authenticated - redirect to login
   if (!isAuthenticated) {
-    // Redirect to login with return url
+    console.log('❌ Not authenticated, redirecting to login from:', location.pathname);
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
+  // Authenticated - render children
+  console.log('✅ Authenticated, rendering protected content');
   return <>{children}</>;
 };
 

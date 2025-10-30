@@ -1,9 +1,11 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock, User, ArrowRight, Code2, Github, Chrome, Sparkles, Shield, Zap } from 'lucide-react';
-import { authService } from '@/services';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function LandingRegister() {
+  const navigate = useNavigate();
+  const { register } = useAuth();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -38,24 +40,21 @@ export default function LandingRegister() {
     setIsLoading(true);
     
     try {
-      const response = await authService.register({
-        name: formData.name,
-        email: formData.email,
-        password: formData.password
-      });
+      console.log('🔐 LandingRegister: Attempting registration...');
+      await register(formData.email, formData.password, formData.name);
+      console.log('✅ LandingRegister: Registration successful, navigating...');
       
-      if (response.success) {
-        window.location.replace('/app/dashboard');
-      } else {
-        setError(response.error || 'Registration failed');
-        setIsLoading(false);
-      }
+      // Navigate to dashboard
+      navigate('/app/dashboard', { replace: true });
     } catch (err: unknown) {
+      console.error('❌ LandingRegister: Registration error:', err);
       if (err && typeof err === 'object' && 'userMessage' in err) {
         setError(err.userMessage as string);
       } else if (err && typeof err === 'object' && 'response' in err) {
         const axiosError = err as { response?: { data?: { error?: string; message?: string } } };
         setError(axiosError.response?.data?.error || axiosError.response?.data?.message || 'Registration failed');
+      } else if (err instanceof Error) {
+        setError(err.message);
       } else {
         setError('Registration failed. Please try again.');
       }

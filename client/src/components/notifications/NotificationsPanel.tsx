@@ -31,38 +31,9 @@ export const NotificationsPanel = () => {
       }
     } catch (error) {
       console.error('Failed to load notifications:', error);
-      // Fallback to mock data if API doesn't exist yet
-      setNotifications([
-        {
-          id: '1',
-          type: 'success',
-          title: 'Analysis Complete',
-          message: 'Project "My App" analysis has finished',
-          read: false,
-          createdAt: new Date(Date.now() - 1000 * 60 * 5).toISOString(),
-          actionUrl: '/app/projects/1',
-          actionLabel: 'View Results'
-        },
-        {
-          id: '2',
-          type: 'info',
-          title: 'New Team Member',
-          message: 'Sarah Adams joined your team',
-          read: false,
-          createdAt: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
-          actionUrl: '/app/team'
-        },
-        {
-          id: '3',
-          type: 'success',
-          title: 'Diagram Generated',
-          message: 'Architecture diagram is ready',
-          read: true,
-          createdAt: new Date(Date.now() - 1000 * 60 * 60).toISOString(),
-          actionUrl: '/app/diagrams'
-        },
-      ]);
-      setUnreadCount(2);
+      // Set empty arrays if API fails - no fallback mock data
+      setNotifications([]);
+      setUnreadCount(0);
     } finally {
       setLoading(false);
     }

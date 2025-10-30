@@ -59,45 +59,9 @@ interface Activity {
 
 export const LiveCollaboration = () => {
   const { projectId } = useParams();
-  const [activeUsers, setActiveUsers] = useState<User[]>([
-    { id: '1', name: 'John Doe', avatar: 'JD', color: '#3b82f6', status: 'active', currentFile: 'App.tsx' },
-    { id: '2', name: 'Sarah Wilson', avatar: 'SW', color: '#8b5cf6', status: 'active', currentFile: 'utils.ts' },
-    { id: '3', name: 'Mike Chen', avatar: 'MC', color: '#ec4899', status: 'idle', currentFile: 'README.md' },
-    { id: '4', name: 'Emma Davis', avatar: 'ED', color: '#10b981', status: 'active', currentFile: 'App.tsx' },
-  ]);
+  const [activeUsers, setActiveUsers] = useState<User[]>([]);
 
-  const [comments, setComments] = useState<Comment[]>([
-    {
-      id: '1',
-      userId: '1',
-      userName: 'John Doe',
-      userAvatar: 'JD',
-      content: 'Should we refactor this component to use hooks instead of class components? @SarahWilson what do you think?',
-      timestamp: new Date(Date.now() - 1000 * 60 * 15),
-      fileName: 'App.tsx',
-      lineNumber: 42,
-      mentions: ['SarahWilson'],
-      replies: [
-        {
-          id: '2',
-          userId: '2',
-          userName: 'Sarah Wilson',
-          userAvatar: 'SW',
-          content: 'Great idea! I can help with that migration. Let\'s start with the smaller components first.',
-          timestamp: new Date(Date.now() - 1000 * 60 * 10),
-        }
-      ]
-    },
-    {
-      id: '3',
-      userId: '3',
-      userName: 'Mike Chen',
-      userAvatar: 'MC',
-      content: 'The new authentication flow looks solid. Tested it on mobile and desktop - works perfectly!',
-      timestamp: new Date(Date.now() - 1000 * 60 * 30),
-      resolved: true,
-    }
-  ]);
+  const [comments, setComments] = useState<Comment[]>([]);
 
   const [activities, setActivities] = useState<Activity[]>([
     { id: '1', userId: '1', userName: 'John Doe', userAvatar: 'JD', action: 'edited', target: 'App.tsx', timestamp: new Date(Date.now() - 1000 * 60 * 5) },

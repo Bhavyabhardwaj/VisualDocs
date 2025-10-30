@@ -74,8 +74,8 @@ export class CodeAnalysisController {
         success: true,
         analysis: {
           id: savedAnalysis.id,
-          projectId: projectId,
-          ...analysis
+          ...analysis,
+          projectId: projectId
         }
       });
 
@@ -161,8 +161,8 @@ export class CodeAnalysisController {
       const { projectId, issueId } = req.params;
       const userId = (req.user as JwtPayload)?.userId;
 
-      if (!userId || !projectId) {
-        return res.status(401).json({ error: 'Unauthorized' });
+      if (!userId || !projectId || !issueId) {
+        return res.status(401).json({ error: 'Unauthorized or missing parameters' });
       }
 
       logger.info('Ignoring issue', { projectId, issueId, userId });
@@ -211,8 +211,8 @@ export class CodeAnalysisController {
       const { file, originalCode, fixCode } = req.body;
       const userId = (req.user as JwtPayload)?.userId;
 
-      if (!userId || !projectId) {
-        return res.status(401).json({ error: 'Unauthorized' });
+      if (!userId || !projectId || !issueId) {
+        return res.status(401).json({ error: 'Unauthorized or missing parameters' });
       }
 
       logger.info('Applying fix', { projectId, issueId, file, userId });

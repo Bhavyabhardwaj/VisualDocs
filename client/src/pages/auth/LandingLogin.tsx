@@ -1,9 +1,12 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Mail, Lock, ArrowRight, Code2, Github, Chrome, Sparkles } from 'lucide-react';
-import { authService } from '@/services';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function LandingLogin() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
@@ -16,19 +19,25 @@ export default function LandingLogin() {
     setError('');
     
     try {
-      const response = await authService.login({ email, password });
-      if (response.success) {
-        window.location.replace('/app/dashboard');
-      } else {
-        setError(response.error || 'Login failed');
-        setIsLoading(false);
-      }
+      console.log('🔐 LandingLogin: Attempting login...');
+      await login(email, password);
+      console.log('✅ LandingLogin: Login successful, navigating...');
+      
+      // Get the return URL from location state, or default to dashboard
+      const from = (location.state as any)?.from?.pathname || '/app/dashboard';
+      console.log('✅ LandingLogin: Redirecting to:', from);
+      
+      // Use navigate instead of window.location to preserve React state
+      navigate(from, { replace: true });
     } catch (err: unknown) {
+      console.error('❌ LandingLogin: Login error:', err);
       if (err && typeof err === 'object' && 'userMessage' in err) {
         setError(err.userMessage as string);
       } else if (err && typeof err === 'object' && 'response' in err) {
         const axiosError = err as { response?: { data?: { error?: string; message?: string } } };
         setError(axiosError.response?.data?.error || axiosError.response?.data?.message || 'Invalid email or password');
+      } else if (err instanceof Error) {
+        setError(err.message);
       } else {
         setError('Invalid email or password');
       }
