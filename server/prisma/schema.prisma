@@ -269,3 +269,59 @@ enum DiagramStatus {
   COMPLETED
   FAILED
 }
+
+// AI Code Analysis model
+model AICodeAnalysis {
+  id              String   @id @default(uuid())
+  projectId       String
+  totalIssues     Int      @default(0)
+  criticalIssues  Int      @default(0)
+  highIssues      Int      @default(0)
+  mediumIssues    Int      @default(0)
+  lowIssues       Int      @default(0)
+  issues          Json     // Stores CodeIssue[] as JSON
+  summary         String
+  analyzedAt      DateTime @default(now())
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([projectId])
+  @@index([analyzedAt])
+  @@map("ai_code_analyses")
+}
+
+// Ignored issues model
+model IgnoredIssue {
+  id         String   @id @default(uuid())
+  projectId  String
+  issueId    String
+  userId     String
+  ignoredAt  DateTime @default(now())
+  
+  createdAt DateTime @default(now())
+
+  @@unique([projectId, issueId, userId])
+  @@index([projectId])
+  @@index([userId])
+  @@map("ignored_issues")
+}
+
+// Applied fixes model
+model AppliedFix {
+  id           String   @id @default(uuid())
+  projectId    String
+  issueId      String
+  fileId       String
+  userId       String
+  originalCode String
+  fixCode      String
+  appliedAt    DateTime @default(now())
+  
+  createdAt DateTime @default(now())
+
+  @@index([projectId])
+  @@index([userId])
+  @@index([fileId])
+  @@map("applied_fixes")
+}

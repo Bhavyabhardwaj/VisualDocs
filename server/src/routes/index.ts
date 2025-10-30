@@ -10,6 +10,7 @@ import diagramRouter, { projectDiagramRouter } from './diagram.router';
 import publicRouter from './public.router';
 import teamRouter from './team.router';
 import activityRouter from './activity.router';
+import codeAnalysisRouter from './codeAnalysis.routes';
 
 const router = Router();
 
@@ -19,6 +20,7 @@ const apiRoutes = [
   { path: '/oauth', route: oauthRouter },
   { path: '/projects', route: projectRouter, isProtected: true },
   { path: '/analysis', route: analysisRouter, isProtected: true },
+  { path: '/code-analysis', route: codeAnalysisRouter, isProtected: true },
   { path: '/diagrams', route: diagramRouter, isProtected: true },
   { path: '/teams', route: teamRouter, isProtected: true },
   { path: '/activity', route: activityRouter, isProtected: true },
