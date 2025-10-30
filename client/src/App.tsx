@@ -100,6 +100,20 @@ function App() {
               </ProtectedRoute>
             } />
             
+            {/* Analytics - Redirect to Analysis Dashboard */}
+            <Route path="/app/analytics" element={
+              <ProtectedRoute>
+                <Navigate to="/app/analysis" replace />
+              </ProtectedRoute>
+            } />
+            
+            {/* Documentation - Redirect to Projects */}
+            <Route path="/app/documentation" element={
+              <ProtectedRoute>
+                <Navigate to="/app/projects" replace />
+              </ProtectedRoute>
+            } />
+            
             {/* Protected App Routes with Layout */}
             <Route path="/app" element={
               <ProtectedRoute>

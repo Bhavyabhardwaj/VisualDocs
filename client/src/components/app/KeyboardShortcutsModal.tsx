@@ -81,13 +81,13 @@ export const KeyboardShortcutsModal = ({ open, onOpenChange }: KeyboardShortcuts
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl">
+      <DialogContent className="sm:max-w-2xl bg-white border-neutral-200">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
+          <DialogTitle className="flex items-center gap-2 text-brand-primary">
             <Keyboard className="w-5 h-5" />
             Keyboard Shortcuts
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-neutral-600">
             Speed up your workflow with these keyboard shortcuts
           </DialogDescription>
         </DialogHeader>
@@ -95,7 +95,7 @@ export const KeyboardShortcutsModal = ({ open, onOpenChange }: KeyboardShortcuts
         <div className="space-y-6 py-4">
           {categories.map((category) => (
             <div key={category}>
-              <h3 className="text-sm font-semibold text-zinc-900 mb-3">
+              <h3 className="text-sm font-semibold text-brand-primary mb-3">
                 {category}
               </h3>
               <div className="space-y-2">
@@ -104,16 +104,16 @@ export const KeyboardShortcutsModal = ({ open, onOpenChange }: KeyboardShortcuts
                   .map((shortcut, index) => (
                     <div
                       key={index}
-                      className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-zinc-50"
+                      className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-brand-bg transition-colors"
                     >
-                      <span className="text-sm text-zinc-700">
+                      <span className="text-sm text-neutral-700">
                         {shortcut.description}
                       </span>
                       <div className="flex items-center gap-1">
                         {shortcut.keys.map((key, i) => (
                           <kbd
                             key={i}
-                            className="px-2 py-1 bg-white border border-zinc-300 rounded text-xs font-mono text-zinc-700 shadow-sm min-w-[28px] text-center"
+                            className="px-2 py-1 bg-white border border-neutral-300 rounded text-xs font-mono text-brand-primary shadow-sm min-w-[28px] text-center"
                           >
                             {key}
                           </kbd>
@@ -126,10 +126,10 @@ export const KeyboardShortcutsModal = ({ open, onOpenChange }: KeyboardShortcuts
           ))}
         </div>
 
-        <div className="border-t border-zinc-100 pt-4">
-          <p className="text-xs text-zinc-500 text-center">
-            Use <kbd className="px-1.5 py-0.5 bg-zinc-100 border border-zinc-200 rounded text-xs font-mono mx-1">Ctrl</kbd> 
-            instead of <kbd className="px-1.5 py-0.5 bg-zinc-100 border border-zinc-200 rounded text-xs font-mono mx-1">⌘</kbd> on Windows
+        <div className="border-t border-neutral-200 pt-4">
+          <p className="text-xs text-neutral-500 text-center">
+            Use <kbd className="px-1.5 py-0.5 bg-brand-bg border border-neutral-200 rounded text-xs font-mono mx-1 text-brand-primary">Ctrl</kbd> 
+            instead of <kbd className="px-1.5 py-0.5 bg-brand-bg border border-neutral-200 rounded text-xs font-mono mx-1 text-brand-primary">⌘</kbd> on Windows
           </p>
         </div>
       </DialogContent>
