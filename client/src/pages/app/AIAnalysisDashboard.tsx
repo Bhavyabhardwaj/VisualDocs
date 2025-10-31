@@ -54,7 +54,7 @@ export const AIAnalysisDashboard = () => {
   useEffect(() => {
     const loadProject = async () => {
       try {
-        const token = localStorage.getItem('authToken');
+        const token = localStorage.getItem('token');
         const response = await fetch('http://localhost:3004/api/projects', {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -73,7 +73,7 @@ export const AIAnalysisDashboard = () => {
   // Load analysis data
   const loadAnalysis = async (pid: string) => {
     try {
-      const token = localStorage.getItem('authToken');
+      const token = localStorage.getItem('token');
       const response = await fetch(`http://localhost:3004/api/code-analysis/${pid}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -144,7 +144,7 @@ export const AIAnalysisDashboard = () => {
     });
 
     try {
-      const token = localStorage.getItem('authToken');
+      const token = localStorage.getItem('token');
       const response = await fetch(`http://localhost:3004/api/code-analysis/${projectId}/analyze`, {
         method: 'POST',
         headers: {
@@ -210,7 +210,7 @@ export const AIAnalysisDashboard = () => {
     });
 
     try {
-      const token = localStorage.getItem('authToken');
+      const token = localStorage.getItem('token');
       const response = await fetch(
         `http://localhost:3004/api/code-analysis/${projectId}/issues/${issueId}/apply`,
         {
@@ -258,7 +258,7 @@ export const AIAnalysisDashboard = () => {
     }
 
     try {
-      const token = localStorage.getItem('authToken');
+      const token = localStorage.getItem('token');
       const response = await fetch(
         `http://localhost:3004/api/code-analysis/${projectId}/issues/${issueId}/ignore`,
         {

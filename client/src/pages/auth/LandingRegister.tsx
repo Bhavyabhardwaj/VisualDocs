@@ -45,7 +45,7 @@ export default function LandingRegister() {
       console.log('✅ LandingRegister: Registration successful!');
       
       // Verify token was saved
-      const savedToken = localStorage.getItem('authToken');
+      const savedToken = localStorage.getItem('token');
       console.log('✅ LandingRegister: Token in localStorage:', savedToken ? 'Found ✓' : 'NOT FOUND ✗');
       
       // Use React Router navigate instead of window.location.href

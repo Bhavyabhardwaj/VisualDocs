@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Mail, Lock, ArrowRight, Code2, Github, Chrome, Sparkles } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
@@ -15,6 +15,23 @@ export default function LandingLogin() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
+  // TEST: Verify localStorage works on component mount
+  React.useEffect(() => {
+    console.log('🧪 TEST: Checking if localStorage works...');
+    try {
+      localStorage.setItem('test-key', 'test-value');
+      const retrieved = localStorage.getItem('test-key');
+      console.log('🧪 TEST: localStorage.setItem() worked:', retrieved === 'test-value' ? 'YES ✓' : 'NO ✗');
+      localStorage.removeItem('test-key');
+      
+      // Check if authToken exists from previous login
+      const existingToken = localStorage.getItem('token');
+      console.log('🧪 TEST: Existing token found:', existingToken ? 'YES (length: ' + existingToken.length + ')' : 'NO');
+    } catch (e) {
+      console.error('🧪 TEST: localStorage is BROKEN:', e);
+    }
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -24,14 +41,14 @@ export default function LandingLogin() {
       console.log('🔐 LandingLogin: Form submitted!');
       console.log('🔐 LandingLogin: Email:', email);
       console.log('🔐 LandingLogin: Password length:', password.length);
-      console.log('🔐 LandingLogin: Token BEFORE login:', localStorage.getItem('authToken') ? 'EXISTS' : 'NONE');
+      console.log('🔐 LandingLogin: Token BEFORE login:', localStorage.getItem('token') ? 'EXISTS' : 'NONE');
       
       console.log('🔐 LandingLogin: Calling login()...');
       await login(email, password);
       console.log('✅ LandingLogin: Login completed!');
       
       // Verify token was saved
-      const savedToken = localStorage.getItem('authToken');
+      const savedToken = localStorage.getItem('token');
       console.log('✅ LandingLogin: Token AFTER login:', savedToken ? 'Found ✓' : 'NOT FOUND ✗');
       
       if (!savedToken) {

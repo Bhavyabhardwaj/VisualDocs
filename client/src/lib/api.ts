@@ -82,7 +82,7 @@ export interface ProjectFile {
 
 // Helper function to get auth token
 const getAuthToken = (): string | null => {
-  return localStorage.getItem('authToken');
+  return localStorage.getItem('token');
 };
 
 // Helper function to handle API requests

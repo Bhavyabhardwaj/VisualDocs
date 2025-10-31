@@ -18,7 +18,7 @@ class ApiClient {
     // Request interceptor - Add auth token
     this.client.interceptors.request.use(
       (config) => {
-        const token = localStorage.getItem('authToken');
+        const token = localStorage.getItem('token');
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
         }
@@ -40,11 +40,11 @@ class ApiClient {
           // Only clear token and redirect if:
           // 1. We're not on login/register pages
           // 2. We actually have a token (otherwise it's expected 401)
-          const hasToken = !!localStorage.getItem('authToken');
+          const hasToken = !!localStorage.getItem('token');
           
           if (!currentPath.includes('/login') && !currentPath.includes('/register') && hasToken) {
             console.log('🚨 API Client: Clearing token and redirecting to login');
-            localStorage.removeItem('authToken');
+            localStorage.removeItem('token');
             window.location.href = '/login';
           } else {
             console.log('🚨 API Client: 401 but not clearing token (on auth page or no token)');

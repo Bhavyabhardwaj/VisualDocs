@@ -84,7 +84,7 @@ export const ShadcnProjectDetail = () => {
 
   // Initialize socket connection
   useEffect(() => {
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem('token');
     if (token) {
       socketService.connect(token);
       setIsSocketConnected(socketService.isConnected());
