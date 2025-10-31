@@ -1,10 +1,9 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Mail, Lock, User, ArrowRight, Code2, Github, Chrome, Sparkles, Shield, Zap } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function LandingRegister() {
-  const navigate = useNavigate();
   const { register } = useAuth();
   const [formData, setFormData] = useState({
     name: '',
@@ -42,10 +41,17 @@ export default function LandingRegister() {
     try {
       console.log('🔐 LandingRegister: Attempting registration...');
       await register(formData.email, formData.password, formData.name);
-      console.log('✅ LandingRegister: Registration successful, navigating...');
+      console.log('✅ LandingRegister: Registration successful!');
       
-      // Navigate to dashboard
-      navigate('/app/dashboard', { replace: true });
+      // Verify token was saved
+      const savedToken = localStorage.getItem('authToken');
+      console.log('✅ LandingRegister: Token in localStorage:', savedToken ? 'Found ✓' : 'NOT FOUND ✗');
+      
+      // Wait for state to settle
+      await new Promise(resolve => setTimeout(resolve, 200));
+      
+      // Force full page reload to ensure clean state
+      window.location.href = '/app/dashboard';
     } catch (err: unknown) {
       console.error('❌ LandingRegister: Registration error:', err);
       if (err && typeof err === 'object' && 'userMessage' in err) {

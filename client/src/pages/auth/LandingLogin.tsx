@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Mail, Lock, ArrowRight, Code2, Github, Chrome, Sparkles } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function LandingLogin() {
-  const navigate = useNavigate();
+  console.log('🎬 LandingLogin component rendered/mounted');
+  
   const location = useLocation();
   const { login } = useAuth();
   const [email, setEmail] = useState('');
@@ -19,15 +20,21 @@ export default function LandingLogin() {
     setError('');
     
     try {
-      console.log('🔐 LandingLogin: Attempting login...');
+      console.log('🔐 LandingLogin: Form submitted!');
+      console.log('🔐 LandingLogin: Email:', email);
+      console.log('🔐 LandingLogin: Password length:', password.length);
+      console.log('🔐 LandingLogin: Token BEFORE login:', localStorage.getItem('authToken') ? 'EXISTS' : 'NONE');
+      
+      console.log('🔐 LandingLogin: Calling login()...');
       await login(email, password);
-      console.log('✅ LandingLogin: Login successful!');
+      console.log('✅ LandingLogin: Login completed!');
       
       // Verify token was saved
       const savedToken = localStorage.getItem('authToken');
-      console.log('✅ LandingLogin: Token in localStorage:', savedToken ? 'Found ✓' : 'NOT FOUND ✗');
+      console.log('✅ LandingLogin: Token AFTER login:', savedToken ? 'Found ✓' : 'NOT FOUND ✗');
       
       if (!savedToken) {
+        console.error('❌ LandingLogin: TOKEN WAS NOT SAVED!');
         throw new Error('Token was not saved properly. Please try again.');
       }
       
@@ -35,11 +42,12 @@ export default function LandingLogin() {
       const from = (location.state as any)?.from?.pathname || '/app/dashboard';
       console.log('✅ LandingLogin: Redirecting to:', from);
       
-      // Small delay to ensure state is fully updated
-      await new Promise(resolve => setTimeout(resolve, 100));
+      // Wait a bit longer to ensure AuthContext updates
+      await new Promise(resolve => setTimeout(resolve, 200));
       
-      // Use navigate instead of window.location to preserve React state
-      navigate(from, { replace: true });
+      // Force a page reload to ensure clean state
+      // This prevents any race conditions with React Router
+      window.location.href = from;
     } catch (err: unknown) {
       console.error('❌ LandingLogin: Login error:', err);
       if (err && typeof err === 'object' && 'userMessage' in err) {

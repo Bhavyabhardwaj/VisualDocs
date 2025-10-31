@@ -10,14 +10,16 @@ interface ProtectedRouteProps {
 export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   const location = useLocation();
   const { isAuthenticated, isLoading, user } = useAuth();
+  // Check localStorage directly as backup
   const token = localStorage.getItem('authToken');
+  const hasLocalToken = !!token;
 
   console.log('🔒 ProtectedRoute DEBUG:', {
     path: location.pathname,
     isAuthenticated,
     isLoading,
     hasUser: !!user,
-    hasToken: !!token,
+    hasToken: hasLocalToken,
     tokenPreview: token ? token.substring(0, 20) + '...' : 'none'
   });
 
@@ -27,10 +29,14 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     return <PageLoading message="Checking authentication..." />;
   }
 
-  // Not authenticated - redirect to login
-  if (!isAuthenticated) {
+  // Check both AuthContext isAuthenticated AND localStorage token
+  // This prevents redirect even if user object hasn't loaded yet
+  const shouldAllowAccess = isAuthenticated || hasLocalToken;
+
+  if (!shouldAllowAccess) {
     console.log('❌ ProtectedRoute: NOT AUTHENTICATED - Redirecting to login');
-    console.log('   - Token exists?', !!token);
+    console.log('   - Token exists?', hasLocalToken);
+    console.log('   - isAuthenticated?', isAuthenticated);
     console.log('   - User exists?', !!user);
     return <Navigate to="/login" state={{ from: location }} replace />;
   }

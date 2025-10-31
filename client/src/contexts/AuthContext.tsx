@@ -34,7 +34,8 @@ export const useAuth = () => {
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [hasToken, setHasToken] = useState(false);
+  // Initialize hasToken from localStorage immediately to prevent flash
+  const [hasToken, setHasToken] = useState(() => !!localStorage.getItem('authToken'));
 
   // Load user from token on mount
   useEffect(() => {
@@ -96,14 +97,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.log('🔐 AuthContext: Attempting login for:', email);
       const response = await authService.login({ email, password });
       
+      console.log('🔐 AuthContext: Full response:', response);
+      console.log('🔐 AuthContext: response.success:', response.success);
+      console.log('🔐 AuthContext: response.data:', response.data);
+      
       if (response.success && response.data) {
-        const { user: userData } = response.data;
-        console.log('✅ AuthContext: Login successful, setting user:', userData.email);
+        // apiClient already extracts response.data from axios response
+        // So we get { user, token } directly at response level (not response.data)
+        const userData = (response as any).user;
+        
+        console.log('✅ AuthContext: Login successful, setting user:', userData?.email);
         const savedToken = localStorage.getItem('authToken');
         console.log('✅ AuthContext: Verifying token in localStorage:', savedToken ? 'Found' : 'Not found');
         
+        if (!savedToken) {
+          console.error('❌ AuthContext: Token not saved!');
+          throw new Error('Authentication token was not saved');
+        }
+        
         // Token is already saved in authService.login
-        setHasToken(!!savedToken);
+        setHasToken(true);
         setUser(userData);
         console.log('✅ AuthContext: User state updated');
       } else {
