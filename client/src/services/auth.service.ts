@@ -26,9 +26,9 @@ export const authService = {
     }
     
     // Backend returns token as an object: { accessToken, refreshToken, expiresIn }
-    // apiClient already extracts response.data from axios response
-    // So we get { user, token } directly, NOT nested in response.data.data
-    const tokenData = (response as any).token;
+    // apiClient returns the full response: { success, data: { user, token }, timestamp, message }
+    // So token is at response.data.token
+    const tokenData = (response.data as any)?.token;
     console.log('🔑 authService.login - tokenData:', tokenData);
     console.log('🔑 authService.login - tokenData type:', typeof tokenData);
     
@@ -48,11 +48,27 @@ export const authService = {
       
       if (accessToken) {
         console.log('💾 authService.login - Saving to localStorage...');
-        localStorage.setItem('authToken', accessToken);
+        console.log('💾 authService.login - localStorage available?', typeof localStorage !== 'undefined');
+        console.log('💾 authService.login - accessToken to save:', accessToken.substring(0, 30) + '...');
+        
+        try {
+          localStorage.setItem('authToken', accessToken);
+          console.log('💾 authService.login - setItem() called successfully');
+        } catch (e) {
+          console.error('❌ authService.login - localStorage.setItem FAILED:', e);
+        }
         
         const verified = localStorage.getItem('authToken');
         console.log('✅ authService.login - Saved and verified:', verified ? 'YES ✓' : 'NO ✗');
         console.log('✅ authService.login - Token length:', verified?.length);
+        
+        if (!verified) {
+          console.error('❌❌❌ CRITICAL: Token was NOT saved to localStorage!');
+          console.error('This could be due to:');
+          console.error('1. Browser privacy settings blocking localStorage');
+          console.error('2. Incognito/Private mode');
+          console.error('3. Browser extension interference');
+        }
       } else {
         console.error('❌ authService.login - No valid accessToken found!');
       }
@@ -68,9 +84,9 @@ export const authService = {
     const response = await apiClient.post<ApiResponse<{ user: User; token: any }>>('/api/auth/register', data);
     console.log('🔐 Register Response:', response);
     
-    // apiClient already extracts response.data from axios response
-    // So we get { user, token } directly, NOT nested in response.data.data
-    const tokenData = (response as any).token;
+    // apiClient returns the full response: { success, data: { user, token }, timestamp, message }
+    // So token is at response.data.token
+    const tokenData = (response.data as any)?.token;
     if (tokenData) {
       const accessToken = typeof tokenData === 'string' ? tokenData : tokenData.accessToken;
       if (accessToken) {

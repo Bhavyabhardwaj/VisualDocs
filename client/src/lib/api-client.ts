@@ -32,12 +32,22 @@ class ApiClient {
       (response) => response,
       (error) => {
         if (error.response?.status === 401) {
-          // Unauthorized - clear token and redirect to login
-          // But only if we're not already on login/register pages
+          console.log('🚨 API Client: Received 401 Unauthorized');
+          console.log('🚨 URL:', error.config?.url);
+          console.log('🚨 Current path:', window.location.pathname);
+          
           const currentPath = window.location.pathname;
-          if (!currentPath.includes('/login') && !currentPath.includes('/register')) {
+          // Only clear token and redirect if:
+          // 1. We're not on login/register pages
+          // 2. We actually have a token (otherwise it's expected 401)
+          const hasToken = !!localStorage.getItem('authToken');
+          
+          if (!currentPath.includes('/login') && !currentPath.includes('/register') && hasToken) {
+            console.log('🚨 API Client: Clearing token and redirecting to login');
             localStorage.removeItem('authToken');
             window.location.href = '/login';
+          } else {
+            console.log('🚨 API Client: 401 but not clearing token (on auth page or no token)');
           }
         }
         

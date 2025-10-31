@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Mail, Lock, ArrowRight, Code2, Github, Chrome, Sparkles } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -7,6 +7,7 @@ export default function LandingLogin() {
   console.log('🎬 LandingLogin component rendered/mounted');
   
   const location = useLocation();
+  const navigate = useNavigate();
   const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -42,12 +43,9 @@ export default function LandingLogin() {
       const from = (location.state as any)?.from?.pathname || '/app/dashboard';
       console.log('✅ LandingLogin: Redirecting to:', from);
       
-      // Wait a bit longer to ensure AuthContext updates
-      await new Promise(resolve => setTimeout(resolve, 200));
-      
-      // Force a page reload to ensure clean state
-      // This prevents any race conditions with React Router
-      window.location.href = from;
+      // Use React Router navigate instead of window.location.href
+      // This maintains the React state and doesn't cause a full page reload
+      navigate(from, { replace: true });
     } catch (err: unknown) {
       console.error('❌ LandingLogin: Login error:', err);
       if (err && typeof err === 'object' && 'userMessage' in err) {

@@ -102,9 +102,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.log('🔐 AuthContext: response.data:', response.data);
       
       if (response.success && response.data) {
-        // apiClient already extracts response.data from axios response
-        // So we get { user, token } directly at response level (not response.data)
-        const userData = (response as any).user;
+        // apiClient returns the full response: { success, data: { user, token }, timestamp, message }
+        // So user is at response.data.user
+        const userData = (response.data as any)?.user;
         
         console.log('✅ AuthContext: Login successful, setting user:', userData?.email);
         const savedToken = localStorage.getItem('authToken');
@@ -159,11 +159,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const logout = useCallback(async () => {
+    console.log('🚪 AuthContext: Logout called');
     try {
       await authService.logout();
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
+      console.log('🚪 AuthContext: Removing token from localStorage');
       localStorage.removeItem('authToken');
       setHasToken(false);
       setUser(null);
