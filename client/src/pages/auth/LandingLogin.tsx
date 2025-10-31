@@ -21,11 +21,22 @@ export default function LandingLogin() {
     try {
       console.log('🔐 LandingLogin: Attempting login...');
       await login(email, password);
-      console.log('✅ LandingLogin: Login successful, navigating...');
+      console.log('✅ LandingLogin: Login successful!');
+      
+      // Verify token was saved
+      const savedToken = localStorage.getItem('authToken');
+      console.log('✅ LandingLogin: Token in localStorage:', savedToken ? 'Found ✓' : 'NOT FOUND ✗');
+      
+      if (!savedToken) {
+        throw new Error('Token was not saved properly. Please try again.');
+      }
       
       // Get the return URL from location state, or default to dashboard
       const from = (location.state as any)?.from?.pathname || '/app/dashboard';
       console.log('✅ LandingLogin: Redirecting to:', from);
+      
+      // Small delay to ensure state is fully updated
+      await new Promise(resolve => setTimeout(resolve, 100));
       
       // Use navigate instead of window.location to preserve React state
       navigate(from, { replace: true });
