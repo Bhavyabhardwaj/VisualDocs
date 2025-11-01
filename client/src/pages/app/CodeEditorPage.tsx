@@ -67,7 +67,7 @@ export default function CodeEditorPage() {
 
   // Initialize Socket.IO connection
   useEffect(() => {
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem('token');
     if (!token || !projectId) return;
 
     const socket = io('http://localhost:3004', {
@@ -131,7 +131,7 @@ export default function CodeEditorPage() {
 
     const loadFiles = async () => {
       try {
-        const token = localStorage.getItem('authToken');
+        const token = localStorage.getItem('token');
         const response = await fetch(`http://localhost:3004/api/projects/${projectId}`, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -299,7 +299,7 @@ export default function CodeEditorPage() {
     setIsSaving(true);
 
     try {
-      const token = localStorage.getItem('authToken');
+      const token = localStorage.getItem('token');
       const response = await fetch(
         `http://localhost:3004/api/projects/${projectId}/files/${selectedFile.id}`,
         {
