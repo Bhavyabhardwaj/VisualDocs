@@ -52,13 +52,13 @@ export const authService = {
         console.log('💾 authService.login - accessToken to save:', accessToken.substring(0, 30) + '...');
         
         try {
-          localStorage.setItem('token', accessToken);
+          localStorage.setItem('authToken', accessToken);
           console.log('💾 authService.login - setItem() called successfully');
         } catch (e) {
           console.error('❌ authService.login - localStorage.setItem FAILED:', e);
         }
         
-        const verified = localStorage.getItem('token');
+        const verified = localStorage.getItem('authToken');
         console.log('✅ authService.login - Saved and verified:', verified ? 'YES ✓' : 'NO ✗');
         console.log('✅ authService.login - Token length:', verified?.length);
         
@@ -91,7 +91,7 @@ export const authService = {
       const accessToken = typeof tokenData === 'string' ? tokenData : tokenData.accessToken;
       if (accessToken) {
         console.log('✅ Saving accessToken to localStorage:', accessToken);
-        localStorage.setItem('token', accessToken);
+        localStorage.setItem('authToken', accessToken);
       }
     }
     return response as any;
@@ -99,7 +99,7 @@ export const authService = {
 
   async logout(): Promise<ApiResponse> {
     const response = await apiClient.post<ApiResponse>('/api/auth/logout');
-    localStorage.removeItem('token');
+    localStorage.removeItem('authToken');
     return response;
   },
 

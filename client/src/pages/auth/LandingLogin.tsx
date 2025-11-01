@@ -25,7 +25,7 @@ export default function LandingLogin() {
       localStorage.removeItem('test-key');
       
       // Check if authToken exists from previous login
-      const existingToken = localStorage.getItem('token');
+      const existingToken = localStorage.getItem('authToken');
       console.log('🧪 TEST: Existing token found:', existingToken ? 'YES (length: ' + existingToken.length + ')' : 'NO');
     } catch (e) {
       console.error('🧪 TEST: localStorage is BROKEN:', e);
@@ -41,14 +41,14 @@ export default function LandingLogin() {
       console.log('🔐 LandingLogin: Form submitted!');
       console.log('🔐 LandingLogin: Email:', email);
       console.log('🔐 LandingLogin: Password length:', password.length);
-      console.log('🔐 LandingLogin: Token BEFORE login:', localStorage.getItem('token') ? 'EXISTS' : 'NONE');
+      console.log('🔐 LandingLogin: Token BEFORE login:', localStorage.getItem('authToken') ? 'EXISTS' : 'NONE');
       
       console.log('🔐 LandingLogin: Calling login()...');
       await login(email, password);
       console.log('✅ LandingLogin: Login completed!');
       
       // Verify token was saved
-      const savedToken = localStorage.getItem('token');
+      const savedToken = localStorage.getItem('authToken');
       console.log('✅ LandingLogin: Token AFTER login:', savedToken ? 'Found ✓' : 'NOT FOUND ✗');
       
       if (!savedToken) {

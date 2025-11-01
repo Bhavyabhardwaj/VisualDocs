@@ -35,12 +35,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   // Initialize hasToken from localStorage immediately to prevent flash
-  const [hasToken, setHasToken] = useState(() => !!localStorage.getItem('token'));
+  const [hasToken, setHasToken] = useState(() => !!localStorage.getItem('authToken'));
 
   // Load user from token on mount
   useEffect(() => {
     const loadUser = async () => {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('authToken');
       console.log('🔐 AuthContext: Checking for token on mount:', token ? 'Found' : 'Not found');
       let finalTokenState = !!token;
       setHasToken(finalTokenState);
@@ -56,7 +56,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           } else {
             // Invalid token response, clear it
             console.warn('⚠️ AuthContext: Invalid token response, clearing...');
-            localStorage.removeItem('token');
+            localStorage.removeItem('authToken');
             finalTokenState = false;
             setHasToken(false);
             setUser(null);
@@ -68,7 +68,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                                 (error as any).response?.status === 401;
           if (isUnauthorized) {
             console.warn('⚠️ AuthContext: Unauthorized (401), clearing token');
-            localStorage.removeItem('token');
+            localStorage.removeItem('authToken');
             finalTokenState = false;
             setHasToken(false);
             setUser(null);
@@ -107,7 +107,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const userData = (response.data as any)?.user;
         
         console.log('✅ AuthContext: Login successful, setting user:', userData?.email);
-        const savedToken = localStorage.getItem('token');
+        const savedToken = localStorage.getItem('authToken');
         console.log('✅ AuthContext: Verifying token in localStorage:', savedToken ? 'Found' : 'Not found');
         
         if (!savedToken) {
@@ -140,7 +140,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (response.success && response.data) {
         const { user: userData } = response.data;
         console.log('✅ AuthContext: Registration successful, setting user:', userData.email);
-        const savedToken = localStorage.getItem('token');
+        const savedToken = localStorage.getItem('authToken');
         console.log('✅ AuthContext: Verifying token in localStorage:', savedToken ? 'Found' : 'Not found');
         
         // Token is already saved in authService.register
@@ -166,7 +166,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.error('Logout error:', error);
     } finally {
       console.log('🚪 AuthContext: Removing token from localStorage');
-      localStorage.removeItem('token');
+      localStorage.removeItem('authToken');
       setHasToken(false);
       setUser(null);
     }

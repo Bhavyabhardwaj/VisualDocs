@@ -11,7 +11,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   const location = useLocation();
   const { isAuthenticated, isLoading, user } = useAuth();
   // Check localStorage directly as backup
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('authToken');
   const hasLocalToken = !!token;
 
   console.log('🔒 ProtectedRoute DEBUG:', {
