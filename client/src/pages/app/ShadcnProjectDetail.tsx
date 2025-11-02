@@ -76,7 +76,16 @@ export const ShadcnProjectDetail = () => {
   };
 
   useEffect(() => {
+    console.log('🎬 Component mounted/updated');
+    console.log('📊 Current analysis state:', analysis);
+    console.log('📚 Current documentation state:', documentation);
+    console.log('📁 Current files count:', files.length);
+    console.log('🎨 Current diagrams count:', diagrams.length);
+  }, [analysis, documentation, files, diagrams]);
+
+  useEffect(() => {
     if (id) {
+      console.log('🚀 Loading data for project:', id);
       loadProject();
       loadProjectFiles();
       loadExistingAnalysis();
@@ -125,23 +134,32 @@ export const ShadcnProjectDetail = () => {
     };
 
     const handleComment = (comment: any) => {
-      console.log('💬 New comment:', comment);
+      console.log('💬 Received comment from socket:', comment);
+      console.log('💬 Current comments count:', comments.length);
+      
       setComments(prev => {
         // Prevent duplicates by checking if comment already exists
         const commentId = comment.id || `${comment.userId}-${comment.timestamp}`;
         const exists = prev.some(c => c.id === commentId);
+        
+        console.log('💬 Comment ID:', commentId);
+        console.log('💬 Duplicate check:', exists);
+        
         if (exists) {
           console.log('⚠️ Duplicate comment detected, skipping');
           return prev;
         }
         
-        return [...prev, {
+        const newComment = {
           id: commentId,
           userId: comment.userId || 'unknown',
           userName: comment.userName || comment.user?.name || 'Anonymous',
           content: comment.comment || comment.content,
           timestamp: comment.timestamp || new Date().toISOString(),
-        }];
+        };
+        
+        console.log('✅ Adding new comment:', newComment);
+        return [...prev, newComment];
       });
     };
 
@@ -233,18 +251,44 @@ export const ShadcnProjectDetail = () => {
       console.log('🔍 Loading existing analysis for project:', id);
       const response = await analysisService.getProjectAnalysis(id);
       
+      console.log('📊 Full API response:', response);
+      console.log('📊 response.data:', response.data);
+      console.log('📊 response.success:', response.success);
+      
+      // Handle different response structures
+      let analysisData = null;
+      
       if (response.data) {
-        console.log('✅ Found existing analysis:', response.data);
-        setAnalysis(response.data);
+        // Try different possible structures
+        if ((response.data as any).analysis) {
+          // Structure: { data: { analysis: {...} } }
+          analysisData = (response.data as any).analysis;
+          console.log('📊 Found analysis in data.analysis');
+        } else if (Array.isArray(response.data)) {
+          // Structure: { data: [...] } - array of analyses
+          analysisData = response.data[0];
+          console.log('📊 Found analysis in data[0]');
+        } else {
+          // Structure: { data: {...} } - direct analysis object
+          analysisData = response.data;
+          console.log('📊 Found analysis directly in data');
+        }
+      }
+      
+      if (analysisData) {
+        console.log('✅ Setting analysis state:', analysisData);
+        setAnalysis(analysisData);
+        console.log('✅ Analysis state updated successfully');
       } else {
-        console.log('ℹ️ No existing analysis found');
+        console.log('⚠️ No analysis data found in response');
       }
     } catch (error: any) {
       // If 404, no existing analysis - that's okay
       if (error?.response?.status === 404) {
-        console.log('ℹ️ No previous analysis exists for this project');
+        console.log('ℹ️ No previous analysis exists for this project (404)');
       } else {
-        console.error('Failed to load existing analysis:', error);
+        console.error('❌ Failed to load existing analysis:', error);
+        console.error('Error details:', error?.response?.data);
       }
     }
   };
@@ -486,8 +530,13 @@ export const ShadcnProjectDetail = () => {
   };
 
   const handleSendComment = (comment: string) => {
-    if (!id) return;
+    if (!id) {
+      console.error('❌ Cannot send comment: No project ID');
+      return;
+    }
+    console.log('💬 Sending comment:', comment, 'to project:', id);
     socketService.sendComment(id, comment);
+    console.log('✅ Comment sent via socket');
   };
 
   const handleShareProject = () => {
@@ -1090,15 +1139,6 @@ export const ShadcnProjectDetail = () => {
                             {JSON.stringify(analysis, null, 2)}
                           </pre>
                         </details>
-                      </div>
-                    ) : project.lastAnalyzedAt ? (
-                      <div className="space-y-4">
-                        <div>
-                          <div className="flex items-center justify-between mb-2">
-                            <span className="text-sm text-neutral-600">Loading analysis...</span>
-                          </div>
-                          <Progress value={0} className="h-2" />
-                        </div>
                       </div>
                     ) : (
                       <div className="text-center py-8">

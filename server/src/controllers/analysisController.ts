@@ -9,7 +9,7 @@ export class AnalysisController {
     async getProjectAnalysis(req: Request, res: Response, next: NextFunction) {
         try {
             const userId = req.user!.userId;
-            const { projectId } = req.params;
+            const projectId = req.params.id; // Fixed: route uses :id not :projectId
 
             if (!projectId) {
                 throw new UnauthorizedError("Project ID is required");
@@ -57,7 +57,7 @@ export class AnalysisController {
     async getAnalysisById(req: Request, res: Response, next: NextFunction) {
         try {
             const userId = req.user!.userId;
-            const { projectId } = req.params;
+            const projectId = req.params.id; // Fixed: route uses :id
 
             if (!projectId) {
                 return new UnauthorizedError("Project ID is required");
@@ -79,7 +79,7 @@ export class AnalysisController {
     async rerunAnalysis(req: Request, res: Response, next: NextFunction) {
         try {
             const userId = req.user!.userId;
-            const { projectId } = req.params;
+            const projectId = req.params.id; // Fixed: route uses :id
             const { fields, force } = req.body;
 
             if (!projectId) {

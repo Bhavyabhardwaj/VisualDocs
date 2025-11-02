@@ -78,9 +78,19 @@ class SocketService {
 
   // Comments
   sendComment(projectId: string, comment: string, fileId?: string) {
-    if (!this.socket) return;
-    this.socket.emit('project-comment', { projectId, comment, fileId });
-    console.log('💬 Comment sent:', comment);
+    if (!this.socket) {
+      console.error('❌ Cannot send comment: Socket not initialized');
+      return;
+    }
+    if (!this.socket.connected) {
+      console.error('❌ Cannot send comment: Socket not connected');
+      return;
+    }
+    
+    const payload = { projectId, comment, fileId };
+    console.log('💬 Emitting project-comment:', payload);
+    this.socket.emit('project-comment', payload);
+    console.log('✅ Comment emitted successfully');
   }
 
   onComment(callback: (data: any) => void) {
