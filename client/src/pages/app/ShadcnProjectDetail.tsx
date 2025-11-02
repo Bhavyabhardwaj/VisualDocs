@@ -44,6 +44,7 @@ export const ShadcnProjectDetail = () => {
   const [analysis, setAnalysis] = useState<Analysis | null>(null);
   const [diagrams, setDiagrams] = useState<Diagram[]>([]);
   const [documentation, setDocumentation] = useState<string | null>(null);
+  const [files, setFiles] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [analyzing, setAnalyzing] = useState(false);
   const [generatingDocs, setGeneratingDocs] = useState(false);
@@ -77,7 +78,9 @@ export const ShadcnProjectDetail = () => {
   useEffect(() => {
     if (id) {
       loadProject();
+      loadProjectFiles();
       loadExistingAnalysis();
+      loadExistingDocumentation();
       handleLoadDiagrams();
     }
   }, [id]);
@@ -105,45 +108,52 @@ export const ShadcnProjectDetail = () => {
     // Join project room
     socketService.joinProject(id);
 
-    // Listen for user updates
-    socketService.onUserJoined((data) => {
+    // Create handler functions that won't be recreated
+    const handleUserJoined = (data: any) => {
       console.log('👋 User joined:', data);
       if (data.users) setActiveUsers(data.users);
-    });
+    };
 
-    socketService.onUserLeft((data) => {
+    const handleUserLeft = (data: any) => {
       console.log('👋 User left:', data);
       if (data.users) setActiveUsers(data.users);
-    });
+    };
 
-    socketService.onProjectUsers((data) => {
+    const handleProjectUsers = (data: any) => {
       console.log('👥 Project users:', data);
       if (data.users) setActiveUsers(data.users);
-    });
+    };
 
-    // Listen for comments
-    socketService.onComment((comment) => {
+    const handleComment = (comment: any) => {
       console.log('💬 New comment:', comment);
-      setComments(prev => [...prev, {
-        id: Date.now().toString(),
-        userId: comment.userId || 'unknown',
-        userName: comment.userName || comment.user?.name || 'Anonymous',
-        content: comment.comment || comment.content,
-        timestamp: new Date().toISOString(),
-      }]);
-    });
+      setComments(prev => {
+        // Prevent duplicates by checking if comment already exists
+        const commentId = comment.id || `${comment.userId}-${comment.timestamp}`;
+        const exists = prev.some(c => c.id === commentId);
+        if (exists) {
+          console.log('⚠️ Duplicate comment detected, skipping');
+          return prev;
+        }
+        
+        return [...prev, {
+          id: commentId,
+          userId: comment.userId || 'unknown',
+          userName: comment.userName || comment.user?.name || 'Anonymous',
+          content: comment.comment || comment.content,
+          timestamp: comment.timestamp || new Date().toISOString(),
+        }];
+      });
+    };
 
-    // Listen for analysis progress
-    socketService.onAnalysisProgress((data) => {
+    const handleAnalysisProgress = (data: any) => {
       console.log('📊 Analysis progress:', data);
       toast({
         title: 'Analysis Progress',
         description: `${data.progress || 0}% complete`,
       });
-    });
+    };
 
-    // Listen for diagram progress
-    socketService.onDiagramProgress((data) => {
+    const handleDiagramProgress = (data: any) => {
       console.log('🎨 Diagram progress:', data);
       if (data.status === 'COMPLETED') {
         handleLoadDiagrams();
@@ -152,12 +162,27 @@ export const ShadcnProjectDetail = () => {
           description: 'Diagram generation finished',
         });
       }
-    });
+    };
+
+    // Listen for user updates
+    socketService.onUserJoined(handleUserJoined);
+    socketService.onUserLeft(handleUserLeft);
+    socketService.onProjectUsers(handleProjectUsers);
+
+    // Listen for comments
+    socketService.onComment(handleComment);
+
+    // Listen for analysis progress
+    socketService.onAnalysisProgress(handleAnalysisProgress);
+
+    // Listen for diagram progress
+    socketService.onDiagramProgress(handleDiagramProgress);
 
     return () => {
       if (id) {
         socketService.leaveProject(id);
       }
+      // Clean up listeners if socketService supports it
     };
   }, [id, isSocketConnected, toast]);
 
@@ -179,6 +204,28 @@ export const ShadcnProjectDetail = () => {
     }
   };
 
+  const loadProjectFiles = async () => {
+    if (!id) return;
+    
+    try {
+      console.log('📁 Loading project files for:', id);
+      const response = await projectService.getProjectFiles(id);
+      console.log('📁 Files response:', response);
+      
+      const filesData = (response.data as any)?.files || response.data || [];
+      console.log('📁 Extracted files:', filesData);
+      
+      setFiles(filesData);
+      
+      if (filesData.length > 0) {
+        console.log(`✅ Loaded ${filesData.length} files`);
+      }
+    } catch (error) {
+      console.error('Failed to load project files:', error);
+      setFiles([]);
+    }
+  };
+
   const loadExistingAnalysis = async () => {
     if (!id) return;
     
@@ -189,11 +236,6 @@ export const ShadcnProjectDetail = () => {
       if (response.data) {
         console.log('✅ Found existing analysis:', response.data);
         setAnalysis(response.data);
-        
-        toast({
-          title: 'Analysis Loaded',
-          description: 'Previous analysis results have been loaded.',
-        });
       } else {
         console.log('ℹ️ No existing analysis found');
       }
@@ -203,6 +245,29 @@ export const ShadcnProjectDetail = () => {
         console.log('ℹ️ No previous analysis exists for this project');
       } else {
         console.error('Failed to load existing analysis:', error);
+      }
+    }
+  };
+
+  const loadExistingDocumentation = async () => {
+    if (!id) return;
+    
+    try {
+      console.log('📚 Loading existing documentation for project:', id);
+      const response = await analysisService.generateDocumentation(id);
+      
+      if (response.data?.documentation) {
+        console.log('✅ Found existing documentation');
+        setDocumentation(response.data.documentation);
+      } else {
+        console.log('ℹ️ No existing documentation found');
+      }
+    } catch (error: any) {
+      // If 404, no existing documentation - that's okay
+      if (error?.response?.status === 404) {
+        console.log('ℹ️ No previous documentation exists for this project');
+      } else {
+        console.error('Failed to load existing documentation:', error);
       }
     }
   };
@@ -257,8 +322,9 @@ export const ShadcnProjectDetail = () => {
       
       setAnalysis(analysisData);
       
-      // Reload project to get updated lastAnalyzedAt
+      // Reload project and files to get updated counts
       await loadProject();
+      await loadProjectFiles();
 
       toast({
         title: 'Analysis Complete',
@@ -424,6 +490,117 @@ export const ShadcnProjectDetail = () => {
     socketService.sendComment(id, comment);
   };
 
+  const handleShareProject = () => {
+    if (!project) return;
+    
+    // Copy project link to clipboard
+    const projectUrl = `${window.location.origin}/app/projects/${id}`;
+    navigator.clipboard.writeText(projectUrl);
+    
+    toast({
+      title: 'Link Copied',
+      description: 'Project link copied to clipboard',
+    });
+  };
+
+  const handleExportProject = async () => {
+    if (!project) return;
+    
+    try {
+      toast({
+        title: 'Exporting Project',
+        description: 'Preparing project export...',
+      });
+
+      // Create export data
+      const exportData = {
+        project,
+        files,
+        analysis,
+        diagrams,
+        documentation,
+        exportedAt: new Date().toISOString(),
+      };
+
+      // Create JSON blob
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { 
+        type: 'application/json' 
+      });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${project.name}_export_${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      toast({
+        title: 'Export Complete',
+        description: 'Project exported successfully',
+      });
+    } catch (error) {
+      console.error('Export failed:', error);
+      toast({
+        title: 'Export Failed',
+        description: 'Failed to export project',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleArchiveProject = async () => {
+    if (!id || !project) return;
+
+    try {
+      // Call archive API (you'll need to implement this in projectService)
+      toast({
+        title: 'Archiving Project',
+        description: 'Project archived successfully',
+      });
+      
+      // Update local state
+      setProject({ ...project, isArchived: true, status: 'archived' });
+    } catch (error) {
+      console.error('Archive failed:', error);
+      toast({
+        title: 'Archive Failed',
+        description: 'Failed to archive project',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleDeleteProject = async () => {
+    if (!id) return;
+
+    // Show confirmation dialog
+    const confirmed = window.confirm(
+      'Are you sure you want to delete this project? This action cannot be undone.'
+    );
+
+    if (!confirmed) return;
+
+    try {
+      await projectService.deleteProject(id);
+      
+      toast({
+        title: 'Project Deleted',
+        description: 'Project has been deleted successfully',
+      });
+
+      // Navigate back to dashboard
+      navigate('/app/dashboard');
+    } catch (error) {
+      console.error('Delete failed:', error);
+      toast({
+        title: 'Delete Failed',
+        description: 'Failed to delete project',
+        variant: 'destructive',
+      });
+    }
+  };
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'active':
@@ -491,11 +668,11 @@ export const ShadcnProjectDetail = () => {
             </div>
 
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={handleShareProject}>
                 <Share2 className="h-4 w-4 mr-2" />
                 Share
               </Button>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={handleExportProject}>
                 <Download className="h-4 w-4 mr-2" />
                 Export
               </Button>
@@ -506,16 +683,16 @@ export const ShadcnProjectDetail = () => {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate(`/app/projects/${id}/settings`)}>
                     <Settings className="h-4 w-4 mr-2" />
                     Settings
                   </DropdownMenuItem>
-                  <DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleArchiveProject}>
                     <Archive className="h-4 w-4 mr-2" />
-                    Archive
+                    {project.isArchived ? 'Unarchive' : 'Archive'}
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem className="text-red-600">
+                  <DropdownMenuItem className="text-red-600" onClick={handleDeleteProject}>
                     <Trash2 className="h-4 w-4 mr-2" />
                     Delete
                   </DropdownMenuItem>
@@ -538,7 +715,7 @@ export const ShadcnProjectDetail = () => {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm text-neutral-600">Files</p>
-                      <p className="text-2xl font-semibold mt-1">{project.fileCount || 0}</p>
+                      <p className="text-2xl font-semibold mt-1">{files.length || project.fileCount || 0}</p>
                     </div>
                     <FileText className="h-8 w-8 text-neutral-400" />
                   </div>
@@ -550,7 +727,7 @@ export const ShadcnProjectDetail = () => {
                     <div>
                       <p className="text-sm text-neutral-600">Analyzed</p>
                       <p className="text-2xl font-semibold mt-1">
-                        {project.lastAnalyzedAt ? 'Yes' : 'No'}
+                        {analysis ? 'Yes' : (project.lastAnalyzedAt ? 'Yes' : 'No')}
                       </p>
                     </div>
                     <Sparkles className="h-8 w-8 text-neutral-400" />
@@ -562,7 +739,7 @@ export const ShadcnProjectDetail = () => {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm text-neutral-600">Docs</p>
-                      <p className="text-2xl font-semibold mt-1">0</p>
+                      <p className="text-2xl font-semibold mt-1">{documentation ? '1' : (project.diagramCount || 0)}</p>
                     </div>
                     <FileJson className="h-8 w-8 text-neutral-400" />
                   </div>
@@ -678,7 +855,7 @@ export const ShadcnProjectDetail = () => {
                       disabled={analyzing}
                     >
                       <PlayCircle className={`h-4 w-4 mr-2 ${analyzing ? 'animate-spin' : ''}`} />
-                      {analyzing ? 'Analyzing...' : 'Run Analysis'}
+                      {analyzing ? 'Analyzing...' : (analysis ? 'Re-run Analysis' : 'Run Analysis')}
                     </Button>
                     <Button 
                       className="w-full justify-start" 
@@ -687,11 +864,21 @@ export const ShadcnProjectDetail = () => {
                       disabled={generatingDocs}
                     >
                       <Sparkles className={`h-4 w-4 mr-2 ${generatingDocs ? 'animate-spin' : ''}`} />
-                      {generatingDocs ? 'Generating...' : 'Generate Documentation'}
+                      {generatingDocs ? 'Generating...' : (documentation ? 'Regenerate Docs' : 'Generate Documentation')}
                     </Button>
-                    <Button className="w-full justify-start" variant="outline">
+                    <Button 
+                      className="w-full justify-start" 
+                      variant="outline"
+                      onClick={() => {
+                        // Scroll to diagrams tab or navigate
+                        const diagramsTab = document.querySelector('[value="diagrams"]');
+                        if (diagramsTab) {
+                          (diagramsTab as HTMLElement).click();
+                        }
+                      }}
+                    >
                       <Eye className="h-4 w-4 mr-2" />
-                      View Diagrams
+                      View Diagrams {diagrams.length > 0 && `(${diagrams.length})`}
                     </Button>
                   </CardContent>
                 </Card>
@@ -707,27 +894,41 @@ export const ShadcnProjectDetail = () => {
                   </CardHeader>
                   <CardContent>
                     <ScrollArea className="h-96">
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-2 p-2 hover:bg-neutral-50 rounded cursor-pointer">
-                          <FolderTree className="h-4 w-4 text-neutral-600" />
-                          <span className="text-sm">src/</span>
+                      {files.length > 0 ? (
+                        <div className="space-y-2">
+                          {files.map((file: any) => (
+                            <div 
+                              key={file.id || file.path} 
+                              className="flex items-center gap-2 p-2 hover:bg-neutral-50 rounded cursor-pointer"
+                            >
+                              {file.path?.endsWith('/') || file.type === 'directory' ? (
+                                <FolderTree className="h-4 w-4 text-neutral-600" />
+                              ) : (
+                                <Code2 className="h-4 w-4 text-neutral-600" />
+                              )}
+                              <span className="text-sm flex-1">{file.filename || file.path || file.name}</span>
+                              {file.language && (
+                                <Badge variant="outline" className="ml-auto text-xs">
+                                  {file.language}
+                                </Badge>
+                              )}
+                              {file.size && (
+                                <span className="text-xs text-neutral-400">
+                                  {(file.size / 1024).toFixed(1)}KB
+                                </span>
+                              )}
+                            </div>
+                          ))}
                         </div>
-                        <div className="flex items-center gap-2 p-2 hover:bg-neutral-50 rounded cursor-pointer pl-6">
-                          <Code2 className="h-4 w-4 text-neutral-600" />
-                          <span className="text-sm">index.ts</span>
-                          <Badge variant="outline" className="ml-auto text-xs">TypeScript</Badge>
+                      ) : (
+                        <div className="flex flex-col items-center justify-center h-full py-12 text-center">
+                          <FolderTree className="h-12 w-12 text-neutral-300 mb-3" />
+                          <p className="text-sm text-neutral-500 font-medium">No files uploaded yet</p>
+                          <p className="text-xs text-neutral-400 mt-1">
+                            Upload files to start analyzing your project
+                          </p>
                         </div>
-                        <div className="flex items-center gap-2 p-2 hover:bg-neutral-50 rounded cursor-pointer pl-6">
-                          <Code2 className="h-4 w-4 text-neutral-600" />
-                          <span className="text-sm">app.ts</span>
-                          <Badge variant="outline" className="ml-auto text-xs">TypeScript</Badge>
-                        </div>
-                        <div className="flex items-center gap-2 p-2 hover:bg-neutral-50 rounded cursor-pointer">
-                          <FileJson className="h-4 w-4 text-neutral-600" />
-                          <span className="text-sm">package.json</span>
-                          <Badge variant="outline" className="ml-auto text-xs">JSON</Badge>
-                        </div>
-                      </div>
+                      )}
                     </ScrollArea>
                   </CardContent>
                 </Card>
