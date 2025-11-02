@@ -50,9 +50,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         try {
           console.log('🔐 AuthContext: Fetching user profile...');
           const response = await authService.getProfile();
+          console.log('📦 AuthContext: Full profile response:', response);
+          console.log('📦 AuthContext: response.data:', response.data);
+          console.log('📦 AuthContext: response.data type:', typeof response.data);
+          
           if (response.success && response.data) {
-            console.log('✅ AuthContext: User loaded successfully:', response.data.email);
-            setUser(response.data);
+            // Check if user data is nested
+            const userData = (response.data as any).user || response.data;
+            console.log('✅ AuthContext: Extracted user data:', userData);
+            console.log('✅ AuthContext: User email:', userData?.email);
+            console.log('✅ AuthContext: User name:', userData?.name);
+            setUser(userData);
           } else {
             // Invalid token response, clear it
             console.warn('⚠️ AuthContext: Invalid token response, clearing...');

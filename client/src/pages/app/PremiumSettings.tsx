@@ -9,6 +9,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
+import { useAuth } from '@/contexts/AuthContext';
 import {
   User,
   Building,
@@ -26,12 +27,34 @@ import {
 } from 'lucide-react';
 
 export const PremiumSettings = () => {
+  const { user } = useAuth();
   const [notifications, setNotifications] = useState({
     emailUpdates: true,
     projectAlerts: true,
     weeklyReports: false,
     securityAlerts: true,
   });
+
+  // Debug: Log user data
+  console.log('⚙️ PremiumSettings - Current user:', user);
+  console.log('⚙️ PremiumSettings - Full user object:', JSON.stringify(user, null, 2));
+  console.log('⚙️ PremiumSettings - User email:', user?.email);
+  console.log('⚙️ PremiumSettings - User name:', user?.name);
+  console.log('⚙️ PremiumSettings - User id:', user?.id);
+
+  // Get user initials
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(n => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
+  // Split name into first and last name
+  const [firstName, lastName] = (user?.name || '').split(' ');
+  const userInitials = getInitials(user?.name || 'User');
 
   return (
     <PremiumLayout>
@@ -84,7 +107,7 @@ export const PremiumSettings = () => {
                   <div className="flex items-center gap-6">
                     <Avatar className="w-20 h-20">
                       <AvatarFallback className="bg-blue-100 text-blue-600 text-2xl font-semibold">
-                        JD
+                        {userInitials}
                       </AvatarFallback>
                     </Avatar>
                     <div>
@@ -106,8 +129,8 @@ export const PremiumSettings = () => {
                       <Label htmlFor="firstName">First Name</Label>
                       <Input
                         id="firstName"
-                        placeholder="John"
-                        defaultValue="John"
+                        placeholder="First name"
+                        defaultValue={firstName || ''}
                         className="border-neutral-200"
                       />
                     </div>
@@ -115,8 +138,8 @@ export const PremiumSettings = () => {
                       <Label htmlFor="lastName">Last Name</Label>
                       <Input
                         id="lastName"
-                        placeholder="Doe"
-                        defaultValue="Doe"
+                        placeholder="Last name"
+                        defaultValue={lastName || ''}
                         className="border-neutral-200"
                       />
                     </div>
@@ -127,8 +150,8 @@ export const PremiumSettings = () => {
                     <Input
                       id="email"
                       type="email"
-                      placeholder="john.doe@example.com"
-                      defaultValue="john.doe@example.com"
+                      placeholder="your.email@example.com"
+                      defaultValue={user?.email || ''}
                       className="border-neutral-200"
                     />
                   </div>
@@ -140,7 +163,7 @@ export const PremiumSettings = () => {
                       rows={4}
                       className="w-full px-3 py-2 border border-neutral-200 rounded-md text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
                       placeholder="Tell us about yourself..."
-                      defaultValue="Full-stack developer passionate about building great products."
+                      defaultValue=""
                     />
                   </div>
 
@@ -188,8 +211,8 @@ export const PremiumSettings = () => {
                     <Label htmlFor="username">Username</Label>
                     <Input
                       id="username"
-                      placeholder="johndoe"
-                      defaultValue="johndoe"
+                      placeholder="username"
+                      defaultValue={user?.email?.split('@')[0] || ''}
                       className="border-neutral-200"
                     />
                     <p className="text-xs text-neutral-600">

@@ -308,94 +308,97 @@ export const RealProjects = () => {
             </CardContent>
           </Card>
         ) : viewMode === 'grid' ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
             {filteredAndSortedProjects.map((project) => {
               const qualityScore = getQualityScore(project);
               
               return (
                 <Card
                   key={project.id}
-                  className="group hover:shadow-md transition-all duration-200 cursor-pointer border border-neutral-200 bg-white"
+                  className="group hover:shadow-xl hover:border-brand-primary/20 transition-all duration-300 cursor-pointer border border-neutral-200 bg-white overflow-hidden"
                   onClick={() => navigate(`/app/projects/${project.id}`)}
                 >
-                  <CardContent className="p-4 sm:p-5 lg:p-6">
-                    <div className="flex items-start justify-between mb-3 sm:mb-4">
-                      <div className="flex items-start gap-2 sm:gap-3 flex-1 min-w-0">
-                        <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
-                          <FolderGit2 className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
-                        </div>
+                  <CardContent className="p-0">
+                    {/* Header Section with Gradient */}
+                    <div className="bg-gradient-to-br from-brand-primary to-brand-secondary p-5 relative">
+                      <div className="flex items-start justify-between">
                         <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-base sm:text-lg truncate group-hover:text-blue-600 transition-colors">
+                          <h3 className="font-semibold text-lg text-white truncate mb-1">
                             {project.name}
                           </h3>
-                          <p className="text-xs sm:text-sm text-neutral-600 line-clamp-2 mt-0.5 sm:mt-1">
+                          <p className="text-sm text-white/80 line-clamp-2">
                             {project.description || 'No description provided'}
                           </p>
                         </div>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="opacity-0 group-hover:opacity-100 h-8 w-8 p-0 text-white hover:bg-white/20"
+                            >
+                              <MoreHorizontal className="w-4 h-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-44">
+                            <DropdownMenuItem 
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                navigate(`/app/projects/${project.id}`);
+                              }}
+                            >
+                              <Eye className="w-4 h-4 mr-2" />
+                              View Details
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
+                              <Download className="w-4 h-4 mr-2" />
+                              Export
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              className="text-red-600"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteProject(project.id);
+                              }}
+                            >
+                              <Trash2 className="w-4 h-4 mr-2" />
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="opacity-0 group-hover:opacity-100 -mr-2 h-7 w-7 sm:h-8 sm:w-8 p-0"
-                          >
-                            <MoreHorizontal className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-44">
-                          <DropdownMenuItem 
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              navigate(`/app/projects/${project.id}`);
-                            }}
-                            className="text-xs sm:text-sm"
-                          >
-                            <Eye className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-2" />
-                            View Details
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={(e) => e.stopPropagation()} className="text-xs sm:text-sm">
-                            <Download className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-2" />
-                            Export
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            className="text-red-600 text-xs sm:text-sm"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDeleteProject(project.id);
-                            }}
-                          >
-                            <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-2" />
-                            Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                      
+                      {/* Decorative Icon */}
+                      <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-white/10 rounded-full blur-2xl"></div>
                     </div>
 
-                    <div className="space-y-3 sm:space-y-4">
-                      <div className="flex items-center gap-3 sm:gap-4 text-xs sm:text-sm text-neutral-600">
-                        <div className="flex items-center gap-1 sm:gap-1.5">
-                          <FileCode className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                          <span className="font-medium">{project.fileCount || 0}</span>
+                    {/* Content Section */}
+                    <div className="p-5 space-y-4">
+                      {/* Stats Row */}
+                      <div className="flex items-center justify-between text-sm">
+                        <div className="flex items-center gap-2 text-neutral-600">
+                          <FileCode className="w-4 h-4 text-brand-primary" />
+                          <span className="font-medium text-brand-primary">{project.fileCount || 0}</span>
                           <span className="text-neutral-500">files</span>
                         </div>
-                        <Separator orientation="vertical" className="h-3 sm:h-4" />
-                        <div className="flex items-center gap-1 sm:gap-1.5 truncate">
-                          <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
-                          <span className="truncate">{formatDistanceToNow(new Date(project.updatedAt), { addSuffix: true })}</span>
+                        <div className="flex items-center gap-2 text-neutral-600">
+                          <Clock className="w-4 h-4" />
+                          <span className="text-xs truncate max-w-[120px]">{formatDistanceToNow(new Date(project.updatedAt), { addSuffix: true })}</span>
                         </div>
                       </div>
 
+                      {/* Quality Score */}
                       <div className="space-y-2">
-                        <div className="flex items-center justify-between text-xs">
-                          <span className="text-neutral-600">Quality Score</span>
-                          <span className="font-medium">{qualityScore}%</span>
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-medium text-neutral-700">Quality Score</span>
+                          <span className="text-lg font-bold text-brand-primary">{qualityScore}%</span>
                         </div>
-                        <Progress value={qualityScore} className="h-1.5 sm:h-2" />
+                        <Progress value={qualityScore} className="h-2" />
                       </div>
 
-                      <div className="flex items-center justify-between pt-1 sm:pt-2">
+                      {/* Status Badge */}
+                      <div className="flex items-center justify-between pt-2 border-t border-neutral-100">
                         <Badge
                           variant={
                             project.status === 'active'
@@ -405,7 +408,7 @@ export const RealProjects = () => {
                               : 'outline'
                           }
                           className={cn(
-                            'text-xs',
+                            'text-xs font-medium',
                             project.status === 'analyzing' && 'animate-pulse'
                           )}
                         >
@@ -448,8 +451,8 @@ export const RealProjects = () => {
                       >
                         <td className="p-4">
                           <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded bg-blue-100 flex items-center justify-center flex-shrink-0">
-                              <FolderGit2 className="w-4 h-4 text-blue-600" />
+                            <div className="w-8 h-8 rounded bg-gradient-to-br from-brand-primary to-brand-secondary flex items-center justify-center flex-shrink-0">
+                              <FolderGit2 className="w-4 h-4 text-white" />
                             </div>
                             <div className="min-w-0">
                               <div className="font-medium truncate">{project.name}</div>
