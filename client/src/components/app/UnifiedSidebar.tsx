@@ -70,10 +70,10 @@ export const UnifiedSidebar = () => {
   };
 
   return (
-    <aside className="fixed left-0 top-16 z-30 h-[calc(100vh-4rem)] w-64 border-r border-neutral-200 bg-white">
-      <div className="flex h-full flex-col">
-        {/* Navigation */}
-        <nav className="flex-1 space-y-1 p-4">
+    <aside className="fixed left-0 top-14 sm:top-16 z-30 h-[calc(100vh-3.5rem)] sm:h-[calc(100vh-4rem)] w-64 border-r border-neutral-200 bg-white transform -translate-x-full lg:translate-x-0 transition-transform duration-200 ease-in-out">
+      <div className="flex h-full flex-col overflow-y-auto">
+        {/* Main Navigation */}
+        <nav className="flex-1 space-y-1 p-3 sm:p-4">
           {navigationItems.map((item) => {
             const Icon = item.icon;
             const active = isActive(item.path);

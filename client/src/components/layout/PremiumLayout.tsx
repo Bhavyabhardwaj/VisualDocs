@@ -14,8 +14,8 @@ export const PremiumLayout = ({ children }: PremiumLayoutProps) => {
       {/* Unified Sidebar */}
       <UnifiedSidebar />
 
-      {/* Main Content with Sidebar and TopNav Offset */}
-      <main className="ml-64 pt-16">
+      {/* Main Content with Sidebar and TopNav Offset - Mobile Responsive */}
+      <main className="lg:ml-64 pt-14 sm:pt-16">
         {children}
       </main>
     </div>

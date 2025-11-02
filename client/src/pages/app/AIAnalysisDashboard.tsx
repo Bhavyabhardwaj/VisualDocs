@@ -46,6 +46,7 @@ interface Issue {
 export const AIAnalysisDashboard = () => {
   const [timeRange, setTimeRange] = useState('7d');
   const [projectId, setProjectId] = useState<string | null>(null);
+  const [projects, setProjects] = useState<any[]>([]);
   const [analysisData, setAnalysisData] = useState<any>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -59,7 +60,17 @@ export const AIAnalysisDashboard = () => {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = await response.json();
-        if (data.projects && data.projects.length > 0) {
+        console.log('📦 Projects response:', data);
+        
+        if (data.success && data.data?.projects && data.data.projects.length > 0) {
+          setProjects(data.data.projects);
+          const firstProject = data.data.projects[0];
+          console.log('📊 Loading analysis for project:', firstProject.id);
+          setProjectId(firstProject.id);
+          loadAnalysis(firstProject.id);
+        } else if (data.projects && data.projects.length > 0) {
+          // Alternative response structure
+          setProjects(data.projects);
           setProjectId(data.projects[0].id);
           loadAnalysis(data.projects[0].id);
         }
@@ -74,15 +85,31 @@ export const AIAnalysisDashboard = () => {
   const loadAnalysis = async (pid: string) => {
     try {
       const token = localStorage.getItem('authToken');
-      const response = await fetch(`http://localhost:3004/api/code-analysis/${pid}`, {
+      console.log('📊 Fetching analysis for project:', pid);
+      
+      // Use the correct endpoint
+      const response = await fetch(`http://localhost:3004/api/analysis/${pid}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+      
+      console.log('📊 Analysis response status:', response.status);
+      
       if (response.ok) {
         const data = await response.json();
-        setAnalysisData(data.analysis);
+        console.log('📊 Analysis data received:', data);
+        
+        // Handle different response structures
+        const analysis = data.data?.analysis || data.analysis || data.data;
+        console.log('📊 Extracted analysis:', analysis);
+        
+        if (analysis) {
+          setAnalysisData(analysis);
+        }
+      } else {
+        console.log('⚠️ No analysis data available (status:', response.status, ')');
       }
     } catch (error) {
-      console.log('No analysis data yet');
+      console.error('Failed to load analysis:', error);
     }
   };
 
@@ -145,7 +172,10 @@ export const AIAnalysisDashboard = () => {
 
     try {
       const token = localStorage.getItem('authToken');
-      const response = await fetch(`http://localhost:3004/api/code-analysis/${projectId}/analyze`, {
+      console.log('🔄 Starting analysis for project:', projectId);
+      
+      // Use the correct endpoint
+      const response = await fetch(`http://localhost:3004/api/analysis/${projectId}/rerun`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -153,16 +183,36 @@ export const AIAnalysisDashboard = () => {
         },
       });
 
-      if (!response.ok) throw new Error('Analysis failed');
+      console.log('🔄 Analysis response status:', response.status);
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('❌ Analysis failed:', errorData);
+        throw new Error(errorData.message || 'Analysis failed');
+      }
 
       const data = await response.json();
-      setAnalysisData(data.analysis);
-
-      toast({
-        title: "Analysis Complete",
-        description: `Found ${data.analysis.totalIssues} issues with ${data.analysis.criticalIssues} critical!`,
-      });
+      console.log('✅ Analysis complete:', data);
+      
+      // Handle different response structures
+      const analysis = data.data?.analysis || data.analysis || data.data;
+      
+      if (analysis) {
+        setAnalysisData(analysis);
+        toast({
+          title: "Analysis Complete",
+          description: `Found ${analysis.totalIssues || 0} issues!`,
+        });
+      } else {
+        // Reload the analysis data
+        await loadAnalysis(projectId);
+        toast({
+          title: "Analysis Complete",
+          description: "Analysis finished successfully!",
+        });
+      }
     } catch (error) {
+      console.error('❌ Analysis error:', error);
       toast({
         title: "Analysis Failed",
         description: error instanceof Error ? error.message : 'Unknown error',
@@ -316,27 +366,51 @@ export const AIAnalysisDashboard = () => {
 
   return (
     <PremiumLayout>
-      <div className="mx-auto max-w-[1400px] px-6 py-8">
+      <div className="mx-auto max-w-[1400px] px-3 sm:px-4 md:px-6 py-4 sm:py-6 md:py-8">
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-start justify-between">
+        <div className="mb-6 md:mb-8">
+          <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
             <div>
-              <div className="flex items-center gap-3 mb-2">
-                <div className="rounded-lg bg-gradient-to-br from-brand-primary to-brand-secondary p-2.5 shadow-sm">
-                  <Brain className="h-6 w-6 text-white" />
+              <div className="flex items-center gap-2 sm:gap-3 mb-2">
+                <div className="rounded-lg bg-gradient-to-br from-brand-primary to-brand-secondary p-2 sm:p-2.5 shadow-sm">
+                  <Brain className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-3xl font-semibold tracking-tight text-brand-primary">AI Analysis</h1>
-                  <p className="text-sm text-neutral-600 mt-1">Intelligent insights for your codebase</p>
+                  <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-brand-primary">AI Analysis</h1>
+                  <p className="text-xs sm:text-sm text-neutral-600 mt-1">Intelligent insights for your codebase</p>
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="gap-2 border-neutral-300 hover:bg-brand-bg">
-                    <Calendar className="h-4 w-4" />
-                    Last {timeRange === '7d' ? '7 days' : timeRange === '30d' ? '30 days' : '90 days'}
+                  <Button variant="outline" size="sm" className="gap-2 border-neutral-300 hover:bg-brand-bg text-xs sm:text-sm">
+                    <FileText className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                    <span className="hidden sm:inline">{projects.find(p => p.id === projectId)?.name || 'Select Project'}</span>
+                    <span className="sm:hidden">Project</span>
+                    <ChevronDown className="h-3 w-3" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-[200px]">
+                  {projects.map(project => (
+                    <DropdownMenuItem 
+                      key={project.id}
+                      onClick={() => {
+                        setProjectId(project.id);
+                        loadAnalysis(project.id);
+                      }}
+                    >
+                      {project.name}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="gap-2 border-neutral-300 hover:bg-brand-bg text-xs sm:text-sm">
+                    <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                    <span className="hidden sm:inline">Last {timeRange === '7d' ? '7 days' : timeRange === '30d' ? '30 days' : '90 days'}</span>
+                    <span className="sm:hidden">{timeRange === '7d' ? '7d' : timeRange === '30d' ? '30d' : '90d'}</span>
                     <ChevronDown className="h-3 w-3" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -349,52 +423,55 @@ export const AIAnalysisDashboard = () => {
               <Button 
                 variant="outline" 
                 size="sm" 
-                className="gap-2 border-neutral-300 hover:bg-brand-bg"
+                className="gap-2 border-neutral-300 hover:bg-brand-bg text-xs sm:text-sm"
                 onClick={handleExportReport}
               >
-                <Download className="h-4 w-4" />
-                Export Report
+                <Download className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">Export Report</span>
+                <span className="sm:hidden">Export</span>
               </Button>
               <Button 
                 size="sm" 
-                className="gap-2 bg-brand-primary hover:bg-brand-secondary text-white"
+                className="gap-2 bg-brand-primary hover:bg-brand-secondary text-white text-xs sm:text-sm"
                 onClick={handleRunAnalysis}
               >
-                <Sparkles className="h-4 w-4" />
-                Run Analysis
+                <Sparkles className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">Run Analysis</span>
+                <span className="sm:hidden">Analyze</span>
               </Button>
             </div>
           </div>
         </div>
 
         {/* Overview Stats */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-8">
+        <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4 mb-6 md:mb-8">
           <Card className="border-neutral-200 hover:shadow-lg transition-shadow">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-neutral-600">Overall Quality</CardTitle>
-              <div className="rounded-lg bg-emerald-50 p-2">
-                <Target className="h-4 w-4 text-emerald-600" />
+            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+              <CardTitle className="text-xs sm:text-sm font-medium text-neutral-600">Overall Quality</CardTitle>
+              <div className="rounded-lg bg-emerald-50 p-1.5 sm:p-2">
+                <Target className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-emerald-600" />
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-neutral-900">{overallQuality}%</div>
-              <div className="mt-2 flex items-center gap-1.5 text-xs text-emerald-600">
-                <TrendingUp className="h-3.5 w-3.5" />
-                <span className="font-medium">Based on analysis</span>
+              <div className="text-2xl sm:text-3xl font-bold text-neutral-900">{overallQuality}%</div>
+              <div className="mt-1 sm:mt-2 flex items-center gap-1.5 text-xs text-emerald-600">
+                <TrendingUp className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                <span className="font-medium hidden sm:inline">Based on analysis</span>
+                <span className="font-medium sm:hidden">Analysis</span>
               </div>
             </CardContent>
           </Card>
 
           <Card className="border-neutral-200 hover:shadow-lg transition-shadow">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-neutral-600">Issues Found</CardTitle>
-              <div className="rounded-lg bg-red-50 p-2">
-                <AlertTriangle className="h-4 w-4 text-red-600" />
+            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+              <CardTitle className="text-xs sm:text-sm font-medium text-neutral-600">Issues Found</CardTitle>
+              <div className="rounded-lg bg-red-50 p-1.5 sm:p-2">
+                <AlertTriangle className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-red-600" />
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-neutral-900">{totalIssues}</div>
-              <div className="mt-2 flex items-center gap-1.5 text-xs text-neutral-600">
+              <div className="text-2xl sm:text-3xl font-bold text-neutral-900">{totalIssues}</div>
+              <div className="mt-1 sm:mt-2 flex items-center gap-1.5 text-xs text-neutral-600">
                 <span className="font-medium">
                   {criticalIssues} critical, {highIssues} high
                 </span>
@@ -403,74 +480,76 @@ export const AIAnalysisDashboard = () => {
           </Card>
 
           <Card className="border-neutral-200 hover:shadow-lg transition-shadow">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-neutral-600">AI Suggestions</CardTitle>
-              <div className="rounded-lg bg-brand-bg p-2">
-                <Sparkles className="h-4 w-4 text-brand-primary" />
+            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+              <CardTitle className="text-xs sm:text-sm font-medium text-neutral-600">AI Suggestions</CardTitle>
+              <div className="rounded-lg bg-brand-bg p-1.5 sm:p-2">
+                <Sparkles className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-brand-primary" />
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-brand-primary">{aiSuggestionsCount}</div>
-              <p className="mt-2 text-xs text-neutral-600">Ready to implement</p>
+              <div className="text-2xl sm:text-3xl font-bold text-brand-primary">{aiSuggestionsCount}</div>
+              <p className="mt-1 sm:mt-2 text-xs text-neutral-600 hidden sm:block">Ready to implement</p>
+              <p className="mt-1 text-xs text-neutral-600 sm:hidden">Ready</p>
             </CardContent>
           </Card>
 
           <Card className="border-neutral-200 hover:shadow-lg transition-shadow">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-neutral-600">Analysis Time</CardTitle>
-              <div className="rounded-lg bg-neutral-100 p-2">
-                <Clock className="h-4 w-4 text-neutral-600" />
+            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+              <CardTitle className="text-xs sm:text-sm font-medium text-neutral-600">Analysis Time</CardTitle>
+              <div className="rounded-lg bg-neutral-100 p-1.5 sm:p-2">
+                <Clock className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-neutral-600" />
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-brand-primary">{analysisTime}</div>
-              <p className="mt-2 text-xs text-neutral-600">Last scan duration</p>
+              <div className="text-2xl sm:text-3xl font-bold text-brand-primary">{analysisTime}</div>
+              <p className="mt-1 sm:mt-2 text-xs text-neutral-600 hidden sm:block">Last scan duration</p>
+              <p className="mt-1 text-xs text-neutral-600 sm:hidden">Last scan</p>
             </CardContent>
           </Card>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-3">
+        <div className="grid gap-4 sm:gap-6 lg:grid-cols-3">
           {/* Left Column: Quality Metrics & Issues */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-2 space-y-4 sm:space-y-6">
             {/* Quality Metrics */}
             <Card className="border-neutral-200">
               <CardHeader>
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                   <div>
-                    <CardTitle className="text-lg font-semibold text-brand-primary">Quality Metrics</CardTitle>
-                    <CardDescription className="mt-1">Track code quality across key dimensions</CardDescription>
+                    <CardTitle className="text-base sm:text-lg font-semibold text-brand-primary">Quality Metrics</CardTitle>
+                    <CardDescription className="mt-1 text-xs sm:text-sm">Track code quality across key dimensions</CardDescription>
                   </div>
                   <Button 
                     variant="outline" 
                     size="sm" 
-                    className="gap-2 border-neutral-300 hover:bg-brand-bg"
+                    className="gap-2 border-neutral-300 hover:bg-brand-bg text-xs sm:text-sm w-full sm:w-auto"
                     onClick={() => toast({
                       title: "Quality Trends",
                       description: "Viewing detailed quality metrics over time...",
                     })}
                   >
-                    <BarChart3 className="h-4 w-4" />
+                    <BarChart3 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                     View Trends
                   </Button>
                 </div>
               </CardHeader>
               <CardContent>
                 {qualityMetrics.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center text-center py-8">
-                    <div className="rounded-full bg-neutral-100 p-3 mb-3">
-                      <BarChart3 className="h-6 w-6 text-neutral-400" />
+                  <div className="flex flex-col items-center justify-center text-center py-6 sm:py-8">
+                    <div className="rounded-full bg-neutral-100 p-2.5 sm:p-3 mb-2 sm:mb-3">
+                      <BarChart3 className="h-5 w-5 sm:h-6 sm:w-6 text-neutral-400" />
                     </div>
-                    <p className="text-sm text-neutral-600">
+                    <p className="text-xs sm:text-sm text-neutral-600">
                       No quality metrics available. Run an analysis to see metrics.
                     </p>
                   </div>
                 ) : (
-                <div className="space-y-5">
+                <div className="space-y-4 sm:space-y-5">
                   {qualityMetrics.map((metric) => (
                     <div key={metric.name}>
                       <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-3">
-                          <span className="text-sm font-medium text-brand-primary">{metric.name}</span>
+                        <div className="flex items-center gap-2 sm:gap-3">
+                          <span className="text-xs sm:text-sm font-medium text-brand-primary">{metric.name}</span>
                           {metric.status === 'improving' && (
                             <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 text-xs gap-1">
                               <TrendingUp className="h-3 w-3" />
@@ -484,9 +563,9 @@ export const AIAnalysisDashboard = () => {
                             </Badge>
                           )}
                         </div>
-                        <span className="text-sm font-bold text-brand-primary">{metric.score}%</span>
+                        <span className="text-xs sm:text-sm font-bold text-brand-primary">{metric.score}%</span>
                       </div>
-                      <div className="relative h-2.5 bg-neutral-100 rounded-full overflow-hidden">
+                      <div className="relative h-2 sm:h-2.5 bg-neutral-100 rounded-full overflow-hidden">
                         <div
                           className={`absolute inset-y-0 left-0 rounded-full transition-all duration-500 ${
                             metric.score >= 90
@@ -508,16 +587,16 @@ export const AIAnalysisDashboard = () => {
             {/* Issues List */}
             <Card className="border-neutral-200">
               <CardHeader>
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                   <div>
-                    <CardTitle className="text-lg font-semibold">Detected Issues</CardTitle>
-                    <CardDescription className="mt-1">AI-powered code analysis results</CardDescription>
+                    <CardTitle className="text-base sm:text-lg font-semibold">Detected Issues</CardTitle>
+                    <CardDescription className="mt-1 text-xs sm:text-sm">AI-powered code analysis results</CardDescription>
                   </div>
                   <div className="flex items-center gap-2">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="outline" size="sm" className="gap-2 hover:bg-neutral-50">
-                          <Filter className="h-4 w-4" />
+                        <Button variant="outline" size="sm" className="gap-2 hover:bg-neutral-50 text-xs sm:text-sm">
+                          <Filter className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                           Filter
                         </Button>
                       </DropdownMenuTrigger>
@@ -531,14 +610,14 @@ export const AIAnalysisDashboard = () => {
                 </div>
               </CardHeader>
               <CardContent>
-                <ScrollArea className="h-[500px] pr-4">
+                <ScrollArea className="h-[400px] sm:h-[500px] pr-2 sm:pr-4">
                   {issues.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center h-full text-center py-12">
-                      <div className="rounded-full bg-neutral-100 p-4 mb-4">
-                        <CheckCircle2 className="h-8 w-8 text-neutral-400" />
+                    <div className="flex flex-col items-center justify-center h-full text-center py-8 sm:py-12">
+                      <div className="rounded-full bg-neutral-100 p-3 sm:p-4 mb-3 sm:mb-4">
+                        <CheckCircle2 className="h-6 w-6 sm:h-8 sm:w-8 text-neutral-400" />
                       </div>
-                      <h3 className="text-lg font-semibold text-neutral-900 mb-2">No Issues Found</h3>
-                      <p className="text-sm text-neutral-600 max-w-md mb-4">
+                      <h3 className="text-base sm:text-lg font-semibold text-neutral-900 mb-2">No Issues Found</h3>
+                      <p className="text-xs sm:text-sm text-neutral-600 max-w-md mb-4 px-4">
                         {analysisData 
                           ? "Your code looks great! No issues detected in the latest analysis."
                           : "Run an analysis to detect issues in your code."}
@@ -546,38 +625,38 @@ export const AIAnalysisDashboard = () => {
                       {!analysisData && (
                         <Button 
                           onClick={handleRunAnalysis}
-                          className="gap-2 bg-brand-primary hover:bg-brand-secondary"
+                          className="gap-2 bg-brand-primary hover:bg-brand-secondary text-xs sm:text-sm"
                         >
-                          <Sparkles className="h-4 w-4" />
+                          <Sparkles className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                           Run First Analysis
                         </Button>
                       )}
                     </div>
                   ) : (
-                  <div className="space-y-3">
+                  <div className="space-y-2 sm:space-y-3">
                     {issues.map((issue) => {
                       const config = getSeverityConfig(issue.severity);
                       const Icon = config.icon;
                       return (
                         <div
                           key={issue.id}
-                          className={`p-4 rounded-lg border ${config.border} ${config.bg} hover:shadow-md transition-all cursor-pointer group`}
+                          className={`p-3 sm:p-4 rounded-lg border ${config.border} ${config.bg} hover:shadow-md transition-all cursor-pointer group`}
                         >
-                          <div className="flex items-start gap-3">
-                            <div className={`rounded-lg bg-white p-2 ${config.border} border`}>
-                              <Icon className={`h-4 w-4 ${config.color}`} />
+                          <div className="flex items-start gap-2 sm:gap-3">
+                            <div className={`rounded-lg bg-white p-1.5 sm:p-2 ${config.border} border`}>
+                              <Icon className={`h-3.5 w-3.5 sm:h-4 sm:w-4 ${config.color}`} />
                             </div>
                             <div className="flex-1 min-w-0">
-                              <div className="flex items-start justify-between mb-2">
+                              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-2 gap-2">
                                 <div className="flex-1">
-                                  <h4 className="text-sm font-semibold text-brand-primary group-hover:text-brand-secondary transition-colors">
+                                  <h4 className="text-xs sm:text-sm font-semibold text-brand-primary group-hover:text-brand-secondary transition-colors">
                                     {issue.title}
                                   </h4>
-                                  <div className="flex items-center gap-2 mt-1.5 text-xs text-neutral-600">
+                                  <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mt-1.5 text-xs text-neutral-600">
                                     <Badge className="bg-white border-neutral-200 text-neutral-700 text-xs">
                                       {issue.category}
                                     </Badge>
-                                    <span>•</span>
+                                    <span className="hidden sm:inline">•</span>
                                     <FileText className="h-3 w-3" />
                                     <span className="font-mono">{issue.file}:{issue.line}</span>
                                   </div>
@@ -589,19 +668,19 @@ export const AIAnalysisDashboard = () => {
                                 </Badge>
                               </div>
                               
-                              <div className="flex items-start gap-2 mt-3 p-3 rounded-lg bg-white border border-neutral-200">
-                                <Sparkles className="h-4 w-4 text-brand-primary flex-shrink-0 mt-0.5" />
+                              <div className="flex items-start gap-2 mt-3 p-2.5 sm:p-3 rounded-lg bg-white border border-neutral-200">
+                                <Sparkles className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-brand-primary flex-shrink-0 mt-0.5" />
                                 <div className="flex-1">
                                   <div className="text-xs font-medium text-brand-primary mb-1">AI Suggestion:</div>
                                   <div className="text-xs text-neutral-600 leading-relaxed">{issue.suggestion}</div>
                                 </div>
                               </div>
 
-                              <div className="flex items-center gap-2 mt-3">
+                              <div className="flex flex-wrap items-center gap-2 mt-3">
                                 <Button 
                                   size="sm" 
                                   variant="outline" 
-                                  className="h-7 text-xs gap-1.5 border-neutral-300 hover:bg-brand-bg"
+                                  className="h-7 text-xs gap-1.5 border-neutral-300 hover:bg-brand-bg flex-1 sm:flex-none"
                                   onClick={() => handleViewCode(issue.file, issue.line)}
                                 >
                                   <Code className="h-3 w-3" />
@@ -610,7 +689,7 @@ export const AIAnalysisDashboard = () => {
                                 <Button 
                                   size="sm" 
                                   variant="outline" 
-                                  className="h-7 text-xs gap-1.5 border-neutral-300 hover:bg-brand-bg"
+                                  className="h-7 text-xs gap-1.5 border-neutral-300 hover:bg-brand-bg flex-1 sm:flex-none"
                                   onClick={() => handleApplyFix(
                                     issue.id,
                                     issue.title,
@@ -625,7 +704,7 @@ export const AIAnalysisDashboard = () => {
                                 <Button 
                                   size="sm" 
                                   variant="ghost" 
-                                  className="h-7 text-xs text-neutral-500 hover:bg-neutral-50"
+                                  className="h-7 text-xs text-neutral-500 hover:bg-neutral-50 w-full sm:w-auto"
                                   onClick={() => handleIgnoreIssue(issue.id, issue.title)}
                                 >
                                   Ignore
@@ -644,24 +723,24 @@ export const AIAnalysisDashboard = () => {
           </div>
 
           {/* Right Column: AI Insights & Recommendations */}
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             {/* AI Insights */}
             <Card className="border-neutral-200 overflow-hidden bg-gradient-to-br from-brand-bg via-[#E8D5C4]/30 to-brand-bg">
               <CardHeader>
                 <div className="flex items-center gap-2 mb-1">
-                  <div className="rounded-lg bg-white p-2 shadow-sm">
-                    <Sparkles className="h-4 w-4 text-brand-primary" />
+                  <div className="rounded-lg bg-white p-1.5 sm:p-2 shadow-sm">
+                    <Sparkles className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-brand-primary" />
                   </div>
-                  <CardTitle className="text-lg font-semibold text-brand-primary">AI Insights</CardTitle>
+                  <CardTitle className="text-base sm:text-lg font-semibold text-brand-primary">AI Insights</CardTitle>
                 </div>
-                <CardDescription className="text-neutral-600">Smart recommendations from our AI</CardDescription>
+                <CardDescription className="text-neutral-600 text-xs sm:text-sm">Smart recommendations from our AI</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="rounded-lg bg-white p-4 shadow-sm border border-neutral-100">
-                  <div className="flex items-start gap-3">
-                    <CheckCircle2 className="h-5 w-5 text-emerald-600 flex-shrink-0 mt-0.5" />
+              <CardContent className="space-y-2 sm:space-y-3">
+                <div className="rounded-lg bg-white p-3 sm:p-4 shadow-sm border border-neutral-100">
+                  <div className="flex items-start gap-2 sm:gap-3">
+                    <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-600 flex-shrink-0 mt-0.5" />
                     <div>
-                      <h4 className="text-sm font-semibold text-brand-primary mb-1">Great Progress!</h4>
+                      <h4 className="text-xs sm:text-sm font-semibold text-brand-primary mb-1">Great Progress!</h4>
                       <p className="text-xs text-neutral-600 leading-relaxed">
                         Your code quality improved by 5% this week. Keep up the excellent work!
                       </p>
@@ -669,11 +748,11 @@ export const AIAnalysisDashboard = () => {
                   </div>
                 </div>
 
-                <div className="rounded-lg bg-white p-4 shadow-sm border border-neutral-100">
-                  <div className="flex items-start gap-3">
-                    <Target className="h-5 w-5 text-brand-primary flex-shrink-0 mt-0.5" />
+                <div className="rounded-lg bg-white p-3 sm:p-4 shadow-sm border border-neutral-100">
+                  <div className="flex items-start gap-2 sm:gap-3">
+                    <Target className="h-4 w-4 sm:h-5 sm:w-5 text-brand-primary flex-shrink-0 mt-0.5" />
                     <div>
-                      <h4 className="text-sm font-semibold text-brand-primary mb-1">Focus Area</h4>
+                      <h4 className="text-xs sm:text-sm font-semibold text-brand-primary mb-1">Focus Area</h4>
                       <p className="text-xs text-neutral-600 leading-relaxed">
                         Consider improving test coverage in the authentication module to reach 95% coverage.
                       </p>
@@ -681,11 +760,11 @@ export const AIAnalysisDashboard = () => {
                   </div>
                 </div>
 
-                <div className="rounded-lg bg-white p-4 shadow-sm border border-neutral-100">
-                  <div className="flex items-start gap-3">
-                    <Zap className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                <div className="rounded-lg bg-white p-3 sm:p-4 shadow-sm border border-neutral-100">
+                  <div className="flex items-start gap-2 sm:gap-3">
+                    <Zap className="h-4 w-4 sm:h-5 sm:w-5 text-amber-600 flex-shrink-0 mt-0.5" />
                     <div>
-                      <h4 className="text-sm font-semibold text-neutral-900 mb-1">Performance Tip</h4>
+                      <h4 className="text-xs sm:text-sm font-semibold text-neutral-900 mb-1">Performance Tip</h4>
                       <p className="text-xs text-neutral-600 leading-relaxed">
                         Implementing lazy loading could reduce initial bundle size by approximately 23%.
                       </p>
@@ -698,60 +777,60 @@ export const AIAnalysisDashboard = () => {
             {/* Code Statistics */}
             <Card className="border-neutral-200">
               <CardHeader>
-                <CardTitle className="text-lg font-semibold">Code Statistics</CardTitle>
-                <CardDescription>Analysis of your codebase</CardDescription>
+                <CardTitle className="text-base sm:text-lg font-semibold">Code Statistics</CardTitle>
+                <CardDescription className="text-xs sm:text-sm">Analysis of your codebase</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between p-3 rounded-lg bg-neutral-50 hover:bg-neutral-100 transition-colors">
-                  <div className="flex items-center gap-3">
-                    <div className="rounded-lg bg-white p-2 border border-neutral-200">
-                      <FileText className="h-4 w-4 text-neutral-700" />
+              <CardContent className="space-y-2 sm:space-y-4">
+                <div className="flex items-center justify-between p-2.5 sm:p-3 rounded-lg bg-neutral-50 hover:bg-neutral-100 transition-colors">
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    <div className="rounded-lg bg-white p-1.5 sm:p-2 border border-neutral-200">
+                      <FileText className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-neutral-700" />
                     </div>
                     <div>
-                      <div className="text-sm font-medium text-neutral-900">Total Files</div>
-                      <div className="text-xs text-neutral-600">TypeScript & React</div>
+                      <div className="text-xs sm:text-sm font-medium text-neutral-900">Total Files</div>
+                      <div className="text-xs text-neutral-600 hidden sm:block">TypeScript & React</div>
                     </div>
                   </div>
-                  <div className="text-xl font-bold text-neutral-900">247</div>
+                  <div className="text-lg sm:text-xl font-bold text-neutral-900">247</div>
                 </div>
 
-                <div className="flex items-center justify-between p-3 rounded-lg bg-neutral-50 hover:bg-neutral-100 transition-colors">
-                  <div className="flex items-center gap-3">
-                    <div className="rounded-lg bg-white p-2 border border-neutral-200">
-                      <Code className="h-4 w-4 text-neutral-700" />
+                <div className="flex items-center justify-between p-2.5 sm:p-3 rounded-lg bg-neutral-50 hover:bg-neutral-100 transition-colors">
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    <div className="rounded-lg bg-white p-1.5 sm:p-2 border border-neutral-200">
+                      <Code className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-neutral-700" />
                     </div>
                     <div>
-                      <div className="text-sm font-medium text-neutral-900">Lines of Code</div>
-                      <div className="text-xs text-neutral-600">Excluding comments</div>
+                      <div className="text-xs sm:text-sm font-medium text-neutral-900">Lines of Code</div>
+                      <div className="text-xs text-neutral-600 hidden sm:block">Excluding comments</div>
                     </div>
                   </div>
-                  <div className="text-xl font-bold text-neutral-900">18.5K</div>
+                  <div className="text-lg sm:text-xl font-bold text-neutral-900">18.5K</div>
                 </div>
 
-                <div className="flex items-center justify-between p-3 rounded-lg bg-neutral-50 hover:bg-neutral-100 transition-colors">
-                  <div className="flex items-center gap-3">
-                    <div className="rounded-lg bg-white p-2 border border-neutral-200">
-                      <GitBranch className="h-4 w-4 text-neutral-700" />
+                <div className="flex items-center justify-between p-2.5 sm:p-3 rounded-lg bg-neutral-50 hover:bg-neutral-100 transition-colors">
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    <div className="rounded-lg bg-white p-1.5 sm:p-2 border border-neutral-200">
+                      <GitBranch className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-neutral-700" />
                     </div>
                     <div>
-                      <div className="text-sm font-medium text-neutral-900">Complexity</div>
-                      <div className="text-xs text-neutral-600">Cyclomatic average</div>
+                      <div className="text-xs sm:text-sm font-medium text-neutral-900">Complexity</div>
+                      <div className="text-xs text-neutral-600 hidden sm:block">Cyclomatic average</div>
                     </div>
                   </div>
-                  <div className="text-xl font-bold text-neutral-900">4.2</div>
+                  <div className="text-lg sm:text-xl font-bold text-neutral-900">4.2</div>
                 </div>
 
-                <div className="flex items-center justify-between p-3 rounded-lg bg-neutral-50 hover:bg-neutral-100 transition-colors">
-                  <div className="flex items-center gap-3">
-                    <div className="rounded-lg bg-white p-2 border border-neutral-200">
-                      <Users className="h-4 w-4 text-neutral-700" />
+                <div className="flex items-center justify-between p-2.5 sm:p-3 rounded-lg bg-neutral-50 hover:bg-neutral-100 transition-colors">
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    <div className="rounded-lg bg-white p-1.5 sm:p-2 border border-neutral-200">
+                      <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-neutral-700" />
                     </div>
                     <div>
-                      <div className="text-sm font-medium text-neutral-900">Contributors</div>
-                      <div className="text-xs text-neutral-600">Last 30 days</div>
+                      <div className="text-xs sm:text-sm font-medium text-neutral-900">Contributors</div>
+                      <div className="text-xs text-neutral-600 hidden sm:block">Last 30 days</div>
                     </div>
                   </div>
-                  <div className="text-xl font-bold text-neutral-900">12</div>
+                  <div className="text-lg sm:text-xl font-bold text-neutral-900">12</div>
                 </div>
               </CardContent>
             </Card>
@@ -759,32 +838,35 @@ export const AIAnalysisDashboard = () => {
             {/* Quick Actions */}
             <Card className="border-neutral-200">
               <CardHeader>
-                <CardTitle className="text-lg font-semibold text-brand-primary">Quick Actions</CardTitle>
+                <CardTitle className="text-base sm:text-lg font-semibold text-brand-primary">Quick Actions</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
                 <Button 
                   variant="outline" 
-                  className="w-full justify-start gap-2 border-neutral-300 hover:bg-brand-bg"
+                  className="w-full justify-start gap-2 border-neutral-300 hover:bg-brand-bg text-xs sm:text-sm"
                   onClick={handleExportReport}
                 >
-                  <Download className="h-4 w-4" />
-                  Export Full Report (PDF)
+                  <Download className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  <span className="hidden sm:inline">Export Full Report (PDF)</span>
+                  <span className="sm:hidden">Export PDF</span>
                 </Button>
                 <Button 
                   variant="outline" 
-                  className="w-full justify-start gap-2 border-neutral-300 hover:bg-brand-bg"
+                  className="w-full justify-start gap-2 border-neutral-300 hover:bg-brand-bg text-xs sm:text-sm"
                   onClick={handleGenerateImprovementPlan}
                 >
-                  <Sparkles className="h-4 w-4" />
-                  Generate Improvement Plan
+                  <Sparkles className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  <span className="hidden sm:inline">Generate Improvement Plan</span>
+                  <span className="sm:hidden">Improvement Plan</span>
                 </Button>
                 <Button 
                   variant="outline" 
-                  className="w-full justify-start gap-2 border-neutral-300 hover:bg-brand-bg"
+                  className="w-full justify-start gap-2 border-neutral-300 hover:bg-brand-bg text-xs sm:text-sm"
                   onClick={handleScheduleAnalysis}
                 >
-                  <Calendar className="h-4 w-4" />
-                  Schedule Weekly Analysis
+                  <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  <span className="hidden sm:inline">Schedule Weekly Analysis</span>
+                  <span className="sm:hidden">Schedule Analysis</span>
                 </Button>
               </CardContent>
             </Card>

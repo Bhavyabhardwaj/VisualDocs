@@ -113,75 +113,88 @@ export const RealProjects = () => {
 
   return (
     <PremiumLayout>
-      <div className="mx-auto max-w-[1400px] px-6 py-8">
+      <div className="mx-auto max-w-[1400px] px-3 sm:px-4 md:px-6 py-4 sm:py-6 md:py-8">
         {/* Page Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-6">
+        <div className="mb-6 md:mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6 gap-4">
             <div>
-              <h1 className="text-3xl font-semibold tracking-tight text-brand-primary">Projects</h1>
-              <p className="text-neutral-600 mt-2 text-[15px]">
+              <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-brand-primary">Projects</h1>
+              <p className="text-neutral-600 mt-1 sm:mt-2 text-sm sm:text-[15px]">
                 Manage and analyze your codebase projects
               </p>
             </div>
-            <div className="flex items-center gap-3">
-              <Button variant="outline" onClick={() => setGithubDialogOpen(true)} className="h-9 text-sm border-neutral-300">
-                <Github className="w-4 h-4 mr-2" />
-                Import from GitHub
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+              <Button 
+                variant="outline" 
+                onClick={() => setGithubDialogOpen(true)} 
+                className="h-8 sm:h-9 text-xs sm:text-sm border-neutral-300 flex-1 sm:flex-none"
+              >
+                <Github className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
+                <span className="hidden sm:inline">Import from GitHub</span>
+                <span className="sm:hidden">GitHub Import</span>
               </Button>
-              <Button onClick={() => setUploadDialogOpen(true)} className="h-9 text-sm bg-brand-primary hover:bg-brand-secondary">
-                <Upload className="w-4 h-4 mr-2" />
-                Upload Files
+              <Button 
+                onClick={() => setUploadDialogOpen(true)} 
+                className="h-8 sm:h-9 text-xs sm:text-sm bg-brand-primary hover:bg-brand-secondary flex-1 sm:flex-none"
+              >
+                <Upload className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
+                <span className="hidden sm:inline">Upload Files</span>
+                <span className="sm:hidden">Upload</span>
               </Button>
             </div>
           </div>
 
           {/* Filters and Search */}
-          <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
-            <div className="flex items-center gap-3 w-full sm:w-auto">
-              <div className="relative flex-1 sm:w-80">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+          <div className="flex flex-col gap-3 sm:gap-4">
+            <div className="flex items-center gap-2 sm:gap-3 w-full">
+              <div className="relative flex-1">
+                <Search className="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 sm:w-4 sm:h-4 text-neutral-400" />
                 <Input
                   placeholder="Search projects..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 h-9 border-neutral-200 bg-white"
+                  className="pl-9 sm:pl-10 h-8 sm:h-9 border-neutral-200 bg-white text-xs sm:text-sm"
                 />
               </div>
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="gap-2 h-9 text-sm">
-                    <Filter className="w-4 h-4" />
-                    Filter
-                    <Badge variant="secondary" className="ml-1 text-xs">
+                  <Button variant="outline" className="gap-1.5 sm:gap-2 h-8 sm:h-9 text-xs sm:text-sm px-2 sm:px-3">
+                    <Filter className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                    <span className="hidden sm:inline">Filter</span>
+                    <Badge variant="secondary" className="ml-0.5 sm:ml-1 text-xs px-1.5 sm:px-2">
                       {filterStatus === 'all' ? 'All' : filterStatus}
                     </Badge>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48">
-                  <DropdownMenuLabel>Status</DropdownMenuLabel>
+                <DropdownMenuContent align="end" className="w-40 sm:w-48">
+                  <DropdownMenuLabel className="text-xs sm:text-sm">Status</DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuCheckboxItem
                     checked={filterStatus === 'all'}
                     onCheckedChange={() => setFilterStatus('all')}
+                    className="text-xs sm:text-sm"
                   >
                     All ({statusCounts.all})
                   </DropdownMenuCheckboxItem>
                   <DropdownMenuCheckboxItem
                     checked={filterStatus === 'active'}
                     onCheckedChange={() => setFilterStatus('active')}
+                    className="text-xs sm:text-sm"
                   >
                     Active ({statusCounts.active})
                   </DropdownMenuCheckboxItem>
                   <DropdownMenuCheckboxItem
                     checked={filterStatus === 'analyzing'}
                     onCheckedChange={() => setFilterStatus('analyzing')}
+                    className="text-xs sm:text-sm"
                   >
                     Analyzing ({statusCounts.analyzing})
                   </DropdownMenuCheckboxItem>
                   <DropdownMenuCheckboxItem
                     checked={filterStatus === 'archived'}
                     onCheckedChange={() => setFilterStatus('archived')}
+                    className="text-xs sm:text-sm"
                   >
                     Archived ({statusCounts.archived})
                   </DropdownMenuCheckboxItem>
@@ -190,29 +203,32 @@ export const RealProjects = () => {
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="gap-2">
-                    <ArrowUpDown className="w-4 h-4" />
-                    Sort
+                  <Button variant="outline" size="sm" className="gap-1.5 sm:gap-2 h-8 sm:h-9 text-xs sm:text-sm px-2 sm:px-3">
+                    <ArrowUpDown className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                    <span className="hidden sm:inline">Sort</span>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48">
-                  <DropdownMenuLabel>Sort by</DropdownMenuLabel>
+                <DropdownMenuContent align="end" className="w-40 sm:w-48">
+                  <DropdownMenuLabel className="text-xs sm:text-sm">Sort by</DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuCheckboxItem
                     checked={sortField === 'name'}
                     onCheckedChange={() => setSortField('name')}
+                    className="text-xs sm:text-sm"
                   >
                     Name
                   </DropdownMenuCheckboxItem>
                   <DropdownMenuCheckboxItem
                     checked={sortField === 'updatedAt'}
                     onCheckedChange={() => setSortField('updatedAt')}
+                    className="text-xs sm:text-sm"
                   >
                     Last Updated
                   </DropdownMenuCheckboxItem>
                   <DropdownMenuCheckboxItem
                     checked={sortField === 'fileCount'}
                     onCheckedChange={() => setSortField('fileCount')}
+                    className="text-xs sm:text-sm"
                   >
                     File Count
                   </DropdownMenuCheckboxItem>
@@ -220,12 +236,14 @@ export const RealProjects = () => {
                   <DropdownMenuCheckboxItem
                     checked={sortOrder === 'asc'}
                     onCheckedChange={() => setSortOrder('asc')}
+                    className="text-xs sm:text-sm"
                   >
                     Ascending
                   </DropdownMenuCheckboxItem>
                   <DropdownMenuCheckboxItem
                     checked={sortOrder === 'desc'}
                     onCheckedChange={() => setSortOrder('desc')}
+                    className="text-xs sm:text-sm"
                   >
                     Descending
                   </DropdownMenuCheckboxItem>
@@ -233,22 +251,22 @@ export const RealProjects = () => {
               </DropdownMenu>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 justify-end">
               <Button
                 variant={viewMode === 'grid' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setViewMode('grid')}
-                className="w-9 h-9 p-0"
+                className="w-8 h-8 sm:w-9 sm:h-9 p-0"
               >
-                <Grid3x3 className="w-4 h-4" />
+                <Grid3x3 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               </Button>
               <Button
                 variant={viewMode === 'table' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setViewMode('table')}
-                className="w-9 h-9 p-0"
+                className="w-8 h-8 sm:w-9 sm:h-9 p-0"
               >
-                <List className="w-4 h-4" />
+                <List className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               </Button>
             </div>
           </div>
@@ -256,33 +274,33 @@ export const RealProjects = () => {
       </div>
 
       {/* Content */}
-      <div className="mx-auto px-8 py-8">
+      <div className="mx-auto px-3 sm:px-4 md:px-8 py-4 sm:py-6 md:py-8">
         {loading ? (
-          <div className="flex items-center justify-center py-16">
-            <Loader2 className="w-8 h-8 animate-spin text-neutral-400" />
+          <div className="flex items-center justify-center py-12 sm:py-16">
+            <Loader2 className="w-6 h-6 sm:w-8 sm:h-8 animate-spin text-neutral-400" />
           </div>
         ) : filteredAndSortedProjects.length === 0 ? (
           <Card className="border-2 border-dashed border-neutral-200">
-            <CardContent className="flex flex-col items-center justify-center py-16">
-              <div className="w-16 h-16 rounded-full bg-neutral-100 flex items-center justify-center mb-4">
-                <FolderGit2 className="w-8 h-8 text-neutral-400" />
+            <CardContent className="flex flex-col items-center justify-center py-12 sm:py-16 px-4">
+              <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-neutral-100 flex items-center justify-center mb-3 sm:mb-4">
+                <FolderGit2 className="w-6 h-6 sm:w-8 sm:h-8 text-neutral-400" />
               </div>
-              <h3 className="text-lg font-semibold mb-2 text-neutral-900">
+              <h3 className="text-base sm:text-lg font-semibold mb-2 text-neutral-900">
                 {searchQuery ? 'No projects found' : 'No projects yet'}
               </h3>
-              <p className="text-neutral-600 text-center max-w-md mb-6 text-sm">
+              <p className="text-neutral-600 text-center max-w-md mb-4 sm:mb-6 text-xs sm:text-sm px-4">
                 {searchQuery
                   ? 'Try adjusting your search or filters'
                   : 'Get started by uploading your code or importing from GitHub'}
               </p>
               {!searchQuery && (
-                <div className="flex gap-3">
-                  <Button onClick={() => setUploadDialogOpen(true)} className="h-9">
-                    <Upload className="w-4 h-4 mr-2" />
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full max-w-xs sm:max-w-none">
+                  <Button onClick={() => setUploadDialogOpen(true)} className="h-8 sm:h-9 text-xs sm:text-sm">
+                    <Upload className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
                     Upload Files
                   </Button>
-                  <Button variant="outline" onClick={() => setGithubDialogOpen(true)} className="h-9">
-                    <Github className="w-4 h-4 mr-2" />
+                  <Button variant="outline" onClick={() => setGithubDialogOpen(true)} className="h-8 sm:h-9 text-xs sm:text-sm">
+                    <Github className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
                     Import from GitHub
                   </Button>
                 </div>
@@ -290,7 +308,7 @@ export const RealProjects = () => {
             </CardContent>
           </Card>
         ) : viewMode === 'grid' ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-5">
             {filteredAndSortedProjects.map((project) => {
               const qualityScore = getQualityScore(project);
               
@@ -300,17 +318,17 @@ export const RealProjects = () => {
                   className="group hover:shadow-md transition-all duration-200 cursor-pointer border border-neutral-200 bg-white"
                   onClick={() => navigate(`/app/projects/${project.id}`)}
                 >
-                  <CardContent className="p-6">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex items-start gap-3 flex-1 min-w-0">
-                        <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
-                          <FolderGit2 className="w-5 h-5 text-blue-600" />
+                  <CardContent className="p-4 sm:p-5 lg:p-6">
+                    <div className="flex items-start justify-between mb-3 sm:mb-4">
+                      <div className="flex items-start gap-2 sm:gap-3 flex-1 min-w-0">
+                        <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
+                          <FolderGit2 className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-lg truncate group-hover:text-blue-600 transition-colors">
+                          <h3 className="font-semibold text-base sm:text-lg truncate group-hover:text-blue-600 transition-colors">
                             {project.name}
                           </h3>
-                          <p className="text-sm text-neutral-600 line-clamp-2 mt-1">
+                          <p className="text-xs sm:text-sm text-neutral-600 line-clamp-2 mt-0.5 sm:mt-1">
                             {project.description || 'No description provided'}
                           </p>
                         </div>
@@ -320,49 +338,52 @@ export const RealProjects = () => {
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="opacity-0 group-hover:opacity-100 -mr-2"
+                            className="opacity-0 group-hover:opacity-100 -mr-2 h-7 w-7 sm:h-8 sm:w-8 p-0"
                           >
-                            <MoreHorizontal className="w-4 h-4" />
+                            <MoreHorizontal className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={(e) => {
-                            e.stopPropagation();
-                            navigate(`/app/projects/${project.id}`);
-                          }}>
-                            <Eye className="w-4 h-4 mr-2" />
+                        <DropdownMenuContent align="end" className="w-44">
+                          <DropdownMenuItem 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate(`/app/projects/${project.id}`);
+                            }}
+                            className="text-xs sm:text-sm"
+                          >
+                            <Eye className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-2" />
                             View Details
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
-                            <Download className="w-4 h-4 mr-2" />
+                          <DropdownMenuItem onClick={(e) => e.stopPropagation()} className="text-xs sm:text-sm">
+                            <Download className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-2" />
                             Export
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
                           <DropdownMenuItem
-                            className="text-red-600"
+                            className="text-red-600 text-xs sm:text-sm"
                             onClick={(e) => {
                               e.stopPropagation();
                               handleDeleteProject(project.id);
                             }}
                           >
-                            <Trash2 className="w-4 h-4 mr-2" />
+                            <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-2" />
                             Delete
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </div>
 
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-4 text-sm text-neutral-600">
-                        <div className="flex items-center gap-1.5">
-                          <FileCode className="w-4 h-4" />
+                    <div className="space-y-3 sm:space-y-4">
+                      <div className="flex items-center gap-3 sm:gap-4 text-xs sm:text-sm text-neutral-600">
+                        <div className="flex items-center gap-1 sm:gap-1.5">
+                          <FileCode className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                           <span className="font-medium">{project.fileCount || 0}</span>
                           <span className="text-neutral-500">files</span>
                         </div>
-                        <Separator orientation="vertical" className="h-4" />
-                        <div className="flex items-center gap-1.5">
-                          <Clock className="w-4 h-4" />
-                          <span>{formatDistanceToNow(new Date(project.updatedAt), { addSuffix: true })}</span>
+                        <Separator orientation="vertical" className="h-3 sm:h-4" />
+                        <div className="flex items-center gap-1 sm:gap-1.5 truncate">
+                          <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
+                          <span className="truncate">{formatDistanceToNow(new Date(project.updatedAt), { addSuffix: true })}</span>
                         </div>
                       </div>
 
@@ -371,10 +392,10 @@ export const RealProjects = () => {
                           <span className="text-neutral-600">Quality Score</span>
                           <span className="font-medium">{qualityScore}%</span>
                         </div>
-                        <Progress value={qualityScore} className="h-2" />
+                        <Progress value={qualityScore} className="h-1.5 sm:h-2" />
                       </div>
 
-                      <div className="flex items-center justify-between pt-2">
+                      <div className="flex items-center justify-between pt-1 sm:pt-2">
                         <Badge
                           variant={
                             project.status === 'active'
