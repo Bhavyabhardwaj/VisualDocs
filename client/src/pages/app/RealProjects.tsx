@@ -308,117 +308,147 @@ export const RealProjects = () => {
             </CardContent>
           </Card>
         ) : viewMode === 'grid' ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredAndSortedProjects.map((project) => {
               const qualityScore = getQualityScore(project);
+              
+              // Subtle, professional color variations
+              const colorSchemes = [
+                { 
+                  border: 'border-l-neutral-800',
+                  iconBg: 'bg-neutral-800',
+                  textAccent: 'text-neutral-800',
+                  progressFrom: 'from-neutral-700',
+                  progressTo: 'to-neutral-900'
+                },
+                { 
+                  border: 'border-l-neutral-700',
+                  iconBg: 'bg-neutral-700',
+                  textAccent: 'text-neutral-700',
+                  progressFrom: 'from-neutral-600',
+                  progressTo: 'to-neutral-800'
+                },
+                { 
+                  border: 'border-l-neutral-600',
+                  iconBg: 'bg-neutral-600',
+                  textAccent: 'text-neutral-600',
+                  progressFrom: 'from-neutral-500',
+                  progressTo: 'to-neutral-700'
+                },
+              ];
+              const colorIndex = project.name.length % colorSchemes.length;
+              const colors = colorSchemes[colorIndex];
               
               return (
                 <Card
                   key={project.id}
-                  className="group hover:shadow-xl hover:border-brand-primary/20 transition-all duration-300 cursor-pointer border border-neutral-200 bg-white overflow-hidden"
+                  className={`group relative hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 cursor-pointer border border-neutral-200 bg-white overflow-hidden ${colors.border} border-l-4`}
                   onClick={() => navigate(`/app/projects/${project.id}`)}
                 >
-                  <CardContent className="p-0">
-                    {/* Header Section with Gradient */}
-                    <div className="bg-gradient-to-br from-brand-primary to-brand-secondary p-5 relative">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-lg text-white truncate mb-1">
-                            {project.name}
-                          </h3>
-                          <p className="text-sm text-white/80 line-clamp-2">
-                            {project.description || 'No description provided'}
-                          </p>
-                        </div>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="opacity-0 group-hover:opacity-100 h-8 w-8 p-0 text-white hover:bg-white/20"
-                            >
-                              <MoreHorizontal className="w-4 h-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-44">
-                            <DropdownMenuItem 
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                navigate(`/app/projects/${project.id}`);
-                              }}
-                            >
-                              <Eye className="w-4 h-4 mr-2" />
-                              View Details
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
-                              <Download className="w-4 h-4 mr-2" />
-                              Export
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem
-                              className="text-red-600"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleDeleteProject(project.id);
-                              }}
-                            >
-                              <Trash2 className="w-4 h-4 mr-2" />
-                              Delete
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                  <CardContent className="p-6">
+                    {/* Header with Icon */}
+                    <div className="flex items-start gap-4 mb-5">
+                      <div className={`w-12 h-12 rounded-lg ${colors.iconBg} flex items-center justify-center flex-shrink-0`}>
+                        <FolderGit2 className="w-6 h-6 text-white" />
                       </div>
-                      
-                      {/* Decorative Icon */}
-                      <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-white/10 rounded-full blur-2xl"></div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-bold text-lg text-neutral-900 truncate mb-1.5">
+                          {project.name}
+                        </h3>
+                        <p className="text-sm text-neutral-500 line-clamp-2 leading-relaxed">
+                          {project.description || 'No description provided'}
+                        </p>
+                      </div>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="opacity-0 group-hover:opacity-100 h-8 w-8 p-0 hover:bg-neutral-100"
+                          >
+                            <MoreHorizontal className="w-4 h-4 text-neutral-600" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-44">
+                          <DropdownMenuItem 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate(`/app/projects/${project.id}`);
+                            }}
+                          >
+                            <Eye className="w-4 h-4 mr-2" />
+                            View Details
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
+                            <Download className="w-4 h-4 mr-2" />
+                            Export
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            className="text-red-600"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteProject(project.id);
+                            }}
+                          >
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
 
-                    {/* Content Section */}
-                    <div className="p-5 space-y-4">
-                      {/* Stats Row */}
-                      <div className="flex items-center justify-between text-sm">
-                        <div className="flex items-center gap-2 text-neutral-600">
-                          <FileCode className="w-4 h-4 text-brand-primary" />
-                          <span className="font-medium text-brand-primary">{project.fileCount || 0}</span>
-                          <span className="text-neutral-500">files</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-neutral-600">
-                          <Clock className="w-4 h-4" />
-                          <span className="text-xs truncate max-w-[120px]">{formatDistanceToNow(new Date(project.updatedAt), { addSuffix: true })}</span>
-                        </div>
+                    {/* Stats Row */}
+                    <div className="flex items-center gap-6 mb-5 pb-5 border-b border-neutral-100">
+                      <div className="flex items-center gap-2">
+                        <FileCode className="w-4 h-4 text-neutral-400" />
+                        <span className="text-sm text-neutral-500">
+                          <span className={`font-semibold ${colors.textAccent}`}>{project.fileCount || 0}</span> files
+                        </span>
                       </div>
-
-                      {/* Quality Score */}
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm font-medium text-neutral-700">Quality Score</span>
-                          <span className="text-lg font-bold text-brand-primary">{qualityScore}%</span>
-                        </div>
-                        <Progress value={qualityScore} className="h-2" />
+                      <div className="flex items-center gap-2">
+                        <Clock className="w-4 h-4 text-neutral-400" />
+                        <span className="text-xs text-neutral-500 truncate">
+                          {formatDistanceToNow(new Date(project.updatedAt), { addSuffix: true })}
+                        </span>
                       </div>
+                    </div>
 
-                      {/* Status Badge */}
-                      <div className="flex items-center justify-between pt-2 border-t border-neutral-100">
-                        <Badge
-                          variant={
-                            project.status === 'active'
-                              ? 'default'
-                              : project.status === 'analyzing'
-                              ? 'secondary'
-                              : 'outline'
-                          }
-                          className={cn(
-                            'text-xs font-medium',
-                            project.status === 'analyzing' && 'animate-pulse'
-                          )}
-                        >
-                          {project.status === 'active'
-                            ? 'Ready'
+                    {/* Quality Score - Clean and Minimal */}
+                    <div className="space-y-3 mb-5">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium text-neutral-600">Code Quality</span>
+                        <span className={`text-2xl font-bold ${colors.textAccent}`}>
+                          {qualityScore}%
+                        </span>
+                      </div>
+                      <Progress value={qualityScore} className="h-2" />
+                      <p className="text-xs text-neutral-500">
+                        {qualityScore >= 80 ? '✨ Excellent quality' : qualityScore >= 60 ? '👍 Good quality' : '⚠️ Needs improvement'}
+                      </p>
+                    </div>
+
+                    {/* Footer with Status */}
+                    <div className="flex items-center justify-between pt-4 border-t border-neutral-100">
+                      <Badge
+                        variant={
+                          project.status === 'active'
+                            ? 'default'
                             : project.status === 'analyzing'
-                            ? 'Analyzing'
-                            : project.status || 'Pending'}
-                        </Badge>
-                      </div>
+                            ? 'secondary'
+                            : 'outline'
+                        }
+                        className={cn(
+                          'font-medium',
+                          project.status === 'analyzing' && 'animate-pulse'
+                        )}
+                      >
+                        {project.status === 'active'
+                          ? 'Ready'
+                          : project.status === 'analyzing'
+                          ? 'Analyzing'
+                          : project.status || 'Pending'}
+                      </Badge>
                     </div>
                   </CardContent>
                 </Card>
