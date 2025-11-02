@@ -52,8 +52,22 @@ export const authService = {
         console.log('💾 authService.login - accessToken to save:', accessToken.substring(0, 30) + '...');
         
         try {
+          console.log('💾 authService.login - Setting authToken in localStorage...');
           localStorage.setItem('authToken', accessToken);
           console.log('💾 authService.login - setItem() called successfully');
+          
+          // IMMEDIATE verification
+          const immediateCheck = localStorage.getItem('authToken');
+          console.log('💾 authService.login - IMMEDIATE check after setItem:', immediateCheck ? 'FOUND ✓' : 'NOT FOUND ✗');
+          
+          // Add a listener to detect if token gets removed
+          window.addEventListener('storage', (e) => {
+            if (e.key === 'authToken' && !e.newValue) {
+              console.error('🚨🚨🚨 ALERT: authToken was REMOVED from localStorage!');
+              console.error('🚨 Event details:', e);
+              console.trace('🚨 Stack trace of who removed it:');
+            }
+          });
         } catch (e) {
           console.error('❌ authService.login - localStorage.setItem FAILED:', e);
         }
