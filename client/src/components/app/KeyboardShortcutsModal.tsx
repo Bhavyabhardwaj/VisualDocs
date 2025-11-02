@@ -5,7 +5,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from '../ui/dialog';
-import { Keyboard } from 'lucide-react';
+import { Keyboard, Command, Zap } from 'lucide-react';
 
 interface KeyboardShortcutsModalProps {
   open: boolean;
@@ -15,7 +15,8 @@ interface KeyboardShortcutsModalProps {
 interface Shortcut {
   keys: string[];
   description: string;
-  category: 'General' | 'Navigation' | 'Actions' | 'Editor';
+  category: 'General' | 'Navigation' | 'Actions';
+  icon?: React.ReactNode;
 }
 
 const shortcuts: Shortcut[] = [
@@ -81,56 +82,70 @@ export const KeyboardShortcutsModal = ({ open, onOpenChange }: KeyboardShortcuts
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl bg-white border-neutral-200">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-brand-primary">
-            <Keyboard className="w-5 h-5" />
-            Keyboard Shortcuts
-          </DialogTitle>
-          <DialogDescription className="text-neutral-600">
-            Speed up your workflow with these keyboard shortcuts
-          </DialogDescription>
-        </DialogHeader>
-
-        <div className="space-y-6 py-4">
-          {categories.map((category) => (
-            <div key={category}>
-              <h3 className="text-sm font-semibold text-brand-primary mb-3">
-                {category}
-              </h3>
-              <div className="space-y-2">
-                {shortcuts
-                  .filter((s) => s.category === category)
-                  .map((shortcut, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-brand-bg transition-colors"
-                    >
-                      <span className="text-sm text-neutral-700">
-                        {shortcut.description}
-                      </span>
-                      <div className="flex items-center gap-1">
-                        {shortcut.keys.map((key, i) => (
-                          <kbd
-                            key={i}
-                            className="px-2 py-1 bg-white border border-neutral-300 rounded text-xs font-mono text-brand-primary shadow-sm min-w-[28px] text-center"
-                          >
-                            {key}
-                          </kbd>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
+      <DialogContent className="sm:max-w-3xl bg-white border-neutral-200 p-0 gap-0 overflow-hidden">
+        {/* Header with Gradient */}
+        <div className="bg-gradient-to-r from-neutral-800 to-neutral-900 px-6 py-5 text-white">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3 text-white text-xl">
+              <div className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center">
+                <Command className="w-5 h-5" />
               </div>
-            </div>
-          ))}
+              Keyboard Shortcuts
+            </DialogTitle>
+            <DialogDescription className="text-neutral-300 mt-2">
+              Master these shortcuts to boost your productivity
+            </DialogDescription>
+          </DialogHeader>
         </div>
 
-        <div className="border-t border-neutral-200 pt-4">
-          <p className="text-xs text-neutral-500 text-center">
-            Use <kbd className="px-1.5 py-0.5 bg-brand-bg border border-neutral-200 rounded text-xs font-mono mx-1 text-brand-primary">Ctrl</kbd> 
-            instead of <kbd className="px-1.5 py-0.5 bg-brand-bg border border-neutral-200 rounded text-xs font-mono mx-1 text-brand-primary">⌘</kbd> on Windows
-          </p>
+        {/* Content */}
+        <div className="px-6 py-6 max-h-[60vh] overflow-y-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {categories.map((category) => (
+              <div key={category} className="space-y-3">
+                <div className="flex items-center gap-2 pb-2 border-b border-neutral-200">
+                  <Zap className="w-4 h-4 text-neutral-600" />
+                  <h3 className="text-sm font-semibold text-neutral-900">
+                    {category}
+                  </h3>
+                </div>
+                <div className="space-y-3">
+                  {shortcuts
+                    .filter((s) => s.category === category)
+                    .map((shortcut, index) => (
+                      <div
+                        key={index}
+                        className="group"
+                      >
+                        <div className="text-xs text-neutral-600 mb-1.5">
+                          {shortcut.description}
+                        </div>
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          {shortcut.keys.map((key, i) => (
+                            <kbd
+                              key={i}
+                              className="inline-flex items-center justify-center min-w-[32px] h-7 px-2 bg-neutral-100 border border-neutral-300 rounded-md text-xs font-semibold text-neutral-900 shadow-sm group-hover:border-neutral-400 transition-colors"
+                            >
+                              {key}
+                            </kbd>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="bg-neutral-50 border-t border-neutral-200 px-6 py-4">
+          <div className="flex items-center justify-center gap-2 text-xs text-neutral-600">
+            <span>Windows users: Replace</span>
+            <kbd className="inline-flex items-center justify-center min-w-[24px] h-6 px-2 bg-white border border-neutral-300 rounded text-xs font-semibold text-neutral-900">⌘</kbd>
+            <span>with</span>
+            <kbd className="inline-flex items-center justify-center min-w-[24px] h-6 px-2 bg-white border border-neutral-300 rounded text-xs font-semibold text-neutral-900">Ctrl</kbd>
+          </div>
         </div>
       </DialogContent>
     </Dialog>

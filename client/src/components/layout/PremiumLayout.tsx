@@ -1,23 +1,45 @@
+import { useState } from 'react';
 import { TopNavBar } from '../app/TopNavBar';
 import { UnifiedSidebar } from '../app/UnifiedSidebar';
+import { useGlobalShortcuts } from '@/hooks/useGlobalShortcuts';
+import { ImprovedCommandPalette } from '../app/ImprovedCommandPalette';
+import { KeyboardShortcutsModal } from '../app/KeyboardShortcutsModal';
 
 interface PremiumLayoutProps {
   children: React.ReactNode;
 }
 
 export const PremiumLayout = ({ children }: PremiumLayoutProps) => {
+  const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
+  const [shortcutsModalOpen, setShortcutsModalOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+
+  // Global keyboard shortcuts
+  useGlobalShortcuts({
+    onCommandPalette: () => setCommandPaletteOpen(true),
+    onShortcutsModal: () => setShortcutsModalOpen(true),
+    onToggleSidebar: () => setSidebarOpen(prev => !prev),
+  });
+
   return (
     <div className="min-h-screen bg-brand-bg">
       {/* Top Navigation Bar */}
-      <TopNavBar />
+      <TopNavBar 
+        onCommandPalette={() => setCommandPaletteOpen(true)}
+        onShortcutsModal={() => setShortcutsModalOpen(true)}
+      />
 
       {/* Unified Sidebar */}
-      <UnifiedSidebar />
+      <UnifiedSidebar isOpen={sidebarOpen} onToggle={() => setSidebarOpen(!sidebarOpen)} />
 
       {/* Main Content with Sidebar and TopNav Offset - Mobile Responsive */}
-      <main className="lg:ml-64 pt-14 sm:pt-16">
+      <main className={`transition-all duration-300 pt-16 ${sidebarOpen ? 'lg:ml-64' : 'lg:ml-0'}`}>
         {children}
       </main>
+
+      {/* Global Modals */}
+      <ImprovedCommandPalette open={commandPaletteOpen} onOpenChange={setCommandPaletteOpen} />
+      <KeyboardShortcutsModal open={shortcutsModalOpen} onOpenChange={setShortcutsModalOpen} />
     </div>
   );
 };

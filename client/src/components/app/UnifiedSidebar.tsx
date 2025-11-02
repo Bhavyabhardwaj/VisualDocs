@@ -18,6 +18,11 @@ interface NavItem {
   badge?: string;
 }
 
+interface UnifiedSidebarProps {
+  isOpen?: boolean;
+  onToggle?: () => void;
+}
+
 const navigationItems: NavItem[] = [
   {
     label: 'Dashboard',
@@ -61,7 +66,7 @@ const navigationItems: NavItem[] = [
   },
 ];
 
-export const UnifiedSidebar = () => {
+export const UnifiedSidebar = ({ isOpen = true }: UnifiedSidebarProps) => {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -70,7 +75,11 @@ export const UnifiedSidebar = () => {
   };
 
   return (
-    <aside className="fixed left-0 top-14 sm:top-16 z-30 h-[calc(100vh-3.5rem)] sm:h-[calc(100vh-4rem)] w-64 border-r border-neutral-200 bg-white transform -translate-x-full lg:translate-x-0 transition-transform duration-200 ease-in-out">
+    <aside className={cn(
+      "fixed left-0 top-16 z-30 h-[calc(100vh-4rem)] w-64 border-r border-neutral-200 bg-white transition-all duration-300 ease-in-out",
+      isOpen ? "lg:translate-x-0" : "lg:-translate-x-full",
+      "-translate-x-full lg:translate-x-0" // Mobile: hidden by default, Desktop: follows isOpen
+    )}>
       <div className="flex h-full flex-col overflow-y-auto">
         {/* Main Navigation */}
         <nav className="flex-1 space-y-1 p-3 sm:p-4">

@@ -128,6 +128,7 @@ export const RealProjects = () => {
                 variant="outline" 
                 onClick={() => setGithubDialogOpen(true)} 
                 className="h-8 sm:h-9 text-xs sm:text-sm border-neutral-300 flex-1 sm:flex-none"
+                data-action="create-project"
               >
                 <Github className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
                 <span className="hidden sm:inline">Import from GitHub</span>
@@ -136,6 +137,7 @@ export const RealProjects = () => {
               <Button 
                 onClick={() => setUploadDialogOpen(true)} 
                 className="h-8 sm:h-9 text-xs sm:text-sm bg-brand-primary hover:bg-brand-secondary flex-1 sm:flex-none"
+                data-action="upload-files"
               >
                 <Upload className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
                 <span className="hidden sm:inline">Upload Files</span>

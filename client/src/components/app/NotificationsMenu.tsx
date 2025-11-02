@@ -75,10 +75,10 @@ export const NotificationsMenu = () => {
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
       <DropdownMenuTrigger asChild>
-        <button className="relative p-2 rounded-lg hover:bg-zinc-50 transition-colors">
-          <Bell className="w-5 h-5 text-zinc-600" />
+        <button className="relative flex items-center justify-center w-10 h-10 rounded-lg hover:bg-neutral-100 transition-colors group">
+          <Bell className="w-5 h-5 text-neutral-600 group-hover:text-neutral-900 transition-colors" />
           {unreadCount > 0 && (
-            <span className="absolute top-1 right-1 w-4 h-4 bg-red-500 rounded-full text-[10px] text-white flex items-center justify-center font-semibold">
+            <span className="absolute -top-1 -right-1 min-w-[20px] h-5 px-1.5 bg-red-500 rounded-full text-[11px] text-white flex items-center justify-center font-semibold shadow-sm">
               {unreadCount > 9 ? '9+' : unreadCount}
             </span>
           )}
@@ -87,12 +87,12 @@ export const NotificationsMenu = () => {
 
       <DropdownMenuContent align="end" className="w-96 p-0">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-zinc-100">
-          <h3 className="text-sm font-semibold text-zinc-900">Notifications</h3>
+        <div className="flex items-center justify-between p-4 border-b border-neutral-100">
+          <h3 className="text-sm font-semibold text-neutral-900">Notifications</h3>
           {unreadCount > 0 && (
             <button
               onClick={markAllAsRead}
-              className="text-xs text-zinc-600 hover:text-zinc-900 font-medium"
+              className="text-xs text-neutral-600 hover:text-neutral-900 font-medium"
             >
               Mark all as read
             </button>
