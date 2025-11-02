@@ -37,15 +37,15 @@ class ApiClient {
           console.log('🚨 Current path:', window.location.pathname);
           
           const currentPath = window.location.pathname;
-          // Only clear token and redirect if:
-          // 1. We're not on login/register pages
-          // 2. We actually have a token (otherwise it's expected 401)
           const hasToken = !!localStorage.getItem('authToken');
           
+          // Only clear token and redirect if we're on a protected route AND have a token
+          // This prevents clearing valid tokens on transient 401s
           if (!currentPath.includes('/login') && !currentPath.includes('/register') && hasToken) {
-            console.log('🚨 API Client: Clearing token and redirecting to login');
-            localStorage.removeItem('authToken');
-            window.location.href = '/login';
+            console.log('🚨 API Client: Token exists but got 401 - token may be invalid/expired');
+            // Don't immediately redirect - let the component handle it
+            // Only clear token if this is clearly an auth failure
+            console.log('🚨 API Client: Keeping token for now, component will handle redirect if needed');
           } else {
             console.log('🚨 API Client: 401 but not clearing token (on auth page or no token)');
           }
