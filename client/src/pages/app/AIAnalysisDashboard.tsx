@@ -4,7 +4,7 @@ import {
   TrendingUp, TrendingDown, AlertCircle, CheckCircle2, Zap,
   FileText, Code, GitBranch, Users, Clock, Download, Filter,
   ChevronDown, Calendar, BarChart3, Sparkles,
-  AlertTriangle, Info, XCircle, Target, Brain
+  AlertTriangle, Info, XCircle, Target, Brain, Box, FileCode
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -21,19 +21,22 @@ import { useToast } from '@/components/ui/use-toast';
 
 interface QualityMetric {
   name: string;
+  value?: number;
+  maxValue?: number;
   score: number;
   change: number;
-  status: 'improving' | 'declining' | 'stable';
+  status: string;
 }
 
 interface Issue {
   id: string;
   severity: 'critical' | 'high' | 'medium' | 'low';
   title: string;
+  description?: string;  // Added for recommendations
   file: string;
   line: number;
   category: string;
-  suggestion: string;
+  suggestion?: string;
   codeSnippet?: string;
   aiSuggestion?: {
     title: string;
@@ -124,30 +127,82 @@ export const AIAnalysisDashboard = () => {
         // Handle different response structures
         const analysis = data.data?.analysis || data.analysis || data.data;
         console.log('📊 Extracted analysis:', analysis);
+        console.log('📊 Analysis keys:', analysis ? Object.keys(analysis) : 'null');
         
-        if (analysis) {
+        if (analysis && analysis !== null && typeof analysis === 'object' && Object.keys(analysis).length > 0) {
+          console.log('✅ Analysis data found:', {
+            totalFiles: analysis.totalFiles,
+            totalLinesOfCode: analysis.totalLinesOfCode,
+            totalComplexity: analysis.totalComplexity,
+            averageComplexity: analysis.averageComplexity,
+            functionCount: analysis.functionCount,
+            classCount: analysis.classCount,
+            interfaceCount: analysis.interfaceCount
+          });
           setAnalysisData(analysis);
+        } else {
+          console.log('⚠️ Analysis is null - project needs to be analyzed');
+          setAnalysisData(null);
         }
       } else {
         console.log('⚠️ No analysis data available (status:', response.status, ')');
+        setAnalysisData(null);
       }
     } catch (error) {
       console.error('Failed to load analysis:', error);
     }
   };
 
-  // Get quality metrics from analysis data
-  const qualityMetrics: QualityMetric[] = analysisData?.qualityMetrics || [];
+  // Get quality metrics from analysis data - transform database format to UI format
+  const qualityMetrics: QualityMetric[] = analysisData ? [
+    {
+      name: "Code Complexity",
+      value: analysisData.averageComplexity || 0,
+      maxValue: 20,
+      score: Math.max(0, 100 - (analysisData.averageComplexity || 0) * 5),
+      change: 0,
+      status: (analysisData.averageComplexity || 0) <= 10 ? "good" : (analysisData.averageComplexity || 0) <= 15 ? "warning" : "critical"
+    },
+    {
+      name: "Maintainability",
+      value: Math.max(0, 100 - (analysisData.averageComplexity || 0) * 5),
+      maxValue: 100,
+      score: Math.max(0, 100 - (analysisData.averageComplexity || 0) * 5),
+      change: 0,
+      status: (analysisData.averageComplexity || 0) <= 10 ? "good" : (analysisData.averageComplexity || 0) <= 15 ? "warning" : "critical"
+    },
+    {
+      name: "Test Coverage",
+      value: 0,
+      maxValue: 100,
+      score: 0,
+      change: 0,
+      status: "warning"
+    }
+  ] : [];
 
-  // Get issues from analysis data (no fallback mock data)
-  const issues: Issue[] = analysisData?.issues || [];
+  // Get issues from analysis data - generate from recommendations
+  const issues: Issue[] = analysisData?.recommendations?.map((rec: string, index: number) => ({
+    id: `issue-${index}`,
+    severity: rec.includes('refactoring') ? 'high' : rec.includes('review') ? 'medium' : 'low',
+    title: rec.includes('refactoring') ? 'High Complexity Detected' : 
+           rec.includes('review') ? 'Architecture Review Needed' : 
+           rec.includes('tests') ? 'Add Unit Tests' : 'Code Quality',
+    description: rec,
+    suggestion: rec,  // Add suggestion field
+    file: 'Multiple files',
+    line: 0,
+    category: rec.includes('complexity') ? 'Performance' : 
+              rec.includes('test') ? 'Testing' : 
+              rec.includes('architecture') ? 'Architecture' : 'Quality',
+  })) || [];
 
   // Calculate stats from real data
-  const totalIssues = analysisData?.totalIssues || 0;
-  const criticalIssues = analysisData?.criticalIssues || 0;
-  const highIssues = analysisData?.highIssues || 0;
-  const mediumIssues = analysisData?.mediumIssues || 0;
-  const lowIssues = analysisData?.lowIssues || 0;
+  const totalIssues = issues.length;
+  const criticalIssues = issues.filter(i => i.severity === 'critical').length;
+  const highIssues = issues.filter(i => i.severity === 'high').length;
+  const mediumIssues = issues.filter(i => i.severity === 'medium').length;
+  const lowIssues = issues.filter(i => i.severity === 'low').length;
   
   // Calculate overall quality score from analysis
   const overallQuality = analysisData?.overallQuality || 0;
@@ -215,18 +270,31 @@ export const AIAnalysisDashboard = () => {
       }
 
       const data = await response.json();
-      console.log('✅ Analysis complete:', data);
+      console.log('✅ Analysis complete - Full response:', data);
+      console.log('✅ Analysis data structure:', JSON.stringify(data, null, 2));
       
       // Handle different response structures
       const analysis = data.data?.analysis || data.analysis || data.data;
+      console.log('✅ Extracted analysis:', analysis);
       
       if (analysis) {
+        console.log('✅ Setting analysis state with data:', {
+          totalFiles: analysis.totalFiles,
+          totalLinesOfCode: analysis.totalLinesOfCode,
+          totalComplexity: analysis.totalComplexity,
+          averageComplexity: analysis.averageComplexity,
+          functionCount: analysis.functionCount,
+          classCount: analysis.classCount,
+          interfaceCount: analysis.interfaceCount,
+          recommendations: analysis.recommendations
+        });
         setAnalysisData(analysis);
         toast({
           title: "Analysis Complete",
-          description: `Found ${analysis.totalIssues || 0} issues!`,
+          description: `Analyzed ${analysis.totalFiles || 0} files with ${analysis.totalLinesOfCode?.toLocaleString() || 0} lines of code!`,
         });
       } else {
+        console.log('⚠️ No analysis in response, reloading...');
         // Reload the analysis data
         await loadAnalysis(projectId);
         toast({
@@ -814,7 +882,9 @@ export const AIAnalysisDashboard = () => {
                       <div className="text-xs text-neutral-600 hidden sm:block">TypeScript & React</div>
                     </div>
                   </div>
-                  <div className="text-lg sm:text-xl font-bold text-neutral-900">247</div>
+                  <div className="text-lg sm:text-xl font-bold text-neutral-900">
+                    {analysisData?.totalFiles || 0}
+                  </div>
                 </div>
 
                 <div className="flex items-center justify-between p-2.5 sm:p-3 rounded-lg bg-neutral-50 hover:bg-neutral-100 transition-colors">
@@ -827,7 +897,9 @@ export const AIAnalysisDashboard = () => {
                       <div className="text-xs text-neutral-600 hidden sm:block">Excluding comments</div>
                     </div>
                   </div>
-                  <div className="text-lg sm:text-xl font-bold text-neutral-900">18.5K</div>
+                  <div className="text-lg sm:text-xl font-bold text-neutral-900">
+                    {analysisData?.totalLinesOfCode?.toLocaleString() || '0'}
+                  </div>
                 </div>
 
                 <div className="flex items-center justify-between p-2.5 sm:p-3 rounded-lg bg-neutral-50 hover:bg-neutral-100 transition-colors">
@@ -840,7 +912,9 @@ export const AIAnalysisDashboard = () => {
                       <div className="text-xs text-neutral-600 hidden sm:block">Cyclomatic average</div>
                     </div>
                   </div>
-                  <div className="text-lg sm:text-xl font-bold text-neutral-900">4.2</div>
+                  <div className="text-lg sm:text-xl font-bold text-neutral-900">
+                    {analysisData?.averageComplexity?.toFixed(1) || '0.0'}
+                  </div>
                 </div>
 
                 <div className="flex items-center justify-between p-2.5 sm:p-3 rounded-lg bg-neutral-50 hover:bg-neutral-100 transition-colors">
@@ -849,11 +923,43 @@ export const AIAnalysisDashboard = () => {
                       <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-neutral-700" />
                     </div>
                     <div>
-                      <div className="text-xs sm:text-sm font-medium text-neutral-900">Contributors</div>
-                      <div className="text-xs text-neutral-600 hidden sm:block">Last 30 days</div>
+                      <div className="text-xs sm:text-sm font-medium text-neutral-900">Functions</div>
+                      <div className="text-xs text-neutral-600 hidden sm:block">Total count</div>
                     </div>
                   </div>
-                  <div className="text-lg sm:text-xl font-bold text-neutral-900">12</div>
+                  <div className="text-lg sm:text-xl font-bold text-neutral-900">
+                    {analysisData?.functionCount || 0}
+                  </div>
+                </div>
+                
+                <div className="flex items-center justify-between p-2.5 sm:p-3 rounded-lg bg-neutral-50 hover:bg-neutral-100 transition-colors">
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    <div className="rounded-lg bg-white p-1.5 sm:p-2 border border-neutral-200">
+                      <Box className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-neutral-700" />
+                    </div>
+                    <div>
+                      <div className="text-xs sm:text-sm font-medium text-neutral-900">Classes</div>
+                      <div className="text-xs text-neutral-600 hidden sm:block">Total count</div>
+                    </div>
+                  </div>
+                  <div className="text-lg sm:text-xl font-bold text-neutral-900">
+                    {analysisData?.classCount || 0}
+                  </div>
+                </div>
+                
+                <div className="flex items-center justify-between p-2.5 sm:p-3 rounded-lg bg-neutral-50 hover:bg-neutral-100 transition-colors">
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    <div className="rounded-lg bg-white p-1.5 sm:p-2 border border-neutral-200">
+                      <FileCode className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-neutral-700" />
+                    </div>
+                    <div>
+                      <div className="text-xs sm:text-sm font-medium text-neutral-900">Interfaces</div>
+                      <div className="text-xs text-neutral-600 hidden sm:block">Total count</div>
+                    </div>
+                  </div>
+                  <div className="text-lg sm:text-xl font-bold text-neutral-900">
+                    {analysisData?.interfaceCount || 0}
+                  </div>
                 </div>
               </CardContent>
             </Card>
