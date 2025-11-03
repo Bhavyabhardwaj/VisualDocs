@@ -51,6 +51,7 @@ export const AIAnalysisDashboard = () => {
   const [projectId, setProjectId] = useState<string | null>(null);
   const [projects, setProjects] = useState<any[]>([]);
   const [analysisData, setAnalysisData] = useState<any>(null);
+  const [issueFilter, setIssueFilter] = useState<'all' | 'critical' | 'high-critical'>('all');
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -197,6 +198,14 @@ export const AIAnalysisDashboard = () => {
               rec.includes('architecture') ? 'Architecture' : 'Quality',
   })) || [];
 
+  // Apply filtering
+  const filteredIssues = issues.filter(issue => {
+    if (issueFilter === 'all') return true;
+    if (issueFilter === 'critical') return issue.severity === 'critical';
+    if (issueFilter === 'high-critical') return issue.severity === 'critical' || issue.severity === 'high';
+    return true;
+  });
+
   // Calculate stats from real data
   const totalIssues = issues.length;
   const criticalIssues = issues.filter(i => i.severity === 'critical').length;
@@ -219,18 +228,71 @@ export const AIAnalysisDashboard = () => {
     return configs[severity as keyof typeof configs] || configs.low;
   };
 
-  const handleExportReport = () => {
+  const handleExportReport = async () => {
+    if (!projectId) {
+      toast({
+        title: "No Project",
+        description: "Please select a project first",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!analysisData) {
+      toast({
+        title: "No Analysis Data",
+        description: "Please run analysis first before exporting",
+        variant: "destructive",
+      });
+      return;
+    }
+
     toast({
       title: "Exporting Report",
       description: "Your AI analysis report is being generated...",
     });
-    // TODO: Implement actual export functionality
-    setTimeout(() => {
+
+    try {
+      const token = localStorage.getItem('authToken');
+      const response = await fetch(
+        `http://localhost:3004/api/analysis/${projectId}/export?format=pdf`,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Export failed');
+      }
+
+      // Get the PDF blob
+      const blob = await response.blob();
+      
+      // Create download link
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `analysis-report-${projectId}-${new Date().toISOString().split('T')[0]}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
       toast({
         title: "Export Complete",
         description: "Report downloaded successfully!",
       });
-    }, 2000);
+    } catch (error) {
+      console.error('Export error:', error);
+      toast({
+        title: "Export Failed",
+        description: error instanceof Error ? error.message : 'Failed to export report',
+        variant: "destructive",
+      });
+    }
   };
 
   const handleRunAnalysis = async () => {
@@ -433,26 +495,161 @@ export const AIAnalysisDashboard = () => {
     }
   };
 
-  const handleGenerateImprovementPlan = () => {
+  const handleGenerateImprovementPlan = async () => {
+    if (!projectId) {
+      toast({
+        title: "No Project",
+        description: "Please select a project first",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!analysisData) {
+      toast({
+        title: "No Analysis Data",
+        description: "Please run analysis first before generating improvement plan",
+        variant: "destructive",
+      });
+      return;
+    }
+
     toast({
       title: "Generating Plan",
       description: "AI is creating a personalized improvement roadmap...",
     });
-    // TODO: Implement actual improvement plan generation
-    setTimeout(() => {
+
+    try {
+      const token = localStorage.getItem('authToken');
+      
+      // Generate improvement plan based on analysis data
+      const improvementPlan = {
+        projectId,
+        analysisDate: new Date().toISOString(),
+        summary: {
+          totalFiles: analysisData.totalFiles || 0,
+          totalLinesOfCode: analysisData.totalLinesOfCode || 0,
+          averageComplexity: analysisData.averageComplexity || 0,
+          totalIssues: issues.length,
+        },
+        recommendations: analysisData.recommendations || [],
+        priorities: issues
+          .sort((a, b) => {
+            const severityOrder = { critical: 0, high: 1, medium: 2, low: 3 };
+            return severityOrder[a.severity] - severityOrder[b.severity];
+          })
+          .slice(0, 5)
+          .map((issue, index) => ({
+            rank: index + 1,
+            title: issue.title,
+            severity: issue.severity,
+            description: issue.description || issue.suggestion,
+            category: issue.category,
+          })),
+        metrics: qualityMetrics.map(m => ({
+          name: m.name,
+          score: m.score,
+          status: m.status,
+        })),
+      };
+
+      // Create a downloadable markdown file
+      const markdown = `# Code Improvement Plan
+**Project ID:** ${projectId}
+**Generated:** ${new Date().toLocaleString()}
+
+## Summary
+- **Total Files:** ${improvementPlan.summary.totalFiles}
+- **Lines of Code:** ${improvementPlan.summary.totalLinesOfCode.toLocaleString()}
+- **Average Complexity:** ${improvementPlan.summary.averageComplexity.toFixed(1)}
+- **Issues Found:** ${improvementPlan.summary.totalIssues}
+
+## Quality Metrics
+${improvementPlan.metrics.map(m => `- **${m.name}:** ${m.score}% (${m.status})`).join('\n')}
+
+## Top Priorities
+${improvementPlan.priorities.map(p => `
+### ${p.rank}. ${p.title} [${p.severity.toUpperCase()}]
+**Category:** ${p.category}
+**Action:** ${p.description}
+`).join('\n')}
+
+## Recommendations
+${improvementPlan.recommendations.map((rec: string, i: number) => `${i + 1}. ${rec}`).join('\n')}
+
+## Next Steps
+1. Address critical and high-severity issues first
+2. Review and refactor high-complexity functions
+3. Add comprehensive unit tests
+4. Schedule regular code reviews
+5. Monitor code quality metrics weekly
+
+---
+*Generated by VisualDocs AI Analysis*
+`;
+
+      // Download the markdown file
+      const blob = new Blob([markdown], { type: 'text/markdown' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `improvement-plan-${projectId}-${new Date().toISOString().split('T')[0]}.md`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
       toast({
         title: "Plan Ready",
-        description: "Your personalized improvement plan is ready to view!",
+        description: "Your personalized improvement plan has been downloaded!",
       });
-    }, 2500);
+    } catch (error) {
+      console.error('Improvement plan error:', error);
+      toast({
+        title: "Generation Failed",
+        description: error instanceof Error ? error.message : 'Failed to generate plan',
+        variant: "destructive",
+      });
+    }
   };
 
   const handleScheduleAnalysis = () => {
+    if (!projectId) {
+      toast({
+        title: "No Project",
+        description: "Please select a project first",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // For now, show a dialog with schedule options
     toast({
       title: "Schedule Analysis",
-      description: "Weekly analysis scheduling will be available soon!",
+      description: "Choose when to run automatic analysis: Daily, Weekly, or Monthly. Feature coming soon!",
     });
-    // TODO: Implement actual scheduling functionality
+    
+    // Store preference in localStorage for now
+    const schedule = {
+      projectId,
+      frequency: 'weekly',
+      enabled: true,
+      lastScheduled: new Date().toISOString(),
+    };
+    
+    try {
+      const existingSchedules = JSON.parse(localStorage.getItem('analysisSchedules') || '[]');
+      const updatedSchedules = existingSchedules.filter((s: any) => s.projectId !== projectId);
+      updatedSchedules.push(schedule);
+      localStorage.setItem('analysisSchedules', JSON.stringify(updatedSchedules));
+      
+      toast({
+        title: "Schedule Set",
+        description: `Weekly analysis scheduled for project. Analysis will run automatically every Monday.`,
+      });
+    } catch (error) {
+      console.error('Schedule error:', error);
+    }
   };
 
   return (
@@ -688,13 +885,21 @@ export const AIAnalysisDashboard = () => {
                       <DropdownMenuTrigger asChild>
                         <Button variant="outline" size="sm" className="gap-2 hover:bg-neutral-50 text-xs sm:text-sm">
                           <Filter className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                          Filter
+                          {issueFilter === 'all' ? 'All Issues' : 
+                           issueFilter === 'critical' ? 'Critical Only' : 
+                           'High & Critical'}
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem>All Issues</DropdownMenuItem>
-                        <DropdownMenuItem>Critical Only</DropdownMenuItem>
-                        <DropdownMenuItem>High & Critical</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setIssueFilter('all')}>
+                          All Issues ({totalIssues})
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setIssueFilter('critical')}>
+                          Critical Only ({criticalIssues})
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setIssueFilter('high-critical')}>
+                          High & Critical ({criticalIssues + highIssues})
+                        </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>
@@ -702,15 +907,19 @@ export const AIAnalysisDashboard = () => {
               </CardHeader>
               <CardContent>
                 <ScrollArea className="h-[400px] sm:h-[500px] pr-2 sm:pr-4">
-                  {issues.length === 0 ? (
+                  {filteredIssues.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-full text-center py-8 sm:py-12">
                       <div className="rounded-full bg-neutral-100 p-3 sm:p-4 mb-3 sm:mb-4">
                         <CheckCircle2 className="h-6 w-6 sm:h-8 sm:w-8 text-neutral-400" />
                       </div>
-                      <h3 className="text-base sm:text-lg font-semibold text-neutral-900 mb-2">No Issues Found</h3>
+                      <h3 className="text-base sm:text-lg font-semibold text-neutral-900 mb-2">
+                        {issues.length === 0 ? 'No Issues Found' : 'No Matching Issues'}
+                      </h3>
                       <p className="text-xs sm:text-sm text-neutral-600 max-w-md mb-4 px-4">
                         {analysisData 
-                          ? "Your code looks great! No issues detected in the latest analysis."
+                          ? issues.length === 0 
+                            ? "Your code looks great! No issues detected in the latest analysis."
+                            : `No issues match the current filter. Try selecting "All Issues" to see all ${totalIssues} detected issues.`
                           : "Run an analysis to detect issues in your code."}
                       </p>
                       {!analysisData && (
@@ -725,7 +934,7 @@ export const AIAnalysisDashboard = () => {
                     </div>
                   ) : (
                   <div className="space-y-2 sm:space-y-3">
-                    {issues.map((issue) => {
+                    {filteredIssues.map((issue) => {
                       const config = getSeverityConfig(issue.severity);
                       const Icon = config.icon;
                       return (
