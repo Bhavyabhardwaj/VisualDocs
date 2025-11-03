@@ -61,18 +61,41 @@ export const AIAnalysisDashboard = () => {
         });
         const data = await response.json();
         console.log('📦 Projects response:', data);
+        console.log('📦 data.success:', data.success);
+        console.log('📦 data.data:', data.data);
+        console.log('📦 data.data?.items:', data.data?.items);
         
-        if (data.success && data.data?.projects && data.data.projects.length > 0) {
+        // The API returns data.data.items (array of projects)
+        if (data.success && data.data?.items && data.data.items.length > 0) {
+          console.log('✅ Using data.data.items path');
+          setProjects(data.data.items);
+          const firstProject = data.data.items[0];
+          console.log('📊 Loading analysis for project:', firstProject.id);
+          setProjectId(firstProject.id);
+          loadAnalysis(firstProject.id);
+        } else if (data.success && data.data?.projects && data.data.projects.length > 0) {
+          console.log('✅ Using data.data.projects path');
           setProjects(data.data.projects);
           const firstProject = data.data.projects[0];
           console.log('📊 Loading analysis for project:', firstProject.id);
           setProjectId(firstProject.id);
           loadAnalysis(firstProject.id);
+        } else if (data.data && Array.isArray(data.data) && data.data.length > 0) {
+          // data.data is directly an array
+          console.log('✅ Using data.data array path');
+          setProjects(data.data);
+          const firstProject = data.data[0];
+          console.log('📊 Loading analysis for project:', firstProject.id);
+          setProjectId(firstProject.id);
+          loadAnalysis(firstProject.id);
         } else if (data.projects && data.projects.length > 0) {
           // Alternative response structure
+          console.log('✅ Using data.projects path');
           setProjects(data.projects);
           setProjectId(data.projects[0].id);
           loadAnalysis(data.projects[0].id);
+        } else {
+          console.warn('⚠️ No projects found in response');
         }
       } catch (error) {
         console.error('Failed to load projects:', error);

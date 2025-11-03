@@ -15,7 +15,7 @@ export class AnalysisController {
                 throw new UnauthorizedError("Project ID is required");
             }
 
-            const analysis = await analysisService.getProjectAnalysis(userId, projectId);
+            const analysis = await analysisService.getProjectAnalysis(projectId, userId);
             return successResponse(
                 res,
                 { analysis },
@@ -63,7 +63,7 @@ export class AnalysisController {
                 return new UnauthorizedError("Project ID is required");
             }
 
-            const analysis = await analysisService.getProjectAnalysis(userId, projectId);
+            const analysis = await analysisService.getProjectAnalysis(projectId, userId);
             return successResponse(
                 res,
                 { analysis },
