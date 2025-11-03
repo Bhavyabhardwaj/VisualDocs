@@ -2,9 +2,11 @@ import type { AuthenticatedSocket, ConnectionResponse, CursorMovePayload, Cursor
 import { Server as SocketIoServer } from "socket.io";
 import { logger, verifyAccessToken } from "../utils";
 import { eventService } from "../services";
+import prisma from "../config/db";
 
 class SocketManager {
     private io: SocketIoServer;
+    private prisma = prisma;
     private connectedUsers: Map<string, UserPresence> = new Map();
     private projectRooms: Map<string, Set<string>> = new Map();
 

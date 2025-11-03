@@ -87,7 +87,7 @@ class SocketService {
       return;
     }
     
-    const payload = { projectId, comment, fileId };
+    const payload = { projectId, content: comment, fileId };
     console.log('💬 Emitting project-comment:', payload);
     this.socket.emit('project-comment', payload);
     console.log('✅ Comment emitted successfully');

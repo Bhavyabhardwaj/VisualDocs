@@ -1,14 +1,20 @@
 import { Router } from 'express';
-import { prisma } from '../utils/database';
-import { successResponse, errorResponse } from '../utils';
+import prisma from '../config/db';
 import type { Request, Response, NextFunction } from 'express';
 
 const router = Router();
 
 // Get all comments for a project
-router.get('/projects/:projectId/comments', async (req: Request, res: Response, next: NextFunction) => {
+router.get('/projects/:projectId', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { projectId } = req.params;
+
+    if (!projectId) {
+      return res.status(400).json({
+        success: false,
+        error: 'Project ID is required',
+      });
+    }
 
     const comments = await prisma.comment.findMany({
       where: { projectId },
@@ -16,7 +22,7 @@ router.get('/projects/:projectId/comments', async (req: Request, res: Response, 
     });
 
     // Transform to match frontend format
-    const formattedComments = comments.map(comment => ({
+    const formattedComments = comments.map((comment: any) => ({
       id: comment.id,
       projectId: comment.projectId,
       userId: comment.userId,
@@ -26,7 +32,11 @@ router.get('/projects/:projectId/comments', async (req: Request, res: Response, 
       timestamp: comment.createdAt.toISOString(),
     }));
 
-    return res.json(successResponse(formattedComments, 'Comments retrieved successfully'));
+    return res.json({
+      success: true,
+      message: 'Comments retrieved successfully',
+      data: formattedComments,
+    });
   } catch (error) {
     next(error);
   }
@@ -38,24 +48,41 @@ router.delete('/comments/:commentId', async (req: Request, res: Response, next: 
     const { commentId } = req.params;
     const userId = req.user?.userId;
 
+    if (!commentId) {
+      return res.status(400).json({
+        success: false,
+        error: 'Comment ID is required',
+      });
+    }
+
     // Check if comment exists and belongs to user
     const comment = await prisma.comment.findUnique({
       where: { id: commentId },
     });
 
     if (!comment) {
-      return res.status(404).json(errorResponse('Comment not found', 404));
+      return res.status(404).json({
+        success: false,
+        error: 'Comment not found',
+      });
     }
 
     if (comment.userId !== userId && req.user?.role !== 'ADMIN') {
-      return res.status(403).json(errorResponse('Unauthorized to delete this comment', 403));
+      return res.status(403).json({
+        success: false,
+        error: 'Unauthorized to delete this comment',
+      });
     }
 
     await prisma.comment.delete({
       where: { id: commentId },
     });
 
-    return res.json(successResponse(null, 'Comment deleted successfully'));
+    return res.json({
+      success: true,
+      message: 'Comment deleted successfully',
+      data: null,
+    });
   } catch (error) {
     next(error);
   }

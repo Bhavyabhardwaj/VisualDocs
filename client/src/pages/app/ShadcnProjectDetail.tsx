@@ -322,7 +322,7 @@ export const ShadcnProjectDetail = () => {
     
     try {
       console.log('💬 Loading existing comments for project:', id);
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/comments/projects/${id}/comments`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/comments/projects/${id}`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
         },
