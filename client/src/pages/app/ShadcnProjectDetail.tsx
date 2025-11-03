@@ -91,6 +91,7 @@ export const ShadcnProjectDetail = () => {
       loadExistingAnalysis();
       loadExistingDocumentation();
       handleLoadDiagrams();
+      loadExistingComments();
     }
   }, [id]);
 
@@ -313,6 +314,31 @@ export const ShadcnProjectDetail = () => {
       } else {
         console.error('Failed to load existing documentation:', error);
       }
+    }
+  };
+
+  const loadExistingComments = async () => {
+    if (!id) return;
+    
+    try {
+      console.log('💬 Loading existing comments for project:', id);
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/comments/projects/${id}/comments`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+        },
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.data) {
+          console.log('✅ Loaded existing comments:', data.data.length);
+          setComments(data.data);
+        }
+      } else {
+        console.log('ℹ️ No existing comments found or error loading');
+      }
+    } catch (error) {
+      console.error('Failed to load existing comments:', error);
     }
   };
 

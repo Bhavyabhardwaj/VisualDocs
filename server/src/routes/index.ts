@@ -11,6 +11,7 @@ import publicRouter from './public.router';
 import teamRouter from './team.router';
 import activityRouter from './activity.router';
 import codeAnalysisRouter from './codeAnalysis.routes';
+import commentRouter from './comment.router';
 
 const router = Router();
 
@@ -24,6 +25,7 @@ const apiRoutes = [
   { path: '/diagrams', route: diagramRouter, isProtected: true },
   { path: '/teams', route: teamRouter, isProtected: true },
   { path: '/activity', route: activityRouter, isProtected: true },
+  { path: '/comments', route: commentRouter, isProtected: true },
   { path: '/public', route: publicRouter },
 ];
 

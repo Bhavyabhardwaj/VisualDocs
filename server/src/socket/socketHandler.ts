@@ -225,25 +225,43 @@ class SocketManager {
         logger.debug('User status updated', { userId: user.userId, status, projectId });
     }
     // project comments
-    private handleProjectComment(socket: AuthenticatedSocket, data: ProjectCommentPayload) {
+    private async handleProjectComment(socket: AuthenticatedSocket, data: ProjectCommentPayload) {
         const user = socket.user!;
         const { projectId, content, position } = data;
-        const comment: LiveComment = {
-            id: `comment_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-            projectId,
-            userId: user.userId,
-            userName: user.name,
-            content,
-            position: position || { x: 0, y: 0 },
-            timestamp: new Date().toISOString()
+        
+        try {
+            // Save comment to database
+            const savedComment = await this.prisma.comment.create({
+                data: {
+                    content,
+                    position: position || { x: 0, y: 0 },
+                    userId: user.userId,
+                    projectId,
+                },
+            });
+
+            const comment: LiveComment = {
+                id: savedComment.id,
+                projectId,
+                userId: user.userId,
+                userName: user.name,
+                content,
+                position: position || { x: 0, y: 0 },
+                timestamp: savedComment.createdAt.toISOString()
+            };
+            
+            // broadcast to all users in the project room (including sender)
+            this.io.to(`project-${projectId}`).emit('new-comment', comment);
+            
+            logger.debug('New project comment saved', {
+                userId: user.userId,
+                projectId,
+                commentId: comment.id
+            });
+        } catch (error) {
+            logger.error('Failed to save comment', { error, userId: user.userId, projectId });
+            socket.emit('error', { message: 'Failed to save comment' });
         }
-        // broadcast to others in the project room
-        this.io.to(`project-${projectId}`).emit('new-comment', comment);
-        logger.debug('New project comment', {
-            userId: user.userId,
-            projectId,
-            commentId: comment.id
-        });
     }
     // cursor position sharing
     private handleCursorPosition(socket: AuthenticatedSocket, data: CursorMovePayload) {

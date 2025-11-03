@@ -62,4 +62,3 @@ export const TopNavBar = ({ onCommandPalette, onShortcutsModal }: TopNavBarProps
     </div>
   );
 };
-};
