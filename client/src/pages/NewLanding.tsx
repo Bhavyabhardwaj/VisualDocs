@@ -164,6 +164,11 @@ export default function NewLanding() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Scroll to top on mount
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   // Auto-rotate hero content every 5 seconds
   useEffect(() => {
     const heroInterval = setInterval(() => {
@@ -258,11 +263,11 @@ export default function NewLanding() {
             </div>
 
             {/* Hero Section */}
-            <div className="pt-16 sm:pt-20 md:pt-24 lg:pt-[216px] pb-8 sm:pb-12 md:pb-16 flex flex-col justify-start items-center px-2 sm:px-4 md:px-8 lg:px-0 w-full relative">
-              <div className="w-full max-w-[937px] lg:w-[937px] flex flex-col justify-center items-center gap-3 sm:gap-4 md:gap-5 lg:gap-6 relative z-10">
-                <div className="self-stretch rounded-[3px] flex flex-col justify-center items-center gap-4 sm:gap-5 md:gap-6 lg:gap-8">
+            <div className="pt-16 sm:pt-20 md:pt-24 lg:pt-32 pb-8 sm:pb-10 md:pb-12 lg:pb-16 flex flex-col justify-start items-center px-2 sm:px-4 md:px-8 lg:px-0 w-full relative">
+              <div className="w-full max-w-[937px] lg:w-[937px] flex flex-col justify-center items-center gap-4 sm:gap-5 md:gap-6 relative z-10">
+                <div className="self-stretch rounded-[3px] flex flex-col justify-center items-center gap-5 sm:gap-6 md:gap-7">
                   {/* Rotating Hero Titles */}
-                  <div className="w-full max-w-[748.71px] lg:w-[748.71px] text-center relative min-h-[240px] sm:min-h-[280px] md:min-h-[320px] lg:min-h-[360px] flex items-center justify-center">
+                  <div className="w-full max-w-[748.71px] lg:w-[748.71px] text-center relative min-h-[200px] sm:min-h-[240px] md:min-h-[280px] lg:min-h-[300px] flex items-center justify-center">
                     {heroContent.map((content, index) => (
                       <h1
                         key={index}
@@ -290,7 +295,7 @@ export default function NewLanding() {
                   </div>
 
                   {/* Rotating Subtitles */}
-                  <div className="w-full max-w-[506.08px] lg:w-[506.08px] text-center relative min-h-[80px] sm:min-h-[90px] md:min-h-[100px] flex items-center justify-center">
+                  <div className="w-full max-w-[506.08px] lg:w-[506.08px] text-center relative min-h-[70px] sm:min-h-[80px] md:min-h-[90px] flex items-center justify-center">
                     {heroContent.map((content, index) => (
                       <div
                         key={index}
@@ -310,7 +315,7 @@ export default function NewLanding() {
                 </div>
               </div>
 
-              <div className="w-full max-w-[497px] lg:w-[497px] flex flex-col justify-center items-center gap-6 sm:gap-8 md:gap-10 lg:gap-12 relative z-10 mt-6 sm:mt-8 md:mt-10 lg:mt-12">
+              <div className="w-full max-w-[497px] lg:w-[497px] flex flex-col justify-center items-center gap-4 relative z-10 mt-4 sm:mt-5 md:mt-6">
                 {/* Rotating CTA Buttons */}
                 <div className="backdrop-blur-[8.25px] flex justify-start items-center gap-4 relative min-h-[48px] sm:min-h-[52px] md:min-h-[56px]">
                   {heroContent.map((content, index) => (
@@ -863,7 +868,7 @@ export default function NewLanding() {
                       {Array.from({ length: 200 }).map((_, i) => (
                         <div
                           key={i}
-                          className="self-stretch h-3 sm:h-4 rotate-[-45deg] origin-top-left outline outline-[0.5px] outline-[rgba(3,7,18,0.08)] outline-offset-[-0.25px]"
+                          className="self-stretch h-3 sm:h-4 rotate-[-45deg] origin-top-left outoutline-[0.5px] outline-[rgba(3,7,18,0.08)] outline-offset-[-0.25px]"
                         />
                       ))}
                     </div>
