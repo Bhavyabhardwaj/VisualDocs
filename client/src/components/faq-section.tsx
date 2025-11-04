@@ -9,34 +9,34 @@ interface FAQItem {
 
 const faqData: FAQItem[] = [
   {
-    question: "What is Brillance and who is it for?",
+    question: "What is VisualDocs and who is it for?",
     answer:
-      "Brillance is a comprehensive billing automation platform designed for businesses that need custom contract management. It's perfect for SaaS companies, service providers, and enterprises looking to streamline their billing processes.",
+      "VisualDocs is an AI-powered documentation platform designed for development teams and software companies. It's perfect for developers, technical writers, and teams who want to automate their documentation workflow and keep their docs always up-to-date with their codebase.",
   },
   {
-    question: "How does the custom contract billing work?",
+    question: "How does the AI-powered documentation work?",
     answer:
-      "Our platform automatically processes your custom contracts, calculates billing amounts based on your specific terms, and generates invoices. You can set up complex pricing structures, usage-based billing, and custom billing cycles.",
+      "Our AI analyzes your codebase, understands the structure and logic, and automatically generates comprehensive documentation. It extracts function signatures, identifies patterns, creates visual diagrams, and writes clear explanations. As your code changes, the documentation updates automatically.",
   },
   {
-    question: "Can I integrate Brillance with my existing tools?",
+    question: "Can I integrate VisualDocs with my existing tools?",
     answer:
-      "Yes! Brillance integrates seamlessly with popular CRM systems, accounting software, and payment processors. We support APIs and webhooks for custom integrations with your existing workflow.",
+      "Yes! VisualDocs integrates seamlessly with GitHub, GitLab, Bitbucket, and other version control systems. We support popular IDEs through extensions, and provide APIs and webhooks for custom integrations with your existing development workflow.",
   },
   {
     question: "What kind of support do you provide?",
     answer:
-      "We offer 24/7 customer support, dedicated account managers for enterprise clients, comprehensive documentation, and onboarding assistance to help you get started quickly.",
+      "We offer comprehensive support including detailed documentation, video tutorials, email support, and live chat. Enterprise customers get dedicated account managers, priority support, and custom onboarding sessions to ensure successful implementation.",
   },
   {
-    question: "Is my data secure with Brillance?",
+    question: "Is my code and data secure with VisualDocs?",
     answer:
-      "Absolutely. We use enterprise-grade security measures including end-to-end encryption, SOC 2 compliance, and regular security audits. Your data is stored in secure, redundant data centers.",
+      "Absolutely. We use enterprise-grade security including end-to-end encryption, SOC 2 compliance, and regular security audits. Your code is analyzed in secure, isolated environments and never shared. We offer both cloud and self-hosted deployment options for maximum control.",
   },
   {
-    question: "How do I get started with Brillance?",
+    question: "How do I get started with VisualDocs?",
     answer:
-      "Getting started is simple! Sign up for our free trial, connect your existing systems, and our onboarding team will help you set up your first custom billing workflow within 24 hours.",
+      "Getting started is simple! Sign up for a free account, connect your repository, and our AI will analyze your code within minutes. You can customize the documentation style, choose what to include, and start collaborating with your team immediately. No credit card required for the free tier.",
   },
 ]
 
@@ -71,9 +71,9 @@ export default function FAQSection() {
             Frequently Asked Questions
           </div>
           <div className="w-full text-[#605A57] text-base font-normal leading-7 font-sans">
-            Explore your data, build your dashboard,
+            Everything you need to know about VisualDocs,
             <br className="hidden md:block" />
-            bring your team together.
+            AI-powered documentation, and getting started.
           </div>
         </div>
 

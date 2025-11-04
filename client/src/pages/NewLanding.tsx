@@ -221,24 +221,45 @@ export default function NewLanding() {
                     </div>
                   </div>
                   <div className="pl-3 sm:pl-4 md:pl-5 lg:pl-5 flex justify-start items-start hidden sm:flex flex-row gap-2 sm:gap-3 md:gap-4 lg:gap-4">
-                    <div className="flex justify-start items-center group cursor-pointer relative">
+                    <a 
+                      href="#features" 
+                      className="flex justify-start items-center group cursor-pointer relative"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' });
+                      }}
+                    >
                       <div className="flex flex-col justify-center text-[rgba(49,45,43,0.80)] text-xs md:text-[13px] font-medium leading-[14px] font-sans group-hover:text-[#2F3037] transition-colors">
                         Features
                       </div>
                       <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#2F3037] group-hover:w-full transition-all duration-300"></div>
-                    </div>
-                    <div className="flex justify-start items-center group cursor-pointer relative">
+                    </a>
+                    <a 
+                      href="#pricing" 
+                      className="flex justify-start items-center group cursor-pointer relative"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' });
+                      }}
+                    >
                       <div className="flex flex-col justify-center text-[rgba(49,45,43,0.80)] text-xs md:text-[13px] font-medium leading-[14px] font-sans group-hover:text-[#2F3037] transition-colors">
                         Pricing
                       </div>
                       <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#2F3037] group-hover:w-full transition-all duration-300"></div>
-                    </div>
-                    <div className="flex justify-start items-center group cursor-pointer relative">
+                    </a>
+                    <a 
+                      href="#faq" 
+                      className="flex justify-start items-center group cursor-pointer relative"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        document.getElementById('faq')?.scrollIntoView({ behavior: 'smooth' });
+                      }}
+                    >
                       <div className="flex flex-col justify-center text-[rgba(49,45,43,0.80)] text-xs md:text-[13px] font-medium leading-[14px] font-sans group-hover:text-[#2F3037] transition-colors">
-                        Docs
+                        FAQ
                       </div>
                       <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#2F3037] group-hover:w-full transition-all duration-300"></div>
-                    </div>
+                    </a>
                   </div>
                 </div>
                 <div className="h-6 sm:h-7 md:h-8 flex justify-start items-start gap-2 sm:gap-3">
@@ -319,8 +340,9 @@ export default function NewLanding() {
                 {/* Rotating CTA Buttons */}
                 <div className="backdrop-blur-[8.25px] flex justify-start items-center gap-4 relative min-h-[48px] sm:min-h-[52px] md:min-h-[56px]">
                   {heroContent.map((content, index) => (
-                    <div
+                    <Link
                       key={index}
+                      to="/register"
                       className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transition-all duration-700 ease-in-out ${
                         activeHero === index
                           ? 'opacity-100 scale-100 blur-0'
@@ -337,7 +359,7 @@ export default function NewLanding() {
                           {content.cta}
                         </div>
                       </div>
-                    </div>
+                    </Link>
                   ))}
                 </div>
 
@@ -562,7 +584,7 @@ export default function NewLanding() {
             </div>
 
             {/* Feature Cards Section with Diagonal Lines */}
-            <div className="self-stretch border-t border-[#E0DEDB] border-b border-[#E0DEDB] flex justify-center items-start">
+            <div id="features" className="self-stretch border-t border-[#E0DEDB] border-b border-[#E0DEDB] flex justify-center items-start">
               <div className="w-4 sm:w-6 md:w-8 lg:w-12 self-stretch relative overflow-hidden">
                 {/* Left decorative pattern */}
                 <div className="w-[120px] sm:w-[140px] md:w-[162px] left-[-40px] sm:left-[-50px] md:left-[-58px] top-[-120px] absolute flex flex-col justify-start items-start">
@@ -879,8 +901,12 @@ export default function NewLanding() {
 
             {/* Other Sections */}
             <TestimonialsSection />
-            <PricingSection />
-            <FaqSection />
+            <div id="pricing">
+              <PricingSection />
+            </div>
+            <div id="faq">
+              <FaqSection />
+            </div>
             <CtaSection />
 
             <FooterSection />
