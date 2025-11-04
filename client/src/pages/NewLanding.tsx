@@ -113,40 +113,14 @@ function Badge({ icon, text }: { icon: React.ReactNode; text: string }) {
 function FeatureCard({
   title,
   description,
-  isActive,
-  progress,
-  onClick,
 }: {
   title: string;
   description: string;
-  isActive: boolean;
-  progress: number;
-  onClick: () => void;
 }) {
   return (
     <div
-      className={`group w-full md:flex-1 self-stretch px-6 py-5 overflow-hidden flex flex-col justify-start items-start gap-2 cursor-pointer relative border-b md:border-b-0 last:border-b-0 transition-all duration-300 ${
-        isActive
-          ? "bg-white shadow-[0px_0px_0px_0.75px_#E0DEDB_inset] shadow-lg"
-          : "border-l-0 border-r-0 md:border border-[#E0DEDB]/80 hover:bg-white/50 hover:shadow-md"
-      }`}
-      onClick={onClick}
+      className="group w-full md:flex-1 self-stretch px-6 py-5 overflow-hidden flex flex-col justify-start items-start gap-2 relative border-b md:border-b-0 last:border-b-0 transition-all duration-300 border-l-0 border-r-0 md:border border-[#E0DEDB]/80 hover:bg-white/50 hover:shadow-md"
     >
-      {/* Progress Bar - Always visible at top */}
-      <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-gray-200 to-gray-100 overflow-hidden z-10">
-        {isActive && (
-          <div
-            className="h-full bg-gradient-to-r from-[#322D2B] via-[#49423D] to-[#322D2B] transition-all duration-100 ease-linear shadow-[0_0_8px_rgba(50,45,43,0.5)]"
-            style={{ width: `${progress}%` }}
-          />
-        )}
-      </div>
-
-      {/* Animated Indicator Dot */}
-      {isActive && (
-        <div className="absolute top-1 right-4 w-2 h-2 bg-[#322D2B] rounded-full animate-pulse shadow-lg"></div>
-      )}
-
       <div className="self-stretch flex justify-center flex-col text-[#49423D] text-sm md:text-sm font-semibold leading-6 md:leading-6 font-sans group-hover:text-[#322D2B] transition-colors">
         {title}
       </div>
@@ -158,11 +132,28 @@ function FeatureCard({
 }
 
 export default function NewLanding() {
-  const [activeCard, setActiveCard] = useState(0);
-  const [progress, setProgress] = useState(0);
   const [scrolled, setScrolled] = useState(false);
-  const mountedRef = useRef(true);
+  const [activeHero, setActiveHero] = useState(0);
   const parallaxOffset = useParallax();
+
+  // Hero content variations
+  const heroContent = [
+    {
+      title: ['Transform code into', 'beautiful documentation', 'instantly'],
+      subtitle: 'Automate your documentation workflow with AI-powered analysis. Generate comprehensive docs from your codebase in seconds.',
+      cta: 'Get Started Free'
+    },
+    {
+      title: ['Ship better docs', 'without the', 'hassle'],
+      subtitle: 'Stop writing documentation manually. Let AI understand your code and create professional docs automatically.',
+      cta: 'Try It Now'
+    },
+    {
+      title: ['Keep your team', 'aligned with', 'smart docs'],
+      subtitle: 'Real-time collaboration meets AI intelligence. Update once, sync everywhere, keep everyone on the same page.',
+      cta: 'Start Collaborating'
+    }
+  ];
 
   // Scroll detection for navbar
   useEffect(() => {
@@ -173,38 +164,14 @@ export default function NewLanding() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Auto-rotate hero content every 5 seconds
   useEffect(() => {
-    const progressInterval = setInterval(() => {
-      if (!mountedRef.current) return;
+    const heroInterval = setInterval(() => {
+      setActiveHero((prev) => (prev + 1) % heroContent.length);
+    }, 5000);
 
-      setProgress((prev) => {
-        if (prev >= 100) {
-          if (mountedRef.current) {
-            setActiveCard((current) => (current + 1) % 3);
-          }
-          return 0;
-        }
-        return prev + 2; // 2% every 100ms = 5 seconds total
-      });
-    }, 100);
-
-    return () => {
-      clearInterval(progressInterval);
-      mountedRef.current = false;
-    };
-  }, []);
-
-  useEffect(() => {
-    return () => {
-      mountedRef.current = false;
-    };
-  }, []);
-
-  const handleCardClick = (index: number) => {
-    if (!mountedRef.current) return;
-    setActiveCard(index);
-    setProgress(0);
-  };
+    return () => clearInterval(heroInterval);
+  }, [heroContent.length]);
   return (
     <div className="w-full min-h-screen relative bg-[#F7F5F3] overflow-x-hidden flex flex-col justify-start items-center">
       {/* Animated gradient orbs background with subtle parallax */}
@@ -294,32 +261,95 @@ export default function NewLanding() {
             <div className="pt-16 sm:pt-20 md:pt-24 lg:pt-[216px] pb-8 sm:pb-12 md:pb-16 flex flex-col justify-start items-center px-2 sm:px-4 md:px-8 lg:px-0 w-full relative">
               <div className="w-full max-w-[937px] lg:w-[937px] flex flex-col justify-center items-center gap-3 sm:gap-4 md:gap-5 lg:gap-6 relative z-10">
                 <div className="self-stretch rounded-[3px] flex flex-col justify-center items-center gap-4 sm:gap-5 md:gap-6 lg:gap-8">
-                  <h1 className="w-full max-w-[748.71px] lg:w-[748.71px] text-center text-[#37322F] text-[28px] xs:text-[32px] sm:text-[40px] md:text-[56px] lg:text-[80px] font-normal leading-[1.15] sm:leading-[1.2] md:leading-[1.25] lg:leading-[1.2] font-serif px-2 sm:px-4 md:px-0 animate-fade-in transform-gpu">
-                    <span className="block">Transform code into</span>
-                    <span className="block">
-                      <span className="animate-fade-in inline-block" style={{ animationDelay: '100ms', animationFillMode: 'both' }}>beautiful documentation</span>
-                    </span>
-                    <span className="block">
-                      <span className="animate-fade-in inline-block" style={{ animationDelay: '200ms', animationFillMode: 'both' }}>instantly</span>
-                    </span>
-                  </h1>
-                  <div className="w-full max-w-[506.08px] lg:w-[506.08px] text-center flex justify-center flex-col text-[rgba(55,50,47,0.80)] text-sm sm:text-base md:text-lg lg:text-xl leading-[1.5] sm:leading-[1.55] md:leading-[1.6] lg:leading-7 font-sans px-2 sm:px-4 md:px-0 font-medium animate-fade-in" style={{ animationDelay: '300ms', animationFillMode: 'both' }}>
-                    Automate your documentation workflow with AI-powered analysis.
-                    <br className="hidden sm:block" />
-                    Generate comprehensive docs from your codebase in seconds.
+                  {/* Rotating Hero Titles */}
+                  <div className="w-full max-w-[748.71px] lg:w-[748.71px] text-center relative min-h-[240px] sm:min-h-[280px] md:min-h-[320px] lg:min-h-[360px] flex items-center justify-center">
+                    {heroContent.map((content, index) => (
+                      <h1
+                        key={index}
+                        className={`absolute inset-0 text-[#37322F] text-[28px] xs:text-[32px] sm:text-[40px] md:text-[56px] lg:text-[80px] font-normal leading-[1.15] sm:leading-[1.2] md:leading-[1.25] lg:leading-[1.2] font-serif px-2 sm:px-4 md:px-0 transition-all duration-700 ease-in-out flex flex-col items-center justify-center ${
+                          activeHero === index
+                            ? 'opacity-100 scale-100 blur-0'
+                            : 'opacity-0 scale-95 blur-sm pointer-events-none'
+                        }`}
+                      >
+                        {content.title.map((line, lineIndex) => (
+                          <span
+                            key={lineIndex}
+                            className={`block transition-all duration-700 ${
+                              activeHero === index ? 'translate-y-0' : 'translate-y-4'
+                            }`}
+                            style={{
+                              transitionDelay: activeHero === index ? `${lineIndex * 100}ms` : '0ms'
+                            }}
+                          >
+                            {line}
+                          </span>
+                        ))}
+                      </h1>
+                    ))}
+                  </div>
+
+                  {/* Rotating Subtitles */}
+                  <div className="w-full max-w-[506.08px] lg:w-[506.08px] text-center relative min-h-[80px] sm:min-h-[90px] md:min-h-[100px] flex items-center justify-center">
+                    {heroContent.map((content, index) => (
+                      <div
+                        key={index}
+                        className={`absolute inset-0 flex justify-center flex-col text-[rgba(55,50,47,0.80)] text-sm sm:text-base md:text-lg lg:text-xl leading-[1.5] sm:leading-[1.55] md:leading-[1.6] lg:leading-7 font-sans px-2 sm:px-4 md:px-0 font-medium transition-all duration-700 ease-in-out ${
+                          activeHero === index
+                            ? 'opacity-100 scale-100 blur-0 translate-y-0'
+                            : 'opacity-0 scale-95 blur-sm translate-y-4 pointer-events-none'
+                        }`}
+                        style={{
+                          transitionDelay: activeHero === index ? '200ms' : '0ms'
+                        }}
+                      >
+                        {content.subtitle}
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>
 
               <div className="w-full max-w-[497px] lg:w-[497px] flex flex-col justify-center items-center gap-6 sm:gap-8 md:gap-10 lg:gap-12 relative z-10 mt-6 sm:mt-8 md:mt-10 lg:mt-12">
-                <div className="backdrop-blur-[8.25px] flex justify-start items-center gap-4">
-                  <div className="h-10 sm:h-11 md:h-12 px-6 sm:px-8 md:px-10 lg:px-12 py-2 sm:py-[6px] relative bg-[#37322F] shadow-[0px_0px_0px_2.5px_rgba(255,255,255,0.08)_inset] overflow-hidden rounded-full flex justify-center items-center cursor-pointer hover:bg-[#2A2520] transition-all duration-300 hover:scale-105 hover:shadow-lg group">
-                    <div className="w-20 sm:w-24 md:w-28 lg:w-44 h-[41px] absolute left-0 top-[-0.5px] bg-gradient-to-b from-[rgba(255,255,255,0)] to-[rgba(0,0,0,0.10)] mix-blend-multiply"></div>
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000"></div>
-                    <div className="flex flex-col justify-center text-white text-sm sm:text-base md:text-[15px] font-medium leading-5 font-sans relative z-10">
-                      Get Started Free
+                {/* Rotating CTA Buttons */}
+                <div className="backdrop-blur-[8.25px] flex justify-start items-center gap-4 relative min-h-[48px] sm:min-h-[52px] md:min-h-[56px]">
+                  {heroContent.map((content, index) => (
+                    <div
+                      key={index}
+                      className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transition-all duration-700 ease-in-out ${
+                        activeHero === index
+                          ? 'opacity-100 scale-100 blur-0'
+                          : 'opacity-0 scale-90 blur-sm pointer-events-none'
+                      }`}
+                      style={{
+                        transitionDelay: activeHero === index ? '300ms' : '0ms'
+                      }}
+                    >
+                      <div className="h-10 sm:h-11 md:h-12 px-6 sm:px-8 md:px-10 lg:px-12 py-2 sm:py-[6px] relative bg-[#37322F] shadow-[0px_0px_0px_2.5px_rgba(255,255,255,0.08)_inset] overflow-hidden rounded-full flex justify-center items-center cursor-pointer hover:bg-[#2A2520] transition-all duration-300 hover:scale-105 hover:shadow-lg group whitespace-nowrap">
+                        <div className="w-20 sm:w-24 md:w-28 lg:w-44 h-[41px] absolute left-0 top-[-0.5px] bg-gradient-to-b from-[rgba(255,255,255,0)] to-[rgba(0,0,0,0.10)] mix-blend-multiply"></div>
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000"></div>
+                        <div className="flex flex-col justify-center text-white text-sm sm:text-base md:text-[15px] font-medium leading-5 font-sans relative z-10">
+                          {content.cta}
+                        </div>
+                      </div>
                     </div>
-                  </div>
+                  ))}
+                </div>
+
+                {/* Progress Indicators */}
+                <div className="flex gap-2 items-center">
+                  {heroContent.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setActiveHero(index)}
+                      className={`transition-all duration-300 rounded-full ${
+                        activeHero === index
+                          ? 'w-8 h-2 bg-[#37322F]'
+                          : 'w-2 h-2 bg-[#E0DEDB] hover:bg-[#A39D98] hover:scale-125'
+                      }`}
+                      aria-label={`View hero ${index + 1}`}
+                    />
+                  ))}
                 </div>
               </div>
 
@@ -370,169 +400,159 @@ export default function NewLanding() {
                 
                 {/* Dashboard Content */}
                 <div className="self-stretch flex-1 flex justify-start items-start relative z-10">
-                  {/* Main Content */}
-                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-                    <div className="relative w-full h-full overflow-hidden">
-                      {/* Product Preview 1 - AI Analysis */}
-                      <div
-                        className={`absolute inset-0 transition-all duration-700 ease-in-out ${
-                          activeCard === 0 ? "opacity-100 scale-100 blur-0 z-10" : "opacity-0 scale-105 blur-md z-0"
-                        }`}
-                      >
-                        <div className="w-full h-full flex items-center justify-center p-4 sm:p-8">
-                          <div className="w-full max-w-5xl space-y-4">
-                            <div className="bg-white/10 backdrop-blur-md rounded-xl shadow-2xl p-4 sm:p-6 border border-white/20">
-                              <div className="flex items-center justify-between mb-4">
-                                <h3 className="text-xl sm:text-2xl font-bold text-white">AI Code Analysis</h3>
-                                <div className="flex gap-1 sm:gap-2">
-                                  <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-red-400"></div>
-                                  <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-yellow-400"></div>
-                                  <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-green-400"></div>
+                  {/* Main Content - Single Static Dashboard Preview */}
+                  <div className="w-full h-full flex items-center justify-center bg-[#F7F5F3]">
+                    <div className="relative w-full h-full overflow-hidden p-4 sm:p-6 md:p-8 lg:p-12">
+                      {/* Elegant Dashboard Preview - Matches Landing Theme */}
+                      <div className="w-full h-full bg-white rounded-lg shadow-[0px_2px_8px_rgba(55,50,47,0.12)] border border-[rgba(55,50,47,0.08)] overflow-hidden">
+                        {/* Dashboard Header */}
+                        <div className="border-b border-[#E0DEDB] bg-white px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="flex gap-1.5">
+                              <div className="w-3 h-3 rounded-full bg-[#FF5F56]"></div>
+                              <div className="w-3 h-3 rounded-full bg-[#FFBD2E]"></div>
+                              <div className="w-3 h-3 rounded-full bg-[#27C93F]"></div>
+                            </div>
+                            <div className="hidden sm:block text-[#37322F] text-sm font-medium font-sans">
+                              Project Documentation
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <div className="hidden md:flex items-center gap-2 bg-[#F7F5F3] px-3 py-1.5 rounded-full border border-[#E0DEDB]">
+                              <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
+                              <span className="text-xs font-medium text-[#605A57]">Live</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Dashboard Content Grid */}
+                        <div className="p-4 sm:p-6 space-y-4 sm:space-y-6 bg-[#FAFAF9]">
+                          {/* Stats Cards Row */}
+                          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+                            <div className="bg-white rounded-lg p-3 sm:p-4 border border-[#E0DEDB] shadow-[0px_1px_3px_rgba(55,50,47,0.08)]">
+                              <div className="text-xs text-[#605A57] font-medium mb-1">Total Files</div>
+                              <div className="text-xl sm:text-2xl font-bold text-[#37322F]">247</div>
+                              <div className="text-xs text-emerald-600 mt-1">↑ 12% this week</div>
+                            </div>
+                            <div className="bg-white rounded-lg p-3 sm:p-4 border border-[#E0DEDB] shadow-[0px_1px_3px_rgba(55,50,47,0.08)]">
+                              <div className="text-xs text-[#605A57] font-medium mb-1">Code Quality</div>
+                              <div className="text-xl sm:text-2xl font-bold text-[#37322F]">94%</div>
+                              <div className="text-xs text-emerald-600 mt-1">↑ 3% improved</div>
+                            </div>
+                            <div className="bg-white rounded-lg p-3 sm:p-4 border border-[#E0DEDB] shadow-[0px_1px_3px_rgba(55,50,47,0.08)]">
+                              <div className="text-xs text-[#605A57] font-medium mb-1">Complexity</div>
+                              <div className="text-xl sm:text-2xl font-bold text-[#37322F]">4.2</div>
+                              <div className="text-xs text-amber-600 mt-1">Optimal range</div>
+                            </div>
+                            <div className="bg-white rounded-lg p-3 sm:p-4 border border-[#E0DEDB] shadow-[0px_1px_3px_rgba(55,50,47,0.08)]">
+                              <div className="text-xs text-[#605A57] font-medium mb-1">Team</div>
+                              <div className="text-xl sm:text-2xl font-bold text-[#37322F]">12</div>
+                              <div className="text-xs text-[#605A57] mt-1">Active members</div>
+                            </div>
+                          </div>
+
+                          {/* Main Content Area */}
+                          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                            {/* Left: Recent Activity */}
+                            <div className="lg:col-span-2 bg-white rounded-lg border border-[#E0DEDB] shadow-[0px_1px_3px_rgba(55,50,47,0.08)] overflow-hidden">
+                              <div className="border-b border-[#E0DEDB] px-4 py-3 bg-[#FAFAF9]">
+                                <h3 className="text-sm font-semibold text-[#37322F]">Recent Analysis</h3>
+                              </div>
+                              <div className="p-4 space-y-3">
+                                {/* Progress bars with landing page colors */}
+                                <div className="space-y-2">
+                                  <div className="flex items-center justify-between text-xs">
+                                    <span className="text-[#605A57] font-medium">src/components/Header.tsx</span>
+                                    <span className="text-[#37322F] font-semibold">98%</span>
+                                  </div>
+                                  <div className="w-full h-2 bg-[#E0DEDB] rounded-full overflow-hidden">
+                                    <div className="h-full bg-gradient-to-r from-[#37322F] to-[#49423D] rounded-full" style={{ width: '98%' }}></div>
+                                  </div>
+                                </div>
+                                <div className="space-y-2">
+                                  <div className="flex items-center justify-between text-xs">
+                                    <span className="text-[#605A57] font-medium">src/utils/helpers.ts</span>
+                                    <span className="text-[#37322F] font-semibold">92%</span>
+                                  </div>
+                                  <div className="w-full h-2 bg-[#E0DEDB] rounded-full overflow-hidden">
+                                    <div className="h-full bg-gradient-to-r from-[#37322F] to-[#49423D] rounded-full" style={{ width: '92%' }}></div>
+                                  </div>
+                                </div>
+                                <div className="space-y-2">
+                                  <div className="flex items-center justify-between text-xs">
+                                    <span className="text-[#605A57] font-medium">src/pages/Dashboard.tsx</span>
+                                    <span className="text-[#37322F] font-semibold">87%</span>
+                                  </div>
+                                  <div className="w-full h-2 bg-[#E0DEDB] rounded-full overflow-hidden">
+                                    <div className="h-full bg-gradient-to-r from-[#37322F] to-[#49423D] rounded-full" style={{ width: '87%' }}></div>
+                                  </div>
+                                </div>
+
+                                {/* Code snippet preview */}
+                                <div className="mt-4 bg-[#F7F5F3] rounded-md p-3 border border-[#E0DEDB] font-mono text-xs">
+                                  <div className="text-[#605A57]">
+                                    <span className="text-purple-600">function</span>{' '}
+                                    <span className="text-blue-600">analyzeCode</span>
+                                    <span className="text-[#37322F]">(</span>
+                                    <span className="text-orange-600">files</span>
+                                    <span className="text-[#37322F]">) {'{'}</span>
+                                  </div>
+                                  <div className="text-[#605A57] ml-4">
+                                    <span className="text-purple-600">return</span>{' '}
+                                    <span className="text-green-600">"Documentation generated"</span>
+                                    <span className="text-[#37322F]">;</span>
+                                  </div>
+                                  <div className="text-[#605A57]">
+                                    <span className="text-[#37322F]">{'}'}</span>
+                                  </div>
                                 </div>
                               </div>
-                              <div className="space-y-2 sm:space-y-3">
-                                <div className="h-3 sm:h-4 bg-gradient-to-r from-blue-400 to-purple-400 rounded w-3/4"></div>
-                                <div className="h-3 sm:h-4 bg-gradient-to-r from-green-400 to-emerald-400 rounded w-full"></div>
-                                <div className="h-3 sm:h-4 bg-gradient-to-r from-orange-400 to-amber-400 rounded w-2/3"></div>
-                                <div className="grid grid-cols-3 gap-2 sm:gap-4 mt-4 sm:mt-6">
-                                  <div className="bg-blue-500/20 p-2 sm:p-4 rounded-lg backdrop-blur-sm border border-blue-400/30">
-                                    <div className="text-xs text-blue-300 font-semibold">Complexity</div>
-                                    <div className="text-lg sm:text-2xl font-bold text-blue-100 mt-1">4.2</div>
+                            </div>
+
+                            {/* Right: Team Activity */}
+                            <div className="bg-white rounded-lg border border-[#E0DEDB] shadow-[0px_1px_3px_rgba(55,50,47,0.08)] overflow-hidden">
+                              <div className="border-b border-[#E0DEDB] px-4 py-3 bg-[#FAFAF9]">
+                                <h3 className="text-sm font-semibold text-[#37322F]">Team Activity</h3>
+                              </div>
+                              <div className="p-4 space-y-3">
+                                <div className="flex items-start gap-3">
+                                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#8B7355] to-[#6B5744] flex items-center justify-center text-white text-xs font-semibold flex-shrink-0">
+                                    SK
                                   </div>
-                                  <div className="bg-green-500/20 p-2 sm:p-4 rounded-lg backdrop-blur-sm border border-green-400/30">
-                                    <div className="text-xs text-green-300 font-semibold">Quality</div>
-                                    <div className="text-lg sm:text-2xl font-bold text-green-100 mt-1">94%</div>
+                                  <div className="flex-1 min-w-0">
+                                    <div className="text-xs font-medium text-[#37322F]">Sarah updated docs</div>
+                                    <div className="text-xs text-[#605A57] truncate">API documentation revised</div>
+                                    <div className="text-xs text-[#A39D98] mt-1">2 min ago</div>
                                   </div>
-                                  <div className="bg-purple-500/20 p-2 sm:p-4 rounded-lg backdrop-blur-sm border border-purple-400/30">
-                                    <div className="text-xs text-purple-300 font-semibold">Files</div>
-                                    <div className="text-lg sm:text-2xl font-bold text-purple-100 mt-1">247</div>
+                                </div>
+                                <div className="flex items-start gap-3">
+                                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#9B8B7E] to-[#7B6B5E] flex items-center justify-center text-white text-xs font-semibold flex-shrink-0">
+                                    MC
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <div className="text-xs font-medium text-[#37322F]">Mike added files</div>
+                                    <div className="text-xs text-[#605A57] truncate">New component analysis</div>
+                                    <div className="text-xs text-[#A39D98] mt-1">12 min ago</div>
+                                  </div>
+                                </div>
+                                <div className="flex items-start gap-3">
+                                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#AB9B8E] to-[#8B7B6E] flex items-center justify-center text-white text-xs font-semibold flex-shrink-0">
+                                    AL
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <div className="text-xs font-medium text-[#37322F]">Alex reviewed</div>
+                                    <div className="text-xs text-[#605A57] truncate">Code quality approved</div>
+                                    <div className="text-xs text-[#A39D98] mt-1">1 hour ago</div>
                                   </div>
                                 </div>
                               </div>
                             </div>
                           </div>
                         </div>
-                      </div>
-
-                      {/* Product Preview 2 - Collaboration */}
-                      <div
-                        className={`absolute inset-0 transition-all duration-700 ease-in-out ${
-                          activeCard === 1 ? "opacity-100 scale-100 blur-0 z-10" : "opacity-0 scale-105 blur-md z-0"
-                        }`}
-                      >
-                        <div className="w-full h-full flex items-center justify-center p-4 sm:p-8">
-                          <div className="w-full max-w-5xl space-y-4">
-                            <div className="bg-white/10 backdrop-blur-md rounded-xl shadow-2xl p-4 sm:p-6 border border-white/20">
-                              <div className="flex items-center justify-between mb-4">
-                                <h3 className="text-xl sm:text-2xl font-bold text-white">Live Collaboration</h3>
-                                <div className="flex gap-2 items-center">
-                                  <div className="flex -space-x-2">
-                                    <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 border-2 border-white/50"></div>
-                                    <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-green-400 to-green-600 border-2 border-white/50"></div>
-                                    <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 border-2 border-white/50"></div>
-                                  </div>
-                                  <span className="text-xs sm:text-sm text-white/80 ml-2">3 online</span>
-                                </div>
-                              </div>
-                              <div className="space-y-2 sm:space-y-3">
-                                <div className="bg-blue-500/20 border-l-4 border-blue-400 p-3 sm:p-4 rounded backdrop-blur-sm">
-                                  <div className="text-sm font-semibold text-blue-100">Sarah updated the API docs</div>
-                                  <div className="text-xs text-blue-300 mt-1">2 minutes ago</div>
-                                </div>
-                                <div className="bg-green-500/20 border-l-4 border-green-400 p-3 sm:p-4 rounded backdrop-blur-sm">
-                                  <div className="text-sm font-semibold text-green-100">Mike added new diagrams</div>
-                                  <div className="text-xs text-green-300 mt-1">5 minutes ago</div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Product Preview 3 - Git Sync */}
-                      <div
-                        className={`absolute inset-0 transition-all duration-700 ease-in-out ${
-                          activeCard === 2 ? "opacity-100 scale-100 blur-0 z-10" : "opacity-0 scale-105 blur-md z-0"
-                        }`}
-                      >
-                        <div className="w-full h-full flex items-center justify-center p-4 sm:p-8">
-                          <div className="w-full max-w-5xl space-y-4">
-                            <div className="bg-white/10 backdrop-blur-md rounded-xl shadow-2xl p-4 sm:p-6 border border-white/20">
-                              <div className="flex items-center justify-between mb-4">
-                                <h3 className="text-xl sm:text-2xl font-bold text-white">Git Integration</h3>
-                                <div className="flex items-center gap-2 bg-green-500/20 px-3 py-1 rounded-full border border-green-400/30">
-                                  <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                                  <span className="text-xs sm:text-sm font-semibold text-green-200">Synced</span>
-                                </div>
-                              </div>
-                              <div className="space-y-2 sm:space-y-3">
-                                <div className="flex items-center gap-3 bg-white/5 p-3 sm:p-4 rounded-lg backdrop-blur-sm border border-white/10">
-                                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-indigo-400 to-indigo-600 flex items-center justify-center text-white font-bold text-sm">
-                                    JD
-                                  </div>
-                                  <div className="flex-1">
-                                    <div className="text-sm font-semibold text-white">feat: Add authentication</div>
-                                    <div className="text-xs text-white/60">main • 3 commits • 10 min ago</div>
-                                  </div>
-                                </div>
-                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 mt-4">
-                                  <div className="bg-green-500/20 p-2 sm:p-3 rounded-lg backdrop-blur-sm border border-green-400/30 text-center">
-                                    <div className="text-base sm:text-xl font-bold text-green-200">+142</div>
-                                    <div className="text-xs text-green-300">Added</div>
-                                  </div>
-                                  <div className="bg-red-500/20 p-2 sm:p-3 rounded-lg backdrop-blur-sm border border-red-400/30 text-center">
-                                    <div className="text-base sm:text-xl font-bold text-red-200">-28</div>
-                                    <div className="text-xs text-red-300">Removed</div>
-                                  </div>
-                                  <div className="bg-blue-500/20 p-2 sm:p-3 rounded-lg backdrop-blur-sm border border-blue-400/30 text-center">
-                                    <div className="text-base sm:text-xl font-bold text-blue-200">12</div>
-                                    <div className="text-xs text-blue-300">Files</div>
-                                  </div>
-                                  <div className="bg-purple-500/20 p-2 sm:p-3 rounded-lg backdrop-blur-sm border border-purple-400/30 text-center">
-                                    <div className="text-base sm:text-xl font-bold text-purple-200">3</div>
-                                    <div className="text-xs text-purple-300">Branches</div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      {/* Active indicator badge */}
-                      <div className="absolute bottom-4 right-4 px-3 py-1.5 bg-white/90 backdrop-blur-sm rounded-full shadow-lg flex items-center gap-2 z-20 animate-fade-in">
-                        <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                        <span className="text-xs font-medium text-gray-700">
-                          {activeCard === 0 ? 'AI Analysis' : activeCard === 1 ? 'Collaboration' : 'Git Sync'}
-                        </span>
-                      </div>
-
-                      {/* Navigation dots */}
-                      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2 z-20">
-                        {[0, 1, 2].map((index) => (
-                          <button
-                            key={index}
-                            onClick={() => handleCardClick(index)}
-                            className={`transition-all duration-300 rounded-full ${
-                              activeCard === index 
-                                ? 'w-8 h-2 bg-[#322D2B] shadow-lg' 
-                                : 'w-2 h-2 bg-gray-400 hover:bg-gray-600 hover:scale-125'
-                            }`}
-                            aria-label={`View dashboard ${index + 1}`}
-                          />
-                        ))}
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
-              
-              {/* Progress indicator text */}
-              <div className="w-full flex justify-center items-center gap-2 mt-4 text-sm text-gray-500 animate-fade-in">
-                <svg className="w-4 h-4 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-                <span>Auto-switching every 5 seconds</span>
               </div>
             </div>
 
@@ -555,23 +575,14 @@ export default function NewLanding() {
                 <FeatureCard
                   title="AI-Powered Analysis"
                   description="Automatically analyze your codebase and generate comprehensive documentation with intelligent AI insights."
-                  isActive={activeCard === 0}
-                  progress={activeCard === 0 ? progress : 0}
-                  onClick={() => handleCardClick(0)}
                 />
                 <FeatureCard
                   title="Real-Time Collaboration"
                   description="Work together seamlessly with your team. Share, review, and update documentation in real-time."
-                  isActive={activeCard === 1}
-                  progress={activeCard === 1 ? progress : 0}
-                  onClick={() => handleCardClick(1)}
                 />
                 <FeatureCard
                   title="Version Control Integration"
                   description="Sync with Git repositories and automatically update docs when code changes. Stay always in sync."
-                  isActive={activeCard === 2}
-                  progress={activeCard === 2 ? progress : 0}
-                  onClick={() => handleCardClick(2)}
                 />
               </div>
 
