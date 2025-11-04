@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import SmartSimpleBrilliant from '@/components/smart-simple-brilliant';
 import YourWorkInSync from '@/components/your-work-in-sync';
 import EffortlessIntegration from '@/components/effortless-integration-updated';
@@ -134,7 +134,9 @@ function FeatureCard({
 export default function NewLanding() {
   const [scrolled, setScrolled] = useState(false);
   const [activeHero, setActiveHero] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
   const parallaxOffset = useParallax();
+  const navigate = useNavigate();
 
   // Hero content variations
   const heroContent = [
@@ -155,28 +157,44 @@ export default function NewLanding() {
     }
   ];
 
-  // Scroll detection for navbar
+  // Scroll detection for navbar with improved threshold
   useEffect(() => {
     const handleScroll = () => {
-      setScrolled(window.scrollY > 50);
+      setScrolled(window.scrollY > 20);
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Scroll to top on mount
+  // Scroll to top on mount with smooth behavior
   useEffect(() => {
-    window.scrollTo(0, 0);
+    window.scrollTo({ top: 0, behavior: 'instant' });
   }, []);
 
-  // Auto-rotate hero content every 5 seconds
+  // Auto-rotate hero content with pause on hover
   useEffect(() => {
+    if (isPaused) return;
+    
     const heroInterval = setInterval(() => {
       setActiveHero((prev) => (prev + 1) % heroContent.length);
     }, 5000);
 
     return () => clearInterval(heroInterval);
-  }, [heroContent.length]);
+  }, [heroContent.length, isPaused]);
+
+  // Smooth scroll helper function
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      const offset = 84; // navbar height
+      const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
+      window.scrollTo({
+        top: elementPosition - offset,
+        behavior: 'smooth'
+      });
+    }
+  };
+
   return (
     <div className="w-full min-h-screen relative bg-[#F7F5F3] overflow-x-hidden flex flex-col justify-start items-center">
       {/* Animated gradient orbs background with subtle parallax */}
@@ -206,60 +224,51 @@ export default function NewLanding() {
 
           <div className="self-stretch pt-[9px] overflow-hidden border-b border-[rgba(55,50,47,0.06)] flex flex-col justify-center items-center gap-4 sm:gap-6 md:gap-8 lg:gap-[66px] relative z-10">
             {/* Enhanced Navigation with scroll effects */}
-            <div className={`w-full h-12 sm:h-14 md:h-16 lg:h-[84px] absolute left-0 top-0 flex justify-center items-center z-20 px-6 sm:px-8 md:px-12 lg:px-0 transition-all duration-300 ${
-              scrolled ? 'sticky top-0 backdrop-blur-md bg-[#F7F5F3]/80 shadow-lg' : ''
+            <div className={`w-full h-12 sm:h-14 md:h-16 lg:h-[84px] absolute left-0 top-0 flex justify-center items-center z-20 px-6 sm:px-8 md:px-12 lg:px-0 transition-all duration-500 ease-out ${
+              scrolled ? 'sticky top-0 backdrop-blur-lg bg-[#F7F5F3]/95 shadow-lg border-b border-[rgba(55,50,47,0.08)]' : ''
             }`}>
               <div className="w-full h-0 absolute left-0 top-6 sm:top-7 md:top-8 lg:top-[42px] border-t border-[rgba(55,50,47,0.12)] shadow-[0px_1px_0px_white]"></div>
 
-              <div className={`w-full max-w-[calc(100%-32px)] sm:max-w-[calc(100%-48px)] md:max-w-[calc(100%-64px)] lg:max-w-[700px] lg:w-[700px] h-10 sm:h-11 md:h-12 py-1.5 sm:py-2 px-3 sm:px-4 md:px-4 pr-2 sm:pr-3 bg-[#F7F5F3] backdrop-blur-sm shadow-[0px_0px_0px_2px_white] overflow-hidden rounded-[50px] flex justify-between items-center relative z-30 transition-all duration-300 ${
-                scrolled ? 'shadow-lg hover:shadow-xl' : ''
+              <div className={`w-full max-w-[calc(100%-32px)] sm:max-w-[calc(100%-48px)] md:max-w-[calc(100%-64px)] lg:max-w-[700px] lg:w-[700px] h-10 sm:h-11 md:h-12 py-1.5 sm:py-2 px-3 sm:px-4 md:px-4 pr-2 sm:pr-3 bg-[#F7F5F3] backdrop-blur-sm shadow-[0px_0px_0px_2px_white] overflow-hidden rounded-[50px] flex justify-between items-center relative z-30 transition-all duration-300 hover:shadow-md ${
+                scrolled ? 'shadow-md hover:shadow-lg' : 'hover:shadow-lg'
               }`}>
                 <div className="flex justify-center items-center">
-                  <div className="flex justify-start items-center">
+                  <button 
+                    onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                    className="flex justify-start items-center hover:opacity-80 transition-opacity cursor-pointer"
+                  >
                     <div className="flex flex-col justify-center text-[#2F3037] text-sm sm:text-base md:text-lg lg:text-xl font-medium leading-5 font-sans">
                       VisualDocs
                     </div>
-                  </div>
+                  </button>
                   <div className="pl-3 sm:pl-4 md:pl-5 lg:pl-5 flex justify-start items-start hidden sm:flex flex-row gap-2 sm:gap-3 md:gap-4 lg:gap-4">
-                    <a 
-                      href="#features" 
+                    <button 
+                      onClick={() => scrollToSection('features')}
                       className="flex justify-start items-center group cursor-pointer relative"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' });
-                      }}
                     >
-                      <div className="flex flex-col justify-center text-[rgba(49,45,43,0.80)] text-xs md:text-[13px] font-medium leading-[14px] font-sans group-hover:text-[#2F3037] transition-colors">
+                      <div className="flex flex-col justify-center text-[rgba(49,45,43,0.80)] text-xs md:text-[13px] font-medium leading-[14px] font-sans group-hover:text-[#2F3037] transition-colors duration-200">
                         Features
                       </div>
-                      <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#2F3037] group-hover:w-full transition-all duration-300"></div>
-                    </a>
-                    <a 
-                      href="#pricing" 
+                      <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#2F3037] group-hover:w-full transition-all duration-300 ease-out"></div>
+                    </button>
+                    <button 
+                      onClick={() => scrollToSection('pricing')}
                       className="flex justify-start items-center group cursor-pointer relative"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' });
-                      }}
                     >
-                      <div className="flex flex-col justify-center text-[rgba(49,45,43,0.80)] text-xs md:text-[13px] font-medium leading-[14px] font-sans group-hover:text-[#2F3037] transition-colors">
+                      <div className="flex flex-col justify-center text-[rgba(49,45,43,0.80)] text-xs md:text-[13px] font-medium leading-[14px] font-sans group-hover:text-[#2F3037] transition-colors duration-200">
                         Pricing
                       </div>
-                      <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#2F3037] group-hover:w-full transition-all duration-300"></div>
-                    </a>
-                    <a 
-                      href="#faq" 
+                      <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#2F3037] group-hover:w-full transition-all duration-300 ease-out"></div>
+                    </button>
+                    <button 
+                      onClick={() => scrollToSection('faq')}
                       className="flex justify-start items-center group cursor-pointer relative"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        document.getElementById('faq')?.scrollIntoView({ behavior: 'smooth' });
-                      }}
                     >
-                      <div className="flex flex-col justify-center text-[rgba(49,45,43,0.80)] text-xs md:text-[13px] font-medium leading-[14px] font-sans group-hover:text-[#2F3037] transition-colors">
+                      <div className="flex flex-col justify-center text-[rgba(49,45,43,0.80)] text-xs md:text-[13px] font-medium leading-[14px] font-sans group-hover:text-[#2F3037] transition-colors duration-200">
                         FAQ
                       </div>
-                      <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#2F3037] group-hover:w-full transition-all duration-300"></div>
-                    </a>
+                      <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#2F3037] group-hover:w-full transition-all duration-300 ease-out"></div>
+                    </button>
                   </div>
                 </div>
                 <div className="h-6 sm:h-7 md:h-8 flex justify-start items-start gap-2 sm:gap-3">
@@ -284,7 +293,11 @@ export default function NewLanding() {
             </div>
 
             {/* Hero Section */}
-            <div className="pt-16 sm:pt-20 md:pt-24 lg:pt-32 pb-8 sm:pb-10 md:pb-12 lg:pb-16 flex flex-col justify-start items-center px-2 sm:px-4 md:px-8 lg:px-0 w-full relative">
+            <div 
+              className="pt-16 sm:pt-20 md:pt-24 lg:pt-32 pb-8 sm:pt-10 md:pb-12 lg:pb-16 flex flex-col justify-start items-center px-2 sm:px-4 md:px-8 lg:px-0 w-full relative"
+              onMouseEnter={() => setIsPaused(true)}
+              onMouseLeave={() => setIsPaused(false)}
+            >
               <div className="w-full max-w-[937px] lg:w-[937px] flex flex-col justify-center items-center gap-4 sm:gap-5 md:gap-6 relative z-10">
                 <div className="self-stretch rounded-[3px] flex flex-col justify-center items-center gap-5 sm:gap-6 md:gap-7">
                   {/* Rotating Hero Titles */}
@@ -301,8 +314,8 @@ export default function NewLanding() {
                         {content.title.map((line, lineIndex) => (
                           <span
                             key={lineIndex}
-                            className={`block transition-all duration-700 ${
-                              activeHero === index ? 'translate-y-0' : 'translate-y-4'
+                            className={`block transition-all duration-700 ease-out ${
+                              activeHero === index ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
                             }`}
                             style={{
                               transitionDelay: activeHero === index ? `${lineIndex * 100}ms` : '0ms'
@@ -363,19 +376,28 @@ export default function NewLanding() {
                   ))}
                 </div>
 
-                {/* Progress Indicators */}
-                <div className="flex gap-2 items-center">
-                  {heroContent.map((_, index) => (
+                {/* Progress Indicators - Enhanced with tooltips */}
+                <div className="flex gap-2 items-center" role="tablist" aria-label="Hero content navigation">
+                  {heroContent.map((content, index) => (
                     <button
                       key={index}
                       onClick={() => setActiveHero(index)}
-                      className={`transition-all duration-300 rounded-full ${
+                      onMouseEnter={() => setIsPaused(true)}
+                      onMouseLeave={() => setIsPaused(false)}
+                      className={`relative transition-all duration-300 rounded-full focus:outline-none focus:ring-2 focus:ring-[#37322F] focus:ring-offset-2 ${
                         activeHero === index
                           ? 'w-8 h-2 bg-[#37322F]'
                           : 'w-2 h-2 bg-[#E0DEDB] hover:bg-[#A39D98] hover:scale-125'
                       }`}
-                      aria-label={`View hero ${index + 1}`}
-                    />
+                      aria-label={`View ${content.title[0]}`}
+                      aria-selected={activeHero === index}
+                      role="tab"
+                    >
+                      {/* Tooltip on hover */}
+                      <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-[#37322F] text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                        {content.title[0]}
+                      </span>
+                    </button>
                   ))}
                 </div>
               </div>
@@ -912,6 +934,24 @@ export default function NewLanding() {
             <FooterSection />
         </div>
       </div>
+
+      {/* Scroll to Top Button - Appears after scrolling */}
+      {scrolled && (
+        <button
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          className="fixed bottom-8 right-8 z-50 w-12 h-12 bg-[#37322F] text-white rounded-full shadow-lg hover:bg-[#2A2520] transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-[#37322F] focus:ring-offset-2 group"
+          aria-label="Scroll to top"
+        >
+          <svg
+            className="w-6 h-6 mx-auto transform group-hover:-translate-y-1 transition-transform"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+          </svg>
+        </button>
+      )}
     </div>
   );
 }

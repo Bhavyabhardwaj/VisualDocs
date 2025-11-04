@@ -15,7 +15,12 @@ export default function FooterSection() {
           {/* Social Media Icons */}
           <div className="flex justify-start items-start gap-4">
             {/* Twitter/X Icon */}
-            <div className="w-6 h-6 relative overflow-hidden">
+            <a 
+              href="https://x.com/bhavya881756073" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="w-6 h-6 relative overflow-hidden hover:opacity-70 transition-opacity cursor-pointer"
+            >
               <div className="w-6 h-6 left-0 top-0 absolute flex items-center justify-center">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path
@@ -24,10 +29,15 @@ export default function FooterSection() {
                   />
                 </svg>
               </div>
-            </div>
+            </a>
 
             {/* LinkedIn Icon */}
-            <div className="w-6 h-6 relative overflow-hidden">
+            <a 
+              href="https://www.linkedin.com/in/bhavyabhardwaj" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="w-6 h-6 relative overflow-hidden hover:opacity-70 transition-opacity cursor-pointer"
+            >
               <div className="w-6 h-6 left-0 top-0 absolute flex items-center justify-center">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path
@@ -36,10 +46,15 @@ export default function FooterSection() {
                   />
                 </svg>
               </div>
-            </div>
+            </a>
 
             {/* GitHub Icon */}
-            <div className="w-6 h-6 relative overflow-hidden">
+            <a 
+              href="https://github.com/Bhavyabhardwaj" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="w-6 h-6 relative overflow-hidden hover:opacity-70 transition-opacity cursor-pointer"
+            >
               <div className="w-6 h-6 left-0 top-0 absolute flex items-center justify-center">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path
@@ -48,7 +63,7 @@ export default function FooterSection() {
                   />
                 </svg>
               </div>
-            </div>
+            </a>
           </div>
         </div>
 
