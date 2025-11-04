@@ -371,49 +371,132 @@ export default function NewLanding() {
                 {/* Dashboard Content */}
                 <div className="self-stretch flex-1 flex justify-start items-start relative z-10">
                   {/* Main Content */}
-                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
+                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
                     <div className="relative w-full h-full overflow-hidden">
-                      {/* Product Image 1 - Plan your schedules */}
+                      {/* Product Preview 1 - AI Analysis */}
                       <div
                         className={`absolute inset-0 transition-all duration-700 ease-in-out ${
                           activeCard === 0 ? "opacity-100 scale-100 blur-0 z-10" : "opacity-0 scale-105 blur-md z-0"
                         }`}
                       >
-                        <img
-                          src="/calendar-scheduling-interface-with-event-details.jpg"
-                          alt="Schedules Dashboard - Documentation Management"
-                          className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-700"
-                        />
-                        {/* Image overlay gradient */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-transparent pointer-events-none"></div>
+                        <div className="w-full h-full flex items-center justify-center p-4 sm:p-8">
+                          <div className="w-full max-w-5xl space-y-4">
+                            <div className="bg-white/10 backdrop-blur-md rounded-xl shadow-2xl p-4 sm:p-6 border border-white/20">
+                              <div className="flex items-center justify-between mb-4">
+                                <h3 className="text-xl sm:text-2xl font-bold text-white">AI Code Analysis</h3>
+                                <div className="flex gap-1 sm:gap-2">
+                                  <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-red-400"></div>
+                                  <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-yellow-400"></div>
+                                  <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-green-400"></div>
+                                </div>
+                              </div>
+                              <div className="space-y-2 sm:space-y-3">
+                                <div className="h-3 sm:h-4 bg-gradient-to-r from-blue-400 to-purple-400 rounded w-3/4"></div>
+                                <div className="h-3 sm:h-4 bg-gradient-to-r from-green-400 to-emerald-400 rounded w-full"></div>
+                                <div className="h-3 sm:h-4 bg-gradient-to-r from-orange-400 to-amber-400 rounded w-2/3"></div>
+                                <div className="grid grid-cols-3 gap-2 sm:gap-4 mt-4 sm:mt-6">
+                                  <div className="bg-blue-500/20 p-2 sm:p-4 rounded-lg backdrop-blur-sm border border-blue-400/30">
+                                    <div className="text-xs text-blue-300 font-semibold">Complexity</div>
+                                    <div className="text-lg sm:text-2xl font-bold text-blue-100 mt-1">4.2</div>
+                                  </div>
+                                  <div className="bg-green-500/20 p-2 sm:p-4 rounded-lg backdrop-blur-sm border border-green-400/30">
+                                    <div className="text-xs text-green-300 font-semibold">Quality</div>
+                                    <div className="text-lg sm:text-2xl font-bold text-green-100 mt-1">94%</div>
+                                  </div>
+                                  <div className="bg-purple-500/20 p-2 sm:p-4 rounded-lg backdrop-blur-sm border border-purple-400/30">
+                                    <div className="text-xs text-purple-300 font-semibold">Files</div>
+                                    <div className="text-lg sm:text-2xl font-bold text-purple-100 mt-1">247</div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
                       </div>
 
-                      {/* Product Image 2 - Data to insights */}
+                      {/* Product Preview 2 - Collaboration */}
                       <div
                         className={`absolute inset-0 transition-all duration-700 ease-in-out ${
                           activeCard === 1 ? "opacity-100 scale-100 blur-0 z-10" : "opacity-0 scale-105 blur-md z-0"
                         }`}
                       >
-                        <img
-                          src="/analytics-dashboard-with-revenue-metrics-and-gro.jpg"
-                          alt="Analytics Dashboard"
-                          className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-700"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-transparent pointer-events-none"></div>
+                        <div className="w-full h-full flex items-center justify-center p-4 sm:p-8">
+                          <div className="w-full max-w-5xl space-y-4">
+                            <div className="bg-white/10 backdrop-blur-md rounded-xl shadow-2xl p-4 sm:p-6 border border-white/20">
+                              <div className="flex items-center justify-between mb-4">
+                                <h3 className="text-xl sm:text-2xl font-bold text-white">Live Collaboration</h3>
+                                <div className="flex gap-2 items-center">
+                                  <div className="flex -space-x-2">
+                                    <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 border-2 border-white/50"></div>
+                                    <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-green-400 to-green-600 border-2 border-white/50"></div>
+                                    <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 border-2 border-white/50"></div>
+                                  </div>
+                                  <span className="text-xs sm:text-sm text-white/80 ml-2">3 online</span>
+                                </div>
+                              </div>
+                              <div className="space-y-2 sm:space-y-3">
+                                <div className="bg-blue-500/20 border-l-4 border-blue-400 p-3 sm:p-4 rounded backdrop-blur-sm">
+                                  <div className="text-sm font-semibold text-blue-100">Sarah updated the API docs</div>
+                                  <div className="text-xs text-blue-300 mt-1">2 minutes ago</div>
+                                </div>
+                                <div className="bg-green-500/20 border-l-4 border-green-400 p-3 sm:p-4 rounded backdrop-blur-sm">
+                                  <div className="text-sm font-semibold text-green-100">Mike added new diagrams</div>
+                                  <div className="text-xs text-green-300 mt-1">5 minutes ago</div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
                       </div>
 
-                      {/* Product Image 3 - Data visualization */}
+                      {/* Product Preview 3 - Git Sync */}
                       <div
                         className={`absolute inset-0 transition-all duration-700 ease-in-out ${
                           activeCard === 2 ? "opacity-100 scale-100 blur-0 z-10" : "opacity-0 scale-105 blur-md z-0"
                         }`}
                       >
-                        <img
-                          src="/data-visualization-dashboard-with-interactive-char.jpg"
-                          alt="Data Visualization Dashboard"
-                          className="w-full h-full object-contain transform hover:scale-105 transition-transform duration-700"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-transparent pointer-events-none"></div>
+                        <div className="w-full h-full flex items-center justify-center p-4 sm:p-8">
+                          <div className="w-full max-w-5xl space-y-4">
+                            <div className="bg-white/10 backdrop-blur-md rounded-xl shadow-2xl p-4 sm:p-6 border border-white/20">
+                              <div className="flex items-center justify-between mb-4">
+                                <h3 className="text-xl sm:text-2xl font-bold text-white">Git Integration</h3>
+                                <div className="flex items-center gap-2 bg-green-500/20 px-3 py-1 rounded-full border border-green-400/30">
+                                  <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                                  <span className="text-xs sm:text-sm font-semibold text-green-200">Synced</span>
+                                </div>
+                              </div>
+                              <div className="space-y-2 sm:space-y-3">
+                                <div className="flex items-center gap-3 bg-white/5 p-3 sm:p-4 rounded-lg backdrop-blur-sm border border-white/10">
+                                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-indigo-400 to-indigo-600 flex items-center justify-center text-white font-bold text-sm">
+                                    JD
+                                  </div>
+                                  <div className="flex-1">
+                                    <div className="text-sm font-semibold text-white">feat: Add authentication</div>
+                                    <div className="text-xs text-white/60">main • 3 commits • 10 min ago</div>
+                                  </div>
+                                </div>
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 mt-4">
+                                  <div className="bg-green-500/20 p-2 sm:p-3 rounded-lg backdrop-blur-sm border border-green-400/30 text-center">
+                                    <div className="text-base sm:text-xl font-bold text-green-200">+142</div>
+                                    <div className="text-xs text-green-300">Added</div>
+                                  </div>
+                                  <div className="bg-red-500/20 p-2 sm:p-3 rounded-lg backdrop-blur-sm border border-red-400/30 text-center">
+                                    <div className="text-base sm:text-xl font-bold text-red-200">-28</div>
+                                    <div className="text-xs text-red-300">Removed</div>
+                                  </div>
+                                  <div className="bg-blue-500/20 p-2 sm:p-3 rounded-lg backdrop-blur-sm border border-blue-400/30 text-center">
+                                    <div className="text-base sm:text-xl font-bold text-blue-200">12</div>
+                                    <div className="text-xs text-blue-300">Files</div>
+                                  </div>
+                                  <div className="bg-purple-500/20 p-2 sm:p-3 rounded-lg backdrop-blur-sm border border-purple-400/30 text-center">
+                                    <div className="text-base sm:text-xl font-bold text-purple-200">3</div>
+                                    <div className="text-xs text-purple-300">Branches</div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                       
                       {/* Active indicator badge */}
