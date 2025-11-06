@@ -2,9 +2,12 @@
 
 import { useState } from "react"
 import { Link } from "react-router-dom"
+import { createCheckoutSession, contactSales, type CheckoutData } from "@/services/paymentService"
 
 export default function PricingSection() {
   const [billingPeriod, setBillingPeriod] = useState<"monthly" | "annually">("annually")
+  const [isProcessing, setIsProcessing] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const pricing = {
     starter: {
@@ -21,8 +24,48 @@ export default function PricingSection() {
     },
   }
 
+  // Handle checkout process
+  const handleCheckout = async (planId: 'starter' | 'professional', planName: string) => {
+    setIsProcessing(true)
+    setError(null)
+
+    try {
+      const checkoutData: CheckoutData = {
+        planName,
+        planId,
+        billingPeriod,
+        price: pricing[planId][billingPeriod],
+      }
+      
+      await createCheckoutSession(checkoutData)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Something went wrong')
+      setIsProcessing(false)
+    }
+  }
+
+  // Handle enterprise contact
+  const handleEnterpriseContact = () => {
+    contactSales('Enterprise Plan')
+  }
+
   return (
     <div className="w-full flex flex-col justify-center items-center gap-2">
+      {/* Error Message */}
+      {error && (
+        <div className="w-full max-w-[937px] mb-4 px-4 py-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3">
+          <svg className="w-5 h-5 text-red-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <p className="text-sm text-red-800 flex-1">{error}</p>
+          <button onClick={() => setError(null)} className="text-red-600 hover:text-red-800">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      )}
+
       {/* Header Section */}
       <div className="self-stretch px-6 md:px-24 py-12 md:py-16 border-b border-[rgba(55,50,47,0.12)] flex justify-center items-center gap-6">
         <div className="w-full max-w-[586px] px-6 py-5 shadow-[0px_2px_4px_rgba(50,45,43,0.06)] overflow-hidden rounded-lg flex flex-col justify-start items-center gap-4 shadow-none">
@@ -168,16 +211,27 @@ export default function PricingSection() {
                   </div>
                 </div>
 
-                <Link 
-                  to="/register"
-                  className="self-stretch px-4 py-[10px] relative bg-[#37322F] shadow-[0px_2px_4px_rgba(55,50,47,0.12)] overflow-hidden rounded-[99px] flex justify-center items-center hover:bg-[#2A2520] transition-all duration-300 hover:scale-105 cursor-pointer group"
+                <button
+                  onClick={() => handleCheckout('starter', 'Starter Plan')}
+                  disabled={isProcessing}
+                  className="self-stretch px-4 py-[10px] relative bg-[#37322F] shadow-[0px_2px_4px_rgba(55,50,47,0.12)] overflow-hidden rounded-[99px] flex justify-center items-center hover:bg-[#2A2520] transition-all duration-300 hover:scale-105 cursor-pointer group disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                 >
                   <div className="w-full h-[41px] absolute left-0 top-[-0.5px] bg-gradient-to-b from-[rgba(255,255,255,0.20)] to-[rgba(0,0,0,0.10)] mix-blend-multiply"></div>
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000"></div>
-                  <div className="max-w-[108px] flex justify-center flex-col text-[#FBFAF9] text-[13px] font-medium leading-5 font-sans relative z-10">
-                    Start for free
-                  </div>
-                </Link>
+                  {isProcessing ? (
+                    <div className="flex items-center gap-2 relative z-10">
+                      <svg className="animate-spin h-4 w-4 text-[#FBFAF9]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      <span className="text-[#FBFAF9] text-[13px] font-medium leading-5 font-sans">Processing...</span>
+                    </div>
+                  ) : (
+                    <div className="max-w-[108px] flex justify-center flex-col text-[#FBFAF9] text-[13px] font-medium leading-5 font-sans relative z-10">
+                      Start for free
+                    </div>
+                  )}
+                </button>
               </div>
 
               <div className="self-stretch flex flex-col justify-start items-start gap-2">
@@ -253,16 +307,27 @@ export default function PricingSection() {
                 </div>
 
                 {/* CTA Button */}
-                <Link 
-                  to="/register"
-                  className="self-stretch px-4 py-[10px] relative bg-[#FBFAF9] shadow-[0px_2px_4px_rgba(55,50,47,0.12)] overflow-hidden rounded-[99px] flex justify-center items-center hover:bg-white transition-all duration-300 hover:scale-105 cursor-pointer group"
+                <button
+                  onClick={() => handleCheckout('professional', 'Professional Plan')}
+                  disabled={isProcessing}
+                  className="self-stretch px-4 py-[10px] relative bg-[#FBFAF9] shadow-[0px_2px_4px_rgba(55,50,47,0.12)] overflow-hidden rounded-[99px] flex justify-center items-center hover:bg-white transition-all duration-300 hover:scale-105 cursor-pointer group disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                 >
                   <div className="w-full h-[41px] absolute left-0 top-[-0.5px] bg-gradient-to-b from-[rgba(255,255,255,0)] to-[rgba(0,0,0,0.10)] mix-blend-multiply"></div>
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-black/5 to-transparent translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000"></div>
-                  <div className="max-w-[108px] flex justify-center flex-col text-[#37322F] text-[13px] font-medium leading-5 font-sans relative z-10">
-                    Get started
-                  </div>
-                </Link>
+                  {isProcessing ? (
+                    <div className="flex items-center gap-2 relative z-10">
+                      <svg className="animate-spin h-4 w-4 text-[#37322F]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      <span className="text-[#37322F] text-[13px] font-medium leading-5 font-sans">Processing...</span>
+                    </div>
+                  ) : (
+                    <div className="max-w-[108px] flex justify-center flex-col text-[#37322F] text-[13px] font-medium leading-5 font-sans relative z-10">
+                      Get started
+                    </div>
+                  )}
+                </button>
               </div>
 
               <div className="self-stretch flex flex-col justify-start items-start gap-2">
