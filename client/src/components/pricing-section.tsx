@@ -403,16 +403,17 @@ export default function PricingSection() {
                   </div>
                 </div>
 
-                <a 
-                  href="mailto:contact@visualdocs.com?subject=Enterprise Plan Inquiry"
-                  className="self-stretch px-4 py-[10px] relative bg-[#37322F] shadow-[0px_2px_4px_rgba(55,50,47,0.12)] overflow-hidden rounded-[99px] flex justify-center items-center hover:bg-[#2A2520] transition-all duration-300 hover:scale-105 cursor-pointer group"
+                <button
+                  onClick={handleEnterpriseContact}
+                  disabled={isProcessing}
+                  className="self-stretch px-4 py-[10px] relative bg-[#37322F] shadow-[0px_2px_4px_rgba(55,50,47,0.12)] overflow-hidden rounded-[99px] flex justify-center items-center hover:bg-[#2A2520] transition-all duration-300 hover:scale-105 cursor-pointer group disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                 >
                   <div className="w-full h-[41px] absolute left-0 top-[-0.5px] bg-gradient-to-b from-[rgba(255,255,255,0.20)] to-[rgba(0,0,0,0.10)] mix-blend-multiply"></div>
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000"></div>
                   <div className="max-w-[108px] flex justify-center flex-col text-[#FBFAF9] text-[13px] font-medium leading-5 font-sans relative z-10">
                     Contact sales
                   </div>
-                </a>
+                </button>
               </div>
 
               <div className="self-stretch flex flex-col justify-start items-start gap-2">
