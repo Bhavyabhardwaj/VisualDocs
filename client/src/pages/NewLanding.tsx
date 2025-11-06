@@ -135,6 +135,8 @@ export default function NewLanding() {
   const [scrolled, setScrolled] = useState(false);
   const [activeHero, setActiveHero] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showBanner, setShowBanner] = useState(true);
   const parallaxOffset = useParallax();
   const navigate = useNavigate();
 
@@ -171,6 +173,18 @@ export default function NewLanding() {
     window.scrollTo({ top: 0, behavior: 'instant' });
   }, []);
 
+  // Lock body scroll when mobile menu is open
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [mobileMenuOpen]);
+
   // Auto-rotate hero content with pause on hover
   useEffect(() => {
     if (isPaused) return;
@@ -193,10 +207,37 @@ export default function NewLanding() {
         behavior: 'smooth'
       });
     }
+    setMobileMenuOpen(false); // Close mobile menu after navigation
   };
 
   return (
     <div className="w-full min-h-screen relative bg-[#F7F5F3] overflow-x-hidden flex flex-col justify-start items-center">
+      {/* Announcement Banner */}
+      {showBanner && (
+        <div className="w-full bg-gradient-to-r from-[#37322F] via-[#49423D] to-[#37322F] text-white py-2 px-4 flex items-center justify-center relative z-50 animate-slide-down">
+          <div className="max-w-4xl w-full flex items-center justify-between gap-4">
+            <div className="flex items-center gap-2 flex-1 justify-center text-center">
+              <span className="hidden sm:inline text-xs sm:text-sm">🎉</span>
+              <span className="text-xs sm:text-sm font-medium">
+                <span className="hidden sm:inline">New: </span>AI-powered documentation is now live! 
+                <Link to="/register" className="underline ml-1 hover:text-white/80 transition-colors">
+                  Try it free
+                </Link>
+              </span>
+            </div>
+            <button
+              onClick={() => setShowBanner(false)}
+              className="p-1 hover:bg-white/10 rounded-full transition-colors"
+              aria-label="Close banner"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Animated gradient orbs background with subtle parallax */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
         <div 
@@ -241,7 +282,8 @@ export default function NewLanding() {
                       VisualDocs
                     </div>
                   </button>
-                  <div className="pl-3 sm:pl-4 md:pl-5 lg:pl-5 flex justify-start items-start hidden sm:flex flex-row gap-2 sm:gap-3 md:gap-4 lg:gap-4">
+                  {/* Desktop Navigation */}
+                  <div className="pl-3 sm:pl-4 md:pl-5 lg:pl-5 flex justify-start items-start hidden md:flex flex-row gap-2 sm:gap-3 md:gap-4 lg:gap-4">
                     <button 
                       onClick={() => scrollToSection('features')}
                       className="flex justify-start items-center group cursor-pointer relative"
@@ -272,9 +314,25 @@ export default function NewLanding() {
                   </div>
                 </div>
                 <div className="h-6 sm:h-7 md:h-8 flex justify-start items-start gap-2 sm:gap-3">
+                  {/* Mobile Hamburger Menu Button */}
+                  <button
+                    onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                    className="md:hidden p-1.5 hover:bg-white/50 rounded-lg transition-colors"
+                    aria-label="Toggle menu"
+                  >
+                    <svg className="w-5 h-5 text-[#37322F]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      {mobileMenuOpen ? (
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      ) : (
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                      )}
+                    </svg>
+                  </button>
+                  
+                  {/* Desktop Auth Buttons */}
                   <Link 
                     to="/login" 
-                    className="px-2 sm:px-3 md:px-[14px] py-1 sm:py-[6px] bg-white shadow-[0px_1px_2px_rgba(55,50,47,0.12)] overflow-hidden rounded-full flex justify-center items-center hover:bg-[#F7F5F3] transition-colors duration-200 group"
+                    className="hidden sm:flex px-2 sm:px-3 md:px-[14px] py-1 sm:py-[6px] bg-white shadow-[0px_1px_2px_rgba(55,50,47,0.12)] overflow-hidden rounded-full justify-center items-center hover:bg-[#F7F5F3] transition-colors duration-200 group"
                   >
                     <div className="flex flex-col justify-center text-[#37322F] text-xs md:text-[13px] font-medium leading-5 font-sans group-hover:text-[#2F3037]">
                       Log in
@@ -288,6 +346,76 @@ export default function NewLanding() {
                       Sign up
                     </div>
                   </Link>
+                </div>
+              </div>
+            </div>
+
+            {/* Mobile Menu Drawer */}
+            <div 
+              className={`fixed inset-0 bg-black/50 backdrop-blur-sm z-40 transition-opacity duration-300 md:hidden ${
+                mobileMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+              }`}
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              <div 
+                className={`absolute right-0 top-0 h-full w-64 bg-[#F7F5F3] shadow-2xl transform transition-transform duration-300 ease-out ${
+                  mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
+                }`}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="flex flex-col h-full p-6">
+                  {/* Close button */}
+                  <div className="flex justify-between items-center mb-8">
+                    <span className="text-lg font-semibold text-[#37322F]">Menu</span>
+                    <button
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="p-2 hover:bg-white rounded-lg transition-colors"
+                      aria-label="Close menu"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+
+                  {/* Mobile Navigation Links */}
+                  <nav className="flex flex-col gap-4 flex-1">
+                    <button
+                      onClick={() => scrollToSection('features')}
+                      className="text-left py-3 px-4 text-[#37322F] hover:bg-white rounded-lg transition-colors font-medium"
+                    >
+                      Features
+                    </button>
+                    <button
+                      onClick={() => scrollToSection('pricing')}
+                      className="text-left py-3 px-4 text-[#37322F] hover:bg-white rounded-lg transition-colors font-medium"
+                    >
+                      Pricing
+                    </button>
+                    <button
+                      onClick={() => scrollToSection('faq')}
+                      className="text-left py-3 px-4 text-[#37322F] hover:bg-white rounded-lg transition-colors font-medium"
+                    >
+                      FAQ
+                    </button>
+                    
+                    <div className="border-t border-[#E0DEDB] my-4"></div>
+                    
+                    <Link
+                      to="/login"
+                      className="py-3 px-4 text-[#37322F] hover:bg-white rounded-lg transition-colors font-medium text-center border border-[#37322F]"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      Log in
+                    </Link>
+                    <Link
+                      to="/register"
+                      className="py-3 px-4 bg-[#37322F] text-white hover:bg-[#2F3037] rounded-lg transition-colors font-medium text-center"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      Sign up
+                    </Link>
+                  </nav>
                 </div>
               </div>
             </div>
@@ -939,7 +1067,7 @@ export default function NewLanding() {
       {scrolled && (
         <button
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-          className="fixed bottom-8 right-8 z-50 w-12 h-12 bg-[#37322F] text-white rounded-full shadow-lg hover:bg-[#2A2520] transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-[#37322F] focus:ring-offset-2 group"
+          className="fixed bottom-24 sm:bottom-8 right-4 sm:right-8 z-50 w-12 h-12 bg-[#37322F] text-white rounded-full shadow-lg hover:bg-[#2A2520] transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-[#37322F] focus:ring-offset-2 group"
           aria-label="Scroll to top"
         >
           <svg
@@ -951,6 +1079,20 @@ export default function NewLanding() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
           </svg>
         </button>
+      )}
+
+      {/* Floating Action Button - Mobile CTA */}
+      {scrolled && (
+        <Link
+          to="/register"
+          className="fixed bottom-8 right-4 sm:right-8 z-50 md:hidden flex items-center gap-2 px-5 py-3 bg-[#37322F] text-white rounded-full shadow-2xl hover:bg-[#2A2520] transition-all duration-300 hover:scale-105 group animate-bounce-subtle"
+          aria-label="Start free trial"
+        >
+          <span className="text-sm font-semibold whitespace-nowrap">Start Free</span>
+          <svg className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+          </svg>
+        </Link>
       )}
     </div>
   );
