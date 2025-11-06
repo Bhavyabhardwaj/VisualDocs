@@ -1,42 +1,141 @@
 /**
- * Payment Service - Stripe Integration
+ * Payment Service - Razorpay Integration (Client Side)
  * Handles checkout sessions and payment processing
+ * FREE for Indian developers - Only 2% fee on successful transactions
  */
+
+// Razorpay types
+declare global {
+  interface Window {
+    Razorpay: any;
+  }
+}
 
 export interface CheckoutData {
   planName: string;
-  planId: 'starter' | 'professional' | 'enterprise';
+  planId: 'professional' | 'enterprise';
   billingPeriod: 'monthly' | 'annually';
   price: number;
 }
 
 /**
- * Initialize Stripe checkout session
- * In production, this would call your backend API to create a Stripe session
+ * Load Razorpay script dynamically
+ */
+const loadRazorpayScript = (): Promise<boolean> => {
+  return new Promise((resolve) => {
+    // Check if script already loaded
+    if (window.Razorpay) {
+      resolve(true);
+      return;
+    }
+
+    const script = document.createElement('script');
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
+};
+
+/**
+ * Initialize Razorpay checkout session
  */
 export const createCheckoutSession = async (data: CheckoutData): Promise<void> => {
   try {
-    // In production, call your backend API
-    // const response = await fetch('/api/create-checkout-session', {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify(data),
-    // });
-    // const { sessionId } = await response.json();
-    // const stripe = await loadStripe(process.env.VITE_STRIPE_PUBLIC_KEY!);
-    // await stripe?.redirectToCheckout({ sessionId });
+    // Load Razorpay script
+    const scriptLoaded = await loadRazorpayScript();
+    if (!scriptLoaded) {
+      throw new Error('Failed to load Razorpay SDK');
+    }
 
-    // For now, redirect to register with plan info
-    const params = new URLSearchParams({
-      plan: data.planId,
-      billing: data.billingPeriod,
-      price: data.price.toString(),
+    // Get auth token
+    const token = localStorage.getItem('token');
+    if (!token) {
+      // Redirect to login with return URL
+      window.location.href = `/login?redirect=/pricing&plan=${data.planId}&billing=${data.billingPeriod}`;
+      return;
+    }
+
+    // Create subscription on backend
+    const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/payment/create-subscription`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        planId: data.planId,
+        billingPeriod: data.billingPeriod,
+      }),
     });
-    
-    window.location.href = `/register?${params.toString()}`;
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to create subscription');
+    }
+
+    const { data: subscriptionData } = await response.json();
+
+    // Configure Razorpay options
+    const options = {
+      key: import.meta.env.VITE_RAZORPAY_KEY_ID, // Razorpay Key ID
+      subscription_id: subscriptionData.subscriptionId,
+      name: 'VisualDocs',
+      description: `${data.planName} - ${data.billingPeriod === 'monthly' ? 'Monthly' : 'Annual'} Plan`,
+      image: '/logo.png', // Your logo
+      prefill: {
+        email: '', // Will be filled from user profile
+        contact: '', // Optional
+      },
+      theme: {
+        color: '#37322F', // Your brand color
+      },
+      handler: async function (response: any) {
+        // Payment successful - verify on backend
+        try {
+          const verifyResponse = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/payment/verify`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_subscription_id: response.razorpay_subscription_id,
+              razorpay_signature: response.razorpay_signature,
+            }),
+          });
+
+          if (verifyResponse.ok) {
+            // Redirect to success page
+            window.location.href = '/dashboard?payment=success';
+          } else {
+            throw new Error('Payment verification failed');
+          }
+        } catch (error) {
+          console.error('Verification error:', error);
+          window.location.href = '/dashboard?payment=error';
+        }
+      },
+      modal: {
+        ondismiss: function() {
+          console.log('Payment cancelled by user');
+          // Optionally redirect or show message
+        }
+      },
+      notes: {
+        planId: data.planId,
+        billingPeriod: data.billingPeriod,
+      },
+    };
+
+    // Open Razorpay checkout
+    const razorpay = new window.Razorpay(options);
+    razorpay.open();
+
   } catch (error) {
     console.error('Checkout error:', error);
-    throw new Error('Failed to initialize checkout. Please try again.');
+    throw new Error(error instanceof Error ? error.message : 'Failed to initialize checkout');
   }
 };
 
@@ -50,30 +149,16 @@ export const contactSales = (planName: string): void => {
 };
 
 /**
- * Stripe price IDs (configure these in your Stripe dashboard)
- * These should be stored in environment variables
- */
-export const STRIPE_PRICE_IDS = {
-  professional: {
-    monthly: 'price_professional_monthly', // Replace with actual Stripe price ID
-    annually: 'price_professional_annual', // Replace with actual Stripe price ID
-  },
-  enterprise: {
-    monthly: 'price_enterprise_monthly',
-    annually: 'price_enterprise_annual',
-  },
-} as const;
-
-/**
  * Format price for display
  */
-export const formatPrice = (price: number, period: 'monthly' | 'annually'): string => {
+export const formatPrice = (price: number, period: 'monthly' | 'annually', currency: 'INR' | 'USD' = 'INR'): string => {
   if (price === 0) return 'Free';
-  const formatted = new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
+  
+  const symbol = currency === 'INR' ? '₹' : '$';
+  const formatted = new Intl.NumberFormat('en-IN', {
     minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
   }).format(price);
   
-  return `${formatted}/${period === 'monthly' ? 'mo' : 'yr'}`;
+  return `${symbol}${formatted}/${period === 'monthly' ? 'mo' : 'yr'}`;
 };

@@ -4,6 +4,7 @@ import { AnalysisController } from './analysisController';
 import { DiagramController } from './diagramController';
 import { teamController } from './teamController';
 import { activityController } from './activityController';
+import { paymentController } from './paymentController';
 
 // Create controller instances
 export const authController = new AuthController();
@@ -18,6 +19,7 @@ export { AnalysisController } from './analysisController';
 export { DiagramController } from './diagramController';
 export { teamController } from './teamController';
 export { activityController } from './activityController';
+export { paymentController } from './paymentController';
 
 // Export default object for easy importing
 export default {

@@ -12,6 +12,7 @@ import teamRouter from './team.router';
 import activityRouter from './activity.router';
 import codeAnalysisRouter from './codeAnalysis.routes';
 import commentRouter from './comment.router';
+import paymentRouter from './payment.router';
 
 const router = Router();
 
@@ -26,6 +27,7 @@ const apiRoutes = [
   { path: '/teams', route: teamRouter, isProtected: true },
   { path: '/activity', route: activityRouter, isProtected: true },
   { path: '/comments', route: commentRouter, isProtected: true },
+  { path: '/payment', route: paymentRouter }, // Some routes protected, webhook public
   { path: '/public', route: publicRouter },
 ];
 

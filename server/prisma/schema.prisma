@@ -33,6 +33,16 @@ model User {
   accessToken   String?       // OAuth access token (encrypted)
   refreshToken  String?       // OAuth refresh token (encrypted)
   
+  // Razorpay Subscription fields
+  razorpayCustomerId    String?   // Razorpay customer ID
+  subscriptionId        String?   @unique // Razorpay subscription ID
+  subscriptionStatus    String?   // active, cancelled, paused, completed, expired
+  subscriptionPlan      String?   // professional, enterprise
+  billingPeriod         String?   // monthly, annually
+  subscriptionStartedAt DateTime? // When subscription started
+  subscriptionEndsAt    DateTime? // When subscription ends/renews
+  trialEndsAt           DateTime? // Trial expiration (if applicable)
+  
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
@@ -42,6 +52,8 @@ model User {
 
   // Indexes
   @@index([providerId])
+  @@index([subscriptionId])
+  @@index([subscriptionStatus])
   @@map("users")
 }
 

@@ -9,23 +9,24 @@ export default function PricingSection() {
   const [isProcessing, setIsProcessing] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  // Razorpay pricing in INR (Indian Rupees)
   const pricing = {
     starter: {
       monthly: 0,
       annually: 0,
     },
     professional: {
-      monthly: 20,
-      annually: 16, // 20% discount for annual
+      monthly: 2000, // ₹2,000/month
+      annually: 19200, // ₹19,200/year (20% discount - ₹1,600/month)
     },
     enterprise: {
-      monthly: 200,
-      annually: 160, // 20% discount for annual
+      monthly: 20000, // ₹20,000/month
+      annually: 192000, // ₹1,92,000/year (20% discount - ₹16,000/month)
     },
   }
 
   // Handle checkout process
-  const handleCheckout = async (planId: 'starter' | 'professional', planName: string) => {
+  const handleCheckout = async (planId: 'professional' | 'enterprise', planName: string) => {
     setIsProcessing(true)
     setError(null)
 
@@ -181,7 +182,7 @@ export default function PricingSection() {
                 <div className="self-stretch flex flex-col justify-start items-start gap-2">
                   <div className="flex flex-col justify-start items-start gap-1">
                     <div className="relative h-[60px] flex items-center text-[#37322F] text-5xl font-medium leading-[60px] font-serif">
-                      <span className="invisible">${pricing.starter[billingPeriod]}</span>
+                      <span className="invisible">₹{pricing.starter[billingPeriod].toLocaleString('en-IN')}</span>
                       <span
                         className="absolute inset-0 flex items-center transition-all duration-500"
                         style={{
@@ -191,7 +192,7 @@ export default function PricingSection() {
                         }}
                         aria-hidden={billingPeriod !== "annually"}
                       >
-                        ${pricing.starter.annually}
+                        ₹{pricing.starter.annually.toLocaleString('en-IN')}
                       </span>
                       <span
                         className="absolute inset-0 flex items-center transition-all duration-500"
@@ -202,7 +203,7 @@ export default function PricingSection() {
                         }}
                         aria-hidden={billingPeriod !== "monthly"}
                       >
-                        ${pricing.starter.monthly}
+                        ₹{pricing.starter.monthly.toLocaleString('en-IN')}
                       </span>
                     </div>
                     <div className="text-[#847971] text-sm font-medium font-sans">
@@ -276,7 +277,7 @@ export default function PricingSection() {
                 <div className="self-stretch flex flex-col justify-start items-start gap-2">
                   <div className="flex flex-col justify-start items-start gap-1">
                     <div className="relative h-[60px] flex items-center text-[#F0EFEE] text-5xl font-medium leading-[60px] font-serif">
-                      <span className="invisible">${pricing.professional[billingPeriod]}</span>
+                      <span className="invisible">₹{pricing.professional[billingPeriod].toLocaleString('en-IN')}</span>
                       <span
                         className="absolute inset-0 flex items-center transition-all duration-500"
                         style={{
@@ -286,7 +287,7 @@ export default function PricingSection() {
                         }}
                         aria-hidden={billingPeriod !== "annually"}
                       >
-                        ${pricing.professional.annually}
+                        ₹{pricing.professional.annually.toLocaleString('en-IN')}
                       </span>
                       <span
                         className="absolute inset-0 flex items-center transition-all duration-500"
@@ -297,7 +298,7 @@ export default function PricingSection() {
                         }}
                         aria-hidden={billingPeriod !== "monthly"}
                       >
-                        ${pricing.professional.monthly}
+                        ₹{pricing.professional.monthly.toLocaleString('en-IN')}
                       </span>
                     </div>
                     <div className="text-[#D2C6BF] text-sm font-medium font-sans">
@@ -373,7 +374,7 @@ export default function PricingSection() {
                 <div className="self-stretch flex flex-col justify-start items-start gap-2">
                   <div className="flex flex-col justify-start items-start gap-1">
                     <div className="relative h-[60px] flex items-center text-[#37322F] text-5xl font-medium leading-[60px] font-serif">
-                      <span className="invisible">${pricing.enterprise[billingPeriod]}</span>
+                      <span className="invisible">₹{pricing.enterprise[billingPeriod].toLocaleString('en-IN')}</span>
                       <span
                         className="absolute inset-0 flex items-center transition-all duration-500"
                         style={{
@@ -383,7 +384,7 @@ export default function PricingSection() {
                         }}
                         aria-hidden={billingPeriod !== "annually"}
                       >
-                        ${pricing.enterprise.annually}
+                        ₹{pricing.enterprise.annually.toLocaleString('en-IN')}
                       </span>
                       <span
                         className="absolute inset-0 flex items-center transition-all duration-500"
@@ -394,7 +395,7 @@ export default function PricingSection() {
                         }}
                         aria-hidden={billingPeriod !== "monthly"}
                       >
-                        ${pricing.enterprise.monthly}
+                        ₹{pricing.enterprise.monthly.toLocaleString('en-IN')}
                       </span>
                     </div>
                     <div className="text-[#847971] text-sm font-medium font-sans">
