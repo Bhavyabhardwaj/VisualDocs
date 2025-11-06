@@ -1020,16 +1020,87 @@ export default function NewLanding() {
                           Transform complex codebases into clear visual diagrams and interactive documentation.
                         </p>
                       </div>
-                      <div className="w-full h-[200px] sm:h-[250px] md:h-[300px] rounded-lg flex overflow-hidden items-center justify-center relative transform group-hover:scale-105 transition-transform duration-500">
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <NumbersThatSpeak
-                            width="100%"
-                            height="100%"
-                            theme="light"
-                            className="w-full h-full object-contain"
-                          />
+                      <div className="w-full h-[200px] sm:h-[250px] md:h-[300px] rounded-lg flex overflow-hidden items-center justify-center relative bg-gradient-to-br from-white to-[#F7F5F3] border border-[#E0DEDB]">
+                        {/* Animated Code Metrics Visualization */}
+                        <div className="w-full h-full p-4 sm:p-6 flex flex-col gap-3">
+                          {/* Header */}
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                              <span className="text-xs font-semibold text-[#37322F]">Analyzing codebase...</span>
+                            </div>
+                            <span className="text-xs text-[#A39D98]">Real-time</span>
+                          </div>
+
+                          {/* Code Metrics Cards */}
+                          <div className="grid grid-cols-2 gap-2 sm:gap-3">
+                            {/* Files Analyzed */}
+                            <div className="bg-white rounded-lg p-3 border border-[#E0DEDB] shadow-sm hover:shadow-md transition-shadow group/card">
+                              <div className="flex items-center gap-2 mb-2">
+                                <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                </svg>
+                                <span className="text-xs font-medium text-[#605A57]">Files</span>
+                              </div>
+                              <div className="text-xl sm:text-2xl font-bold text-[#37322F] group-hover/card:text-blue-600 transition-colors">
+                                <AnimatedCounter end={247} duration={1500} />
+                              </div>
+                            </div>
+
+                            {/* Functions */}
+                            <div className="bg-white rounded-lg p-3 border border-[#E0DEDB] shadow-sm hover:shadow-md transition-shadow group/card">
+                              <div className="flex items-center gap-2 mb-2">
+                                <svg className="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                                </svg>
+                                <span className="text-xs font-medium text-[#605A57]">Functions</span>
+                              </div>
+                              <div className="text-xl sm:text-2xl font-bold text-[#37322F] group-hover/card:text-purple-600 transition-colors">
+                                <AnimatedCounter end={1834} duration={1500} />
+                              </div>
+                            </div>
+
+                            {/* Coverage */}
+                            <div className="bg-white rounded-lg p-3 border border-[#E0DEDB] shadow-sm hover:shadow-md transition-shadow group/card">
+                              <div className="flex items-center gap-2 mb-2">
+                                <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <span className="text-xs font-medium text-[#605A57]">Coverage</span>
+                              </div>
+                              <div className="text-xl sm:text-2xl font-bold text-[#37322F] group-hover/card:text-green-600 transition-colors">
+                                <AnimatedCounter end={94} duration={1500} suffix="%" />
+                              </div>
+                            </div>
+
+                            {/* Lines of Code */}
+                            <div className="bg-white rounded-lg p-3 border border-[#E0DEDB] shadow-sm hover:shadow-md transition-shadow group/card">
+                              <div className="flex items-center gap-2 mb-2">
+                                <svg className="w-4 h-4 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7h16M4 12h16M4 17h16" />
+                                </svg>
+                                <span className="text-xs font-medium text-[#605A57]">Lines</span>
+                              </div>
+                              <div className="text-xl sm:text-2xl font-bold text-[#37322F] group-hover/card:text-orange-600 transition-colors">
+                                <AnimatedCounter end={52} duration={1500} suffix="k" />
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Progress Bar */}
+                          <div className="mt-auto">
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="text-xs text-[#605A57]">Documentation Status</span>
+                              <span className="text-xs font-semibold text-[#37322F]">89%</span>
+                            </div>
+                            <div className="w-full h-2 bg-[#E0DEDB] rounded-full overflow-hidden">
+                              <div 
+                                className="h-full bg-gradient-to-r from-[#37322F] via-[#49423D] to-[#37322F] rounded-full transition-all duration-2000 ease-out"
+                                style={{ width: '89%', backgroundSize: '200% 100%', animation: 'shimmer 2s infinite' }}
+                              ></div>
+                            </div>
+                          </div>
                         </div>
-                        <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-[#F7F5F3] to-transparent pointer-events-none"></div>
                       </div>
                     </div>
                   </div>
