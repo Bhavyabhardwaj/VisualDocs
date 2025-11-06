@@ -1,36 +1,20 @@
 import { Router } from 'express';
-import Stripe from 'stripe';
 import { authenticateToken } from '../middleware/auth';
+import { paymentService } from '../services/payments/PaymentService';
 
 const router = Router();
 
-// Initialize Stripe with secret key
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
-  apiVersion: '2023-10-16',
-});
-
-// Price IDs from Stripe Dashboard (replace with your actual IDs)
-const PRICE_IDS = {
-  professional: {
-    monthly: process.env.STRIPE_PROFESSIONAL_MONTHLY_PRICE_ID || 'price_xxx',
-    annually: process.env.STRIPE_PROFESSIONAL_ANNUAL_PRICE_ID || 'price_yyy',
-  },
-  enterprise: {
-    monthly: process.env.STRIPE_ENTERPRISE_MONTHLY_PRICE_ID || 'price_zzz',
-    annually: process.env.STRIPE_ENTERPRISE_ANNUAL_PRICE_ID || 'price_www',
-  },
-};
-
 /**
  * POST /api/payment/create-checkout-session
- * Create a Stripe checkout session for subscription
+ * Create a checkout session for subscription (works with any provider)
  */
 router.post('/create-checkout-session', authenticateToken, async (req, res) => {
   try {
-    const { planId, billingPeriod } = req.body;
+    const { planId, billingPeriod, priceAmount } = req.body;
     const userId = req.user?.id;
+    const userEmail = req.user?.email;
 
-    if (!userId) {
+    if (!userId || !userEmail) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
@@ -43,45 +27,29 @@ router.post('/create-checkout-session', authenticateToken, async (req, res) => {
       return res.status(400).json({ error: 'Invalid billing period' });
     }
 
-    // Get the price ID
-    const priceId = PRICE_IDS[planId as keyof typeof PRICE_IDS][billingPeriod as 'monthly' | 'annually'];
+    // Get payment provider
+    const provider = paymentService.getProvider();
 
-    // Create Stripe checkout session
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      line_items: [
-        {
-          price: priceId,
-          quantity: 1,
-        },
-      ],
-      mode: 'subscription',
-      success_url: `${process.env.FRONTEND_URL}/dashboard?session_id={CHECKOUT_SESSION_ID}&success=true`,
-      cancel_url: `${process.env.FRONTEND_URL}/pricing?canceled=true`,
-      client_reference_id: userId,
-      customer_email: req.user?.email,
-      metadata: {
-        userId,
-        planId,
-        billingPeriod,
-      },
-      subscription_data: {
-        metadata: {
-          userId,
-          planId,
-        },
-      },
+    // Create checkout session using current provider
+    const session = await provider.createCheckoutSession({
+      planId,
+      billingPeriod,
+      userId,
+      userEmail,
+      priceAmount: priceAmount || (planId === 'professional' ? 20 : 200),
+      currency: 'USD',
     });
 
-    res.json({ 
-      sessionId: session.id,
-      url: session.url 
+    res.json({
+      sessionId: session.sessionId,
+      url: session.checkoutUrl,
+      provider: paymentService.getProviderType(),
     });
   } catch (error) {
-    console.error('Stripe checkout error:', error);
-    res.status(500).json({ 
+    console.error('Checkout error:', error);
+    res.status(500).json({
       error: 'Failed to create checkout session',
-      message: error instanceof Error ? error.message : 'Unknown error'
+      message: error instanceof Error ? error.message : 'Unknown error',
     });
   }
 });
