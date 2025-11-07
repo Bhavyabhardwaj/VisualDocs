@@ -12,7 +12,7 @@ interface PremiumLayoutProps {
 export const PremiumLayout = ({ children }: PremiumLayoutProps) => {
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [shortcutsModalOpen, setShortcutsModalOpen] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(false); // Default closed on mobile
+  const [sidebarOpen, setSidebarOpen] = useState(true); // Default open on desktop
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Global keyboard shortcuts

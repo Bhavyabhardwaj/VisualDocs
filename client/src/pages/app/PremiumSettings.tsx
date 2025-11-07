@@ -72,24 +72,39 @@ export const PremiumSettings = () => {
         {/* Settings Content - Responsive */}
         <div className="mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 md:py-8">
           <Tabs defaultValue="profile" className="space-y-6 sm:space-y-8">
-            <TabsList className="bg-neutral-100 p-1 w-full overflow-x-auto flex-nowrap justify-start sm:justify-center">
-              <TabsTrigger value="profile" className="data-[state=active]:bg-white text-xs sm:text-sm whitespace-nowrap px-2 sm:px-3">
+            <TabsList className="!bg-neutral-50 !border !border-neutral-200 p-1 w-full overflow-x-auto flex-nowrap justify-start sm:justify-center rounded-lg h-auto">
+              <TabsTrigger 
+                value="profile" 
+                className="data-[state=active]:!bg-white data-[state=active]:!text-neutral-900 data-[state=active]:shadow-sm !text-neutral-600 text-xs sm:text-sm whitespace-nowrap px-2 sm:px-3 py-2 rounded-md"
+              >
                 <User className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
                 <span className="hidden xs:inline">Profile</span>
               </TabsTrigger>
-              <TabsTrigger value="account" className="data-[state=active]:bg-white text-xs sm:text-sm whitespace-nowrap px-2 sm:px-3">
+              <TabsTrigger 
+                value="account" 
+                className="data-[state=active]:!bg-white data-[state=active]:!text-neutral-900 data-[state=active]:shadow-sm !text-neutral-600 text-xs sm:text-sm whitespace-nowrap px-2 sm:px-3 py-2 rounded-md"
+              >
                 <Building className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
                 <span className="hidden xs:inline">Account</span>
               </TabsTrigger>
-              <TabsTrigger value="notifications" className="data-[state=active]:bg-white text-xs sm:text-sm whitespace-nowrap px-2 sm:px-3">
+              <TabsTrigger 
+                value="notifications" 
+                className="data-[state=active]:!bg-white data-[state=active]:!text-neutral-900 data-[state=active]:shadow-sm !text-neutral-600 text-xs sm:text-sm whitespace-nowrap px-2 sm:px-3 py-2 rounded-md"
+              >
                 <Bell className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
                 <span className="hidden xs:inline">Notifications</span>
               </TabsTrigger>
-              <TabsTrigger value="integrations" className="data-[state=active]:bg-white text-xs sm:text-sm whitespace-nowrap px-2 sm:px-3">
+              <TabsTrigger 
+                value="integrations" 
+                className="data-[state=active]:!bg-white data-[state=active]:!text-neutral-900 data-[state=active]:shadow-sm !text-neutral-600 text-xs sm:text-sm whitespace-nowrap px-2 sm:px-3 py-2 rounded-md"
+              >
                 <Plug className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
                 <span className="hidden xs:inline">Integrations</span>
               </TabsTrigger>
-              <TabsTrigger value="billing" className="data-[state=active]:bg-white text-xs sm:text-sm whitespace-nowrap px-2 sm:px-3">
+              <TabsTrigger 
+                value="billing" 
+                className="data-[state=active]:!bg-white data-[state=active]:!text-neutral-900 data-[state=active]:shadow-sm !text-neutral-600 text-xs sm:text-sm whitespace-nowrap px-2 sm:px-3 py-2 rounded-md"
+              >
                 <CreditCard className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
                 <span className="hidden xs:inline">Billing</span>
               </TabsTrigger>
