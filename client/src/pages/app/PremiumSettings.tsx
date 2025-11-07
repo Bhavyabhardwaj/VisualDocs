@@ -97,16 +97,16 @@ export const PremiumSettings = () => {
 
             {/* Profile Tab */}
             <TabsContent value="profile" className="space-y-4 sm:space-y-6">
-              <Card className="border-neutral-200 shadow-none"
-                <CardHeader>
-                  <CardTitle className="text-lg">Personal Information</CardTitle>
-                  <CardDescription>Update your personal details and profile picture</CardDescription>
+              <Card className="border-neutral-200 shadow-none">
+                <CardHeader className="px-4 sm:px-6">
+                  <CardTitle className="text-base sm:text-lg">Personal Information</CardTitle>
+                  <CardDescription className="text-xs sm:text-sm">Update your personal details and profile picture</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-6">
+                <CardContent className="space-y-4 sm:space-y-6 px-4 sm:px-6">
                   {/* Avatar Upload */}
-                  <div className="flex items-center gap-6">
-                    <Avatar className="w-20 h-20">
-                      <AvatarFallback className="bg-blue-100 text-blue-600 text-2xl font-semibold">
+                  <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6">
+                    <Avatar className="w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0">
+                      <AvatarFallback className="bg-blue-100 text-blue-600 text-xl sm:text-2xl font-semibold">
                         {userInitials}
                       </AvatarFallback>
                     </Avatar>

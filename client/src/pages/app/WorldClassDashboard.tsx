@@ -249,7 +249,6 @@ export const WorldClassDashboard = () => {
               <Button
                 variant={filterStatus === 'active' ? 'default' : 'outline'}
                 size="sm"
-                className="text-xs sm:text-sm whitespace-nowrap"
                 onClick={() => setFilterStatus('active')}
                 className={`text-xs sm:text-sm whitespace-nowrap ${
                   filterStatus === 'active'
