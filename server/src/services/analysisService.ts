@@ -1,4 +1,4 @@
-import { PrismaClient, Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { logger } from '../utils/logger';
 import { BadRequestError, NotFoundError, UnauthorizedError } from '../errors';
 import type { FileAnalysisResult, ProjectAnalysisResult } from '../types';

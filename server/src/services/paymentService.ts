@@ -6,7 +6,7 @@
 
 import Razorpay from 'razorpay';
 import crypto from 'crypto';
-import { BadRequestError, InternalServerError } from '../errors';
+import { BadRequestError } from '../errors';
 
 // Razorpay instance
 const razorpay = new Razorpay({
@@ -51,7 +51,7 @@ export class PaymentService {
       const order = await razorpay.orders.create(options);
       return order;
     } catch (error: any) {
-      throw new InternalServerError(
+      throw new Error(
         `Failed to create Razorpay order: ${error.message}`
       );
     }
@@ -97,7 +97,7 @@ export class PaymentService {
         shortUrl: subscription.short_url, // Payment link for user
       };
     } catch (error: any) {
-      throw new InternalServerError(
+      throw new Error(
         `Failed to create subscription: ${error.message}`
       );
     }
@@ -150,7 +150,7 @@ export class PaymentService {
       const payment = await razorpay.payments.fetch(paymentId);
       return payment;
     } catch (error: any) {
-      throw new InternalServerError(
+      throw new Error(
         `Failed to fetch payment: ${error.message}`
       );
     }
@@ -164,7 +164,7 @@ export class PaymentService {
       const subscription = await razorpay.subscriptions.fetch(subscriptionId);
       return subscription;
     } catch (error: any) {
-      throw new InternalServerError(
+      throw new Error(
         `Failed to fetch subscription: ${error.message}`
       );
     }
@@ -184,7 +184,7 @@ export class PaymentService {
       );
       return subscription;
     } catch (error: any) {
-      throw new InternalServerError(
+      throw new Error(
         `Failed to cancel subscription: ${error.message}`
       );
     }
@@ -198,7 +198,7 @@ export class PaymentService {
       const subscription = await razorpay.subscriptions.pause(subscriptionId);
       return subscription;
     } catch (error: any) {
-      throw new InternalServerError(
+      throw new Error(
         `Failed to pause subscription: ${error.message}`
       );
     }
@@ -212,7 +212,7 @@ export class PaymentService {
       const subscription = await razorpay.subscriptions.resume(subscriptionId);
       return subscription;
     } catch (error: any) {
-      throw new InternalServerError(
+      throw new Error(
         `Failed to resume subscription: ${error.message}`
       );
     }
@@ -234,7 +234,7 @@ export class PaymentService {
       const refund = await razorpay.payments.refund(paymentId, options);
       return refund;
     } catch (error: any) {
-      throw new InternalServerError(
+      throw new Error(
         `Failed to create refund: ${error.message}`
       );
     }
@@ -250,7 +250,7 @@ export class PaymentService {
       });
       return invoices;
     } catch (error: any) {
-      throw new InternalServerError(
+      throw new Error(
         `Failed to fetch invoices: ${error.message}`
       );
     }

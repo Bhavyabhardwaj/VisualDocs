@@ -4,10 +4,9 @@
  */
 
 import { PaymentProvider } from './PaymentProvider';
-import { StripeProvider } from './StripeProvider';
 import { DodoProvider } from './DodoProvider';
 
-type PaymentProviderType = 'stripe' | 'dodo';
+type PaymentProviderType = 'dodo';
 
 export class PaymentService {
   private static instance: PaymentService;
@@ -16,7 +15,7 @@ export class PaymentService {
 
   private constructor() {
     // Initialize based on environment variable
-    this.providerType = (process.env.PAYMENT_PROVIDER as PaymentProviderType) || 'stripe';
+    this.providerType = (process.env.PAYMENT_PROVIDER as PaymentProviderType) || 'dodo';
     this.provider = this.createProvider(this.providerType);
   }
 
@@ -54,12 +53,6 @@ export class PaymentService {
    */
   private createProvider(type: PaymentProviderType): PaymentProvider {
     switch (type) {
-      case 'stripe':
-        if (!process.env.STRIPE_SECRET_KEY) {
-          throw new Error('STRIPE_SECRET_KEY is not configured');
-        }
-        return new StripeProvider(process.env.STRIPE_SECRET_KEY);
-
       case 'dodo':
         if (!process.env.DODO_API_KEY) {
           throw new Error('DODO_API_KEY is not configured');

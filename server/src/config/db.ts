@@ -1,4 +1,4 @@
-import { PrismaClient } from "../generated/prisma";
+import { PrismaClient } from "@prisma/client";
 import { logger } from "../utils";
 
 // Configure Prisma Client with proper connection pooling
