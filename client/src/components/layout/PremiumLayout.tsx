@@ -47,19 +47,13 @@ export const PremiumLayout = ({ children }: PremiumLayoutProps) => {
         />
       )}
 
-      {/* Unified Sidebar - Mobile Drawer */}
-      <div className={`
-        fixed top-14 left-0 bottom-0 z-50 w-[280px] max-w-[85vw] bg-white border-r border-neutral-200
-        transform transition-transform duration-300 ease-out lg:hidden
-        ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
-      `}>
-        <UnifiedSidebar isOpen={true} onToggle={handleMobileMenuClose} onNavigate={handleMobileMenuClose} />
-      </div>
-
-      {/* Desktop Sidebar */}
-      <div className="hidden lg:block">
-        <UnifiedSidebar isOpen={sidebarOpen} onToggle={() => setSidebarOpen(!sidebarOpen)} />
-      </div>
+      {/* Unified Sidebar - Mobile & Desktop */}
+      <UnifiedSidebar 
+        isOpen={sidebarOpen} 
+        onToggle={() => setSidebarOpen(!sidebarOpen)} 
+        onNavigate={handleMobileMenuClose}
+        mobileMenuOpen={mobileMenuOpen}
+      />
 
       {/* Main Content with Sidebar and TopNav Offset - Mobile Responsive */}
       <main className={`transition-all duration-300 pt-16 ${sidebarOpen ? 'lg:ml-64' : 'lg:ml-0'}`}>

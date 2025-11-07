@@ -25,8 +25,7 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { FileUploadDialog } from '@/components/app/FileUploadDialog';
 import { GitHubImportDialog } from '@/components/app/GitHubImportDialog';
-import { TopNavBar } from '@/components/app/TopNavBar';
-import { UnifiedSidebar } from '@/components/app/UnifiedSidebar';
+import { PremiumLayout } from '@/components/layout/PremiumLayout';
 import { projectService } from '@/services/project.service';
 import type { Project } from '@/types/api';
 
@@ -92,21 +91,13 @@ export const WorldClassDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-brand-bg">
-      {/* Top Navigation Bar - Premium UI */}
-      <TopNavBar />
-
-      {/* Unified Sidebar Navigation */}
-      <UnifiedSidebar />
-
-      {/* Main Content with Responsive Sidebar Offset */}
-      <main className="lg:ml-64 pt-14 sm:pt-16">
-        <div className="mx-auto max-w-[1400px] px-3 sm:px-4 md:px-6 py-4 sm:py-6 md:py-8">
-          {/* Page Header with Quick Actions */}
-          <div className="mb-6 sm:mb-8">
-            <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
-              <div className="w-full sm:w-auto">
-                <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-brand-primary">Dashboard</h1>
+    <PremiumLayout>
+      <div className="mx-auto max-w-[1400px] px-3 sm:px-4 md:px-6 py-4 sm:py-6 md:py-8">
+        {/* Page Header with Quick Actions */}
+        <div className="mb-6 sm:mb-8">
+          <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
+            <div className="w-full sm:w-auto">
+              <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-brand-primary">Dashboard</h1>
                 <p className="mt-1 sm:mt-2 text-xs sm:text-sm text-neutral-600">
                   Welcome back! Here's what's happening with your projects today.
                 </p>
@@ -495,24 +486,23 @@ export const WorldClassDashboard = () => {
           </div>
         )}
         </div>
-      </main>
 
-      {/* Dialogs */}
-      <FileUploadDialog
-        open={uploadDialogOpen}
-        onOpenChange={setUploadDialogOpen}
-        projectId={selectedProjectId}
-        onUploadComplete={loadProjects}
-      />
+        {/* Dialogs */}
+        <FileUploadDialog
+          open={uploadDialogOpen}
+          onOpenChange={setUploadDialogOpen}
+          projectId={selectedProjectId}
+          onUploadComplete={loadProjects}
+        />
 
-      <GitHubImportDialog
-        open={githubDialogOpen}
-        onOpenChange={setGithubDialogOpen}
-        onImportComplete={(projectId) => {
-          loadProjects();
-          navigate(`/app/projects/${projectId}`);
-        }}
-      />
-    </div>
+        <GitHubImportDialog
+          open={githubDialogOpen}
+          onOpenChange={setGithubDialogOpen}
+          onImportComplete={(projectId) => {
+            loadProjects();
+            navigate(`/app/projects/${projectId}`);
+          }}
+        />
+    </PremiumLayout>
   );
 };

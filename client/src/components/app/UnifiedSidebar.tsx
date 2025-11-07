@@ -22,6 +22,7 @@ interface UnifiedSidebarProps {
   isOpen?: boolean;
   onToggle?: () => void;
   onNavigate?: () => void;
+  mobileMenuOpen?: boolean;
 }
 
 const navigationItems: NavItem[] = [
@@ -67,7 +68,7 @@ const navigationItems: NavItem[] = [
   },
 ];
 
-export const UnifiedSidebar = ({ isOpen = true, onNavigate }: UnifiedSidebarProps) => {
+export const UnifiedSidebar = ({ isOpen = true, onNavigate, mobileMenuOpen = false }: UnifiedSidebarProps) => {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -82,9 +83,11 @@ export const UnifiedSidebar = ({ isOpen = true, onNavigate }: UnifiedSidebarProp
 
   return (
     <aside className={cn(
-      "fixed left-0 top-16 z-30 h-[calc(100vh-4rem)] w-64 border-r border-neutral-200 bg-white transition-all duration-300 ease-in-out",
-      isOpen ? "lg:translate-x-0" : "lg:-translate-x-full",
-      "-translate-x-full lg:translate-x-0" // Mobile: hidden by default, Desktop: follows isOpen
+      "fixed left-0 top-14 sm:top-16 z-50 h-[calc(100vh-3.5rem)] sm:h-[calc(100vh-4rem)] w-[280px] max-w-[85vw] lg:w-64 border-r border-neutral-200 bg-white transition-all duration-300 ease-out",
+      // Mobile: controlled by mobileMenuOpen
+      mobileMenuOpen ? "translate-x-0 lg:translate-x-0" : "-translate-x-full",
+      // Desktop: controlled by isOpen
+      isOpen ? "lg:translate-x-0" : "lg:-translate-x-full"
     )}>
       <div className="flex h-full flex-col overflow-y-auto">
         {/* Main Navigation */}
