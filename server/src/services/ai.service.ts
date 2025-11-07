@@ -5,7 +5,7 @@ import type { ProjectAnalysisResult } from '../types';
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 
 export class AIService {
-    private model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash-latest' });
+    private model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
     /**
      * Generate comprehensive documentation using Gemini AI

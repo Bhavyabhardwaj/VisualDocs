@@ -646,6 +646,14 @@ export class ProjectController {
     async validateGitHubRepository(req: Request, res: Response, next: NextFunction) {
         try {
             const { githubUrl } = req.body;
+            
+            if (!githubUrl) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'GitHub URL is required'
+                });
+            }
+
             const { githubService } = await import('../services');
 
             const { owner, repo, repository } = await githubService.validateRepository(githubUrl);
@@ -653,6 +661,7 @@ export class ProjectController {
             return successResponse(
                 res,
                 {
+                    isValid: true,
                     repository: {
                         owner,
                         repo,
@@ -672,7 +681,16 @@ export class ProjectController {
                 'Repository validated successfully'
             );
         } catch (error) {
-            next(error);
+            // Return validation failure instead of throwing
+            logger.error('GitHub validation failed:', error);
+            return successResponse(
+                res,
+                {
+                    isValid: false,
+                    message: error instanceof Error ? error.message : 'Repository validation failed'
+                },
+                'Validation completed'
+            );
         }
     }
 

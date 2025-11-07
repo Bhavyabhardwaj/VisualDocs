@@ -363,6 +363,9 @@ export class AnalysisService {
         // Efficient complexity distribution using array indexing
         const complexityBuckets: number[] = [0, 0, 0, 0]; // [low, medium, high, critical]
 
+        // Get project files for AI recommendations
+        const projectFiles = await this.getProjectFiles(projectId);
+
         for (const analysis of fileAnalyses) {
             totalFiles++;
             totalLinesOfCode += analysis.linesOfCode;
@@ -390,6 +393,9 @@ export class AnalysisService {
         // Convert Map to plain object for JSON storage
         const languageDistributionObj = Object.fromEntries(languageDistribution);
 
+        // Generate AI-powered recommendations
+        const recommendations = await this.generateAIRecommendations(projectId, projectFiles);
+
         const result: ProjectAnalysisResult = {
             id: `analysis_${Date.now()}`,
             projectId,
@@ -413,7 +419,7 @@ export class AnalysisService {
                 internal: [], 
                 external: Array.from(dependencySet) 
             },
-            recommendations: this.generateRecommendations(totalComplexity, averageComplexity, totalFiles),
+            recommendations,
             completedAt: new Date(),
         };
 
@@ -430,7 +436,7 @@ export class AnalysisService {
                 interfaceCount,
                 languageDistribution: languageDistributionObj,
                 dependencies: result.dependencies,
-                recommendations: result.recommendations,
+                recommendations,
                 completedAt: new Date(),
             },
             create: {
@@ -445,7 +451,7 @@ export class AnalysisService {
                 languageDistribution: languageDistributionObj,
                 frameworksDetected: [],
                 dependencies: result.dependencies,
-                recommendations: result.recommendations,
+                recommendations,
                 completedAt: new Date(),
             }
         });
@@ -454,7 +460,65 @@ export class AnalysisService {
     }
 
     /**
-     *  Smart recommendations based on metrics
+     *  Smart recommendations based on metrics and AI analysis
+     */
+    private async generateAIRecommendations(projectId: string, files: any[]): Promise<string[]> {
+        try {
+            // Import AI code analysis service
+            const { codeAnalysisService } = await import('./codeAnalysis.service');
+            
+            // Limit files for AI analysis (max 10 files, 5000 chars each)
+            const filesToAnalyze = files.slice(0, 10).map(f => ({
+                name: f.name,
+                path: f.path || f.name,
+                content: f.content.substring(0, 5000),
+                language: f.language || 'typescript'
+            }));
+
+            if (filesToAnalyze.length === 0) {
+                return ['Add code files to get AI-powered recommendations'];
+            }
+
+            const analysis = await codeAnalysisService.analyzeCodeWithAI(filesToAnalyze);
+            
+            // Generate recommendations from AI analysis
+            const recommendations: string[] = [];
+            
+            if (analysis.criticalIssues > 0) {
+                recommendations.push(`🚨 ${analysis.criticalIssues} critical issue(s) detected - immediate attention required`);
+            }
+            if (analysis.highIssues > 0) {
+                recommendations.push(`⚠️ ${analysis.highIssues} high-priority issue(s) found - review recommended`);
+            }
+            
+            // Add top 3 specific recommendations from AI
+            const topIssues = analysis.issues
+                .filter(i => i.severity === 'critical' || i.severity === 'high')
+                .slice(0, 3);
+            
+            topIssues.forEach(issue => {
+                recommendations.push(`${issue.category}: ${issue.title}`);
+            });
+
+            if (recommendations.length === 0 && analysis.summary) {
+                recommendations.push(analysis.summary);
+            }
+            
+            if (recommendations.length === 0) {
+                recommendations.push('✅ Code quality looks good - no critical issues detected');
+            }
+
+            return recommendations;
+        } catch (error) {
+            logger.warn('AI recommendations failed, using fallback', {
+                error: error instanceof Error ? error.message : 'Unknown error'
+            });
+            return this.generateRecommendations(0, 0, files.length);
+        }
+    }
+
+    /**
+     *  Smart recommendations based on metrics (fallback)
      */
     private generateRecommendations(totalComplexity: number, averageComplexity: number, totalFiles: number): string[] {
         const recommendations: string[] = [];

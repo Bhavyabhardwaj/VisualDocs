@@ -34,7 +34,7 @@ export interface AnalysisResult {
 }
 
 export class CodeAnalysisService {
-  private model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash-latest' });
+  private model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
   /**
    * Analyze code files using Gemini AI to detect real issues
