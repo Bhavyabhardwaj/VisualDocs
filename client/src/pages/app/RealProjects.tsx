@@ -53,7 +53,18 @@ export const RealProjects = () => {
     try {
       setLoading(true);
       const response = await projectService.getProjects({ limit: 100 });
-      setProjects(response.data.items || []);
+      const projectsData = response.data.items || [];
+      
+      // Map the projects to include fileCount from _count.codeFiles and latest analysis
+      const mappedProjects = projectsData.map((project: any) => ({
+        ...project,
+        fileCount: project._count?.codeFiles || 0,
+        diagramCount: project._count?.diagrams || 0,
+        analysis: project.analyses?.[0] || null, // Get the latest analysis
+      }));
+      
+      console.log('📊 Loaded projects with file counts:', mappedProjects);
+      setProjects(mappedProjects);
     } catch (error) {
       console.error('Failed to load projects:', error);
       setProjects([]);
@@ -76,7 +87,20 @@ export const RealProjects = () => {
     }
   };
 
-  const getQualityScore = (project: Project) => {
+  const getQualityScore = (project: any) => {
+    // If project has analysis data, use it for quality score
+    if (project.analysis?.averageComplexity !== undefined) {
+      const complexity = project.analysis.averageComplexity;
+      // Convert complexity to quality score (inverse relationship)
+      // Lower complexity = higher quality
+      if (complexity <= 5) return 95;
+      if (complexity <= 10) return 85;
+      if (complexity <= 15) return 75;
+      if (complexity <= 20) return 65;
+      return 55;
+    }
+    
+    // Fallback calculation based on file count and status
     const baseScore = 70;
     const fileBonus = Math.min((project.fileCount || 0) * 2, 20);
     const analysisBonus = project.status === 'active' ? 10 : 0;

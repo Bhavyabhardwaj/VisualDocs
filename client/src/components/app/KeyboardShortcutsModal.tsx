@@ -5,7 +5,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from '../ui/dialog';
-import { Keyboard, Command, Zap } from 'lucide-react';
+import { Command, Zap } from 'lucide-react';
 
 interface KeyboardShortcutsModalProps {
   open: boolean;
@@ -82,30 +82,30 @@ export const KeyboardShortcutsModal = ({ open, onOpenChange }: KeyboardShortcuts
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-3xl bg-white border-neutral-200 p-0 gap-0 overflow-hidden">
-        {/* Header with Gradient */}
-        <div className="bg-gradient-to-r from-neutral-800 to-neutral-900 px-6 py-5 text-white">
+      <DialogContent className="sm:max-w-3xl !bg-white !border-neutral-200 p-0 gap-0 overflow-hidden">
+        {/* Header - Light Theme */}
+        <div className="!bg-gradient-to-r !from-neutral-50 !to-neutral-100 px-6 py-5 border-b !border-neutral-200">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-3 text-white text-xl">
-              <div className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center">
-                <Command className="w-5 h-5" />
+            <DialogTitle className="flex items-center gap-3 !text-neutral-900 text-xl">
+              <div className="w-10 h-10 rounded-lg !bg-neutral-200 flex items-center justify-center">
+                <Command className="w-5 h-5 !text-neutral-700" />
               </div>
               Keyboard Shortcuts
             </DialogTitle>
-            <DialogDescription className="text-neutral-300 mt-2">
+            <DialogDescription className="!text-neutral-600 mt-2">
               Master these shortcuts to boost your productivity
             </DialogDescription>
           </DialogHeader>
         </div>
 
         {/* Content */}
-        <div className="px-6 py-6 max-h-[60vh] overflow-y-auto">
+        <div className="px-6 py-6 max-h-[60vh] overflow-y-auto !bg-white">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {categories.map((category) => (
               <div key={category} className="space-y-3">
-                <div className="flex items-center gap-2 pb-2 border-b border-neutral-200">
-                  <Zap className="w-4 h-4 text-neutral-600" />
-                  <h3 className="text-sm font-semibold text-neutral-900">
+                <div className="flex items-center gap-2 pb-2 border-b !border-neutral-200">
+                  <Zap className="w-4 h-4 !text-neutral-600" />
+                  <h3 className="text-sm font-semibold !text-neutral-900">
                     {category}
                   </h3>
                 </div>
@@ -117,14 +117,14 @@ export const KeyboardShortcutsModal = ({ open, onOpenChange }: KeyboardShortcuts
                         key={index}
                         className="group"
                       >
-                        <div className="text-xs text-neutral-600 mb-1.5">
+                        <div className="text-xs !text-neutral-600 mb-1.5">
                           {shortcut.description}
                         </div>
                         <div className="flex items-center gap-1.5 flex-wrap">
                           {shortcut.keys.map((key, i) => (
                             <kbd
                               key={i}
-                              className="inline-flex items-center justify-center min-w-[32px] h-7 px-2 bg-neutral-100 border border-neutral-300 rounded-md text-xs font-semibold text-neutral-900 shadow-sm group-hover:border-neutral-400 transition-colors"
+                              className="inline-flex items-center justify-center min-w-[32px] h-7 px-2 !bg-neutral-50 !border !border-neutral-300 rounded-md text-xs font-semibold !text-neutral-900 shadow-sm group-hover:!border-neutral-400 group-hover:!bg-neutral-100 transition-colors"
                             >
                               {key}
                             </kbd>
@@ -139,12 +139,12 @@ export const KeyboardShortcutsModal = ({ open, onOpenChange }: KeyboardShortcuts
         </div>
 
         {/* Footer */}
-        <div className="bg-neutral-50 border-t border-neutral-200 px-6 py-4">
-          <div className="flex items-center justify-center gap-2 text-xs text-neutral-600">
+        <div className="!bg-neutral-50 border-t !border-neutral-200 px-6 py-4">
+          <div className="flex items-center justify-center gap-2 text-xs !text-neutral-600">
             <span>Windows users: Replace</span>
-            <kbd className="inline-flex items-center justify-center min-w-[24px] h-6 px-2 bg-white border border-neutral-300 rounded text-xs font-semibold text-neutral-900">⌘</kbd>
+            <kbd className="inline-flex items-center justify-center min-w-[24px] h-6 px-2 !bg-white !border !border-neutral-300 rounded text-xs font-semibold !text-neutral-900">⌘</kbd>
             <span>with</span>
-            <kbd className="inline-flex items-center justify-center min-w-[24px] h-6 px-2 bg-white border border-neutral-300 rounded text-xs font-semibold text-neutral-900">Ctrl</kbd>
+            <kbd className="inline-flex items-center justify-center min-w-[24px] h-6 px-2 !bg-white !border !border-neutral-300 rounded text-xs font-semibold !text-neutral-900">Ctrl</kbd>
           </div>
         </div>
       </DialogContent>

@@ -52,6 +52,8 @@ export const AIAnalysisDashboard = () => {
   const [projects, setProjects] = useState<any[]>([]);
   const [analysisData, setAnalysisData] = useState<any>(null);
   const [issueFilter, setIssueFilter] = useState<'all' | 'critical' | 'high-critical'>('all');
+  const [loading, setLoading] = useState(true);
+  const [analyzing, setAnalyzing] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -59,50 +61,32 @@ export const AIAnalysisDashboard = () => {
   useEffect(() => {
     const loadProject = async () => {
       try {
+        setLoading(true);
         const token = localStorage.getItem('authToken');
         const response = await fetch('http://localhost:3004/api/projects', {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = await response.json();
-        console.log('📦 Projects response:', data);
-        console.log('📦 data.success:', data.success);
-        console.log('📦 data.data:', data.data);
-        console.log('📦 data.data?.items:', data.data?.items);
         
         // The API returns data.data.items (array of projects)
         if (data.success && data.data?.items && data.data.items.length > 0) {
-          console.log('✅ Using data.data.items path');
+          console.log(`✅ Loaded ${data.data.items.length} projects:`, data.data.items.map((p: any) => `${p.name} (${p._count?.codeFiles || 0} files)`));
           setProjects(data.data.items);
           const firstProject = data.data.items[0];
-          console.log('📊 Loading analysis for project:', firstProject.id);
           setProjectId(firstProject.id);
-          loadAnalysis(firstProject.id);
-        } else if (data.success && data.data?.projects && data.data.projects.length > 0) {
-          console.log('✅ Using data.data.projects path');
-          setProjects(data.data.projects);
-          const firstProject = data.data.projects[0];
-          console.log('📊 Loading analysis for project:', firstProject.id);
-          setProjectId(firstProject.id);
-          loadAnalysis(firstProject.id);
-        } else if (data.data && Array.isArray(data.data) && data.data.length > 0) {
-          // data.data is directly an array
-          console.log('✅ Using data.data array path');
-          setProjects(data.data);
-          const firstProject = data.data[0];
-          console.log('📊 Loading analysis for project:', firstProject.id);
-          setProjectId(firstProject.id);
-          loadAnalysis(firstProject.id);
-        } else if (data.projects && data.projects.length > 0) {
-          // Alternative response structure
-          console.log('✅ Using data.projects path');
-          setProjects(data.projects);
-          setProjectId(data.projects[0].id);
-          loadAnalysis(data.projects[0].id);
+          await loadAnalysis(firstProject.id);
         } else {
-          console.warn('⚠️ No projects found in response');
+          console.warn('⚠️ No projects found - please create a project first');
         }
       } catch (error) {
         console.error('Failed to load projects:', error);
+        toast({
+          title: "Failed to Load Projects",
+          description: "Could not load your projects. Please try refreshing the page.",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
       }
     };
     loadProject();
@@ -114,43 +98,62 @@ export const AIAnalysisDashboard = () => {
       const token = localStorage.getItem('authToken');
       console.log('📊 Fetching analysis for project:', pid);
       
-      // Use the correct endpoint
-      const response = await fetch(`http://localhost:3004/api/analysis/${pid}`, {
+      // First, try to get existing analysis
+      const analysisResponse = await fetch(`http://localhost:3004/api/analysis/${pid}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       
-      console.log('📊 Analysis response status:', response.status);
+      if (analysisResponse.ok) {
+        const data = await analysisResponse.json();
+        const analysis = data.data?.analysis || data.analysis || data.data;
+        
+        if (analysis && Object.keys(analysis).length > 0) {
+          console.log('✅ Loaded existing analysis:', analysis);
+          setAnalysisData(analysis);
+          
+          // Also try to load AI code analysis for issues
+          loadAICodeAnalysis(pid);
+          return;
+        }
+      }
+      
+      // No analysis exists - set to null so UI can show "Run Analysis" button
+      console.log('⚠️ No analysis data - project needs to be analyzed');
+      setAnalysisData(null);
+    } catch (error) {
+      console.error('Failed to load analysis:', error);
+      setAnalysisData(null);
+    }
+  };
+
+  // Load AI code analysis for detailed issues
+  const loadAICodeAnalysis = async (pid: string) => {
+    try {
+      const token = localStorage.getItem('authToken');
+      const response = await fetch(`http://localhost:3004/api/code-analysis/${pid}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       
       if (response.ok) {
         const data = await response.json();
-        console.log('📊 Analysis data received:', data);
+        console.log('🤖 AI Code Analysis:', data);
         
-        // Handle different response structures
-        const analysis = data.data?.analysis || data.analysis || data.data;
-        console.log('📊 Extracted analysis:', analysis);
-        console.log('📊 Analysis keys:', analysis ? Object.keys(analysis) : 'null');
-        
-        if (analysis && analysis !== null && typeof analysis === 'object' && Object.keys(analysis).length > 0) {
-          console.log('✅ Analysis data found:', {
-            totalFiles: analysis.totalFiles,
-            totalLinesOfCode: analysis.totalLinesOfCode,
-            totalComplexity: analysis.totalComplexity,
-            averageComplexity: analysis.averageComplexity,
-            functionCount: analysis.functionCount,
-            classCount: analysis.classCount,
-            interfaceCount: analysis.interfaceCount
+        // Merge AI issues with analysis data
+        if (data.data && analysisData) {
+          setAnalysisData({
+            ...analysisData,
+            aiAnalysis: data.data,
+            issues: data.data.issues || [],
+            totalIssues: data.data.totalIssues || 0,
+            criticalIssues: data.data.criticalIssues || 0,
+            highIssues: data.data.highIssues || 0,
+            mediumIssues: data.data.mediumIssues || 0,
+            lowIssues: data.data.lowIssues || 0,
           });
-          setAnalysisData(analysis);
-        } else {
-          console.log('⚠️ Analysis is null - project needs to be analyzed');
-          setAnalysisData(null);
         }
-      } else {
-        console.log('⚠️ No analysis data available (status:', response.status, ')');
-        setAnalysisData(null);
       }
     } catch (error) {
-      console.error('Failed to load analysis:', error);
+      console.log('AI code analysis not available:', error);
     }
   };
 
@@ -182,20 +185,28 @@ export const AIAnalysisDashboard = () => {
     }
   ] : [];
 
-  // Get issues from analysis data - generate from recommendations
-  const issues: Issue[] = analysisData?.recommendations?.map((rec: string, index: number) => ({
-    id: `issue-${index}`,
-    severity: rec.includes('refactoring') ? 'high' : rec.includes('review') ? 'medium' : 'low',
-    title: rec.includes('refactoring') ? 'High Complexity Detected' : 
-           rec.includes('review') ? 'Architecture Review Needed' : 
-           rec.includes('tests') ? 'Add Unit Tests' : 'Code Quality',
+  // Get issues from analysis data - use real AI issues if available, fallback to recommendations
+  const issues: Issue[] = analysisData?.issues?.map((issue: any) => ({
+    id: issue.id || `issue-${Math.random()}`,
+    severity: issue.severity || 'medium',
+    title: issue.title || 'Code Issue',
+    description: issue.description || '',
+    file: issue.file || 'Multiple files',
+    line: issue.line || 0,
+    category: issue.category || 'Quality',
+    codeSnippet: issue.codeSnippet || '',
+    aiSuggestion: issue.aiSuggestion || null,
+  })) || analysisData?.recommendations?.map((rec: string, index: number) => ({
+    id: `rec-${index}`,
+    severity: rec.includes('🚨') ? 'critical' : rec.includes('⚠️') ? 'high' : 'medium',
+    title: rec.split(':')[1]?.trim() || rec.substring(0, 50),
     description: rec,
-    suggestion: rec,  // Add suggestion field
+    suggestion: rec,
     file: 'Multiple files',
     line: 0,
-    category: rec.includes('complexity') ? 'Performance' : 
-              rec.includes('test') ? 'Testing' : 
-              rec.includes('architecture') ? 'Architecture' : 'Quality',
+    category: rec.includes('Security') ? 'Security' : 
+              rec.includes('Performance') ? 'Performance' : 
+              rec.includes('Maintainability') ? 'Maintainability' : 'Quality',
   })) || [];
 
   // Apply filtering
@@ -207,15 +218,32 @@ export const AIAnalysisDashboard = () => {
   });
 
   // Calculate stats from real data
-  const totalIssues = issues.length;
-  const criticalIssues = issues.filter(i => i.severity === 'critical').length;
-  const highIssues = issues.filter(i => i.severity === 'high').length;
-  const mediumIssues = issues.filter(i => i.severity === 'medium').length;
-  const lowIssues = issues.filter(i => i.severity === 'low').length;
+  const totalIssues = analysisData?.totalIssues || issues.length;
+  const criticalIssues = analysisData?.criticalIssues || issues.filter(i => i.severity === 'critical').length;
+  const highIssues = analysisData?.highIssues || issues.filter(i => i.severity === 'high').length;
+  const mediumIssues = analysisData?.mediumIssues || issues.filter(i => i.severity === 'medium').length;
+  const lowIssues = analysisData?.lowIssues || issues.filter(i => i.severity === 'low').length;
   
   // Calculate overall quality score from analysis
-  const overallQuality = analysisData?.overallQuality || 0;
-  const aiSuggestionsCount = issues.filter(issue => issue.suggestion).length;
+  const calculateQualityScore = () => {
+    if (!analysisData) return 0;
+    
+    // If we have AI analysis with real score
+    if (analysisData.aiAnalysis?.overallQuality) {
+      return analysisData.aiAnalysis.overallQuality;
+    }
+    
+    // Calculate from complexity
+    const complexity = analysisData.averageComplexity || 0;
+    if (complexity <= 5) return 95;
+    if (complexity <= 10) return 85;
+    if (complexity <= 15) return 75;
+    if (complexity <= 20) return 65;
+    return 55;
+  };
+  
+  const overallQuality = calculateQualityScore();
+  const aiSuggestionsCount = issues.filter(issue => issue.aiSuggestion).length;
   const analysisTime = analysisData?.analysisTime || '0s';
 
   const getSeverityConfig = (severity: string) => {
@@ -305,17 +333,18 @@ export const AIAnalysisDashboard = () => {
       return;
     }
 
+    setAnalyzing(true);
     toast({
-      title: "Analysis Started",
-      description: "AI is analyzing your codebase for issues and improvements...",
+      title: "AI Analysis Starting",
+      description: "Running comprehensive AI code analysis...",
     });
 
     try {
       const token = localStorage.getItem('authToken');
-      console.log('🔄 Starting analysis for project:', projectId);
+      console.log('🤖 Starting AI code analysis for project:', projectId);
       
-      // Use the correct endpoint
-      const response = await fetch(`http://localhost:3004/api/analysis/${projectId}/rerun`, {
+      // Step 1: Run regular analysis first
+      const analysisResponse = await fetch(`http://localhost:3004/api/analysis/${projectId}/rerun`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -323,54 +352,55 @@ export const AIAnalysisDashboard = () => {
         },
       });
 
-      console.log('🔄 Analysis response status:', response.status);
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error('❌ Analysis failed:', errorData);
-        throw new Error(errorData.message || 'Analysis failed');
+      if (!analysisResponse.ok) {
+        throw new Error('Analysis failed');
       }
 
-      const data = await response.json();
-      console.log('✅ Analysis complete - Full response:', data);
-      console.log('✅ Analysis data structure:', JSON.stringify(data, null, 2));
-      
-      // Handle different response structures
-      const analysis = data.data?.analysis || data.analysis || data.data;
-      console.log('✅ Extracted analysis:', analysis);
-      
-      if (analysis) {
-        console.log('✅ Setting analysis state with data:', {
-          totalFiles: analysis.totalFiles,
-          totalLinesOfCode: analysis.totalLinesOfCode,
-          totalComplexity: analysis.totalComplexity,
-          averageComplexity: analysis.averageComplexity,
-          functionCount: analysis.functionCount,
-          classCount: analysis.classCount,
-          interfaceCount: analysis.interfaceCount,
-          recommendations: analysis.recommendations
-        });
-        setAnalysisData(analysis);
+      const analysisData = await analysisResponse.json();
+      console.log('✅ Basic analysis complete:', analysisData);
+
+      // Step 2: Run AI code analysis for detailed issues
+      toast({
+        title: "AI Analysis In Progress",
+        description: "Analyzing code with AI for issues and suggestions...",
+      });
+
+      const aiAnalysisResponse = await fetch(`http://localhost:3004/api/code-analysis/${projectId}/analyze`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (aiAnalysisResponse.ok) {
+        const aiData = await aiAnalysisResponse.json();
+        console.log('✅ AI analysis complete:', aiData);
+        
         toast({
-          title: "Analysis Complete",
-          description: `Analyzed ${analysis.totalFiles || 0} files with ${analysis.totalLinesOfCode?.toLocaleString() || 0} lines of code!`,
+          title: "Analysis Complete!",
+          description: `Found ${aiData.data?.totalIssues || 0} issues. ${aiData.data?.criticalIssues || 0} critical, ${aiData.data?.highIssues || 0} high priority.`,
         });
       } else {
-        console.log('⚠️ No analysis in response, reloading...');
-        // Reload the analysis data
-        await loadAnalysis(projectId);
+        console.log('⚠️ AI analysis not available, using basic analysis only');
         toast({
           title: "Analysis Complete",
-          description: "Analysis finished successfully!",
+          description: "Basic analysis finished successfully!",
         });
       }
+
+      // Reload all data
+      await loadAnalysis(projectId);
+      
     } catch (error) {
       console.error('❌ Analysis error:', error);
       toast({
         title: "Analysis Failed",
-        description: error instanceof Error ? error.message : 'Unknown error',
+        description: error instanceof Error ? error.message : 'Failed to complete analysis',
         variant: "destructive",
       });
+    } finally {
+      setAnalyzing(false);
     }
   };
 
@@ -654,6 +684,16 @@ ${improvementPlan.recommendations.map((rec: string, i: number) => `${i + 1}. ${r
 
   return (
     <PremiumLayout>
+      {loading ? (
+        <div className="mx-auto max-w-[1400px] px-3 sm:px-4 md:px-6 py-4 sm:py-6 md:py-8">
+          <div className="flex items-center justify-center h-[60vh]">
+            <div className="text-center">
+              <Sparkles className="h-12 w-12 text-brand-primary animate-pulse mx-auto mb-4" />
+              <p className="text-neutral-600">Loading analysis...</p>
+            </div>
+          </div>
+        </div>
+      ) : (
       <div className="mx-auto max-w-[1400px] px-3 sm:px-4 md:px-6 py-4 sm:py-6 md:py-8">
         {/* Header */}
         <div className="mb-6 md:mb-8">
@@ -722,16 +762,67 @@ ${improvementPlan.recommendations.map((rec: string, i: number) => `${i + 1}. ${r
                 size="sm" 
                 className="gap-2 bg-brand-primary hover:bg-brand-secondary text-white text-xs sm:text-sm"
                 onClick={handleRunAnalysis}
+                disabled={analyzing}
               >
-                <Sparkles className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                <span className="hidden sm:inline">Run Analysis</span>
-                <span className="sm:hidden">Analyze</span>
+                <Sparkles className={`h-3.5 w-3.5 sm:h-4 sm:w-4 ${analyzing ? 'animate-spin' : ''}`} />
+                <span className="hidden sm:inline">{analyzing ? 'Analyzing...' : 'Run Analysis'}</span>
+                <span className="sm:hidden">{analyzing ? '...' : 'Analyze'}</span>
               </Button>
             </div>
           </div>
         </div>
 
         {/* Overview Stats */}
+        {!analysisData && projectId && (
+          <Card className="border-brand-primary/30 bg-gradient-to-r from-brand-bg to-white mb-6 md:mb-8">
+            <CardContent className="pt-6">
+              <div className="flex flex-col md:flex-row items-center gap-4 md:gap-6">
+                <div className="rounded-full bg-brand-primary/10 p-4">
+                  <Brain className="h-8 w-8 text-brand-primary animate-pulse" />
+                </div>
+                <div className="flex-1 text-center md:text-left">
+                  <h3 className="text-lg font-semibold text-brand-primary mb-2">No Analysis Data Yet</h3>
+                  <p className="text-sm text-neutral-600 mb-3">
+                    {projects.find(p => p.id === projectId)?._count?.codeFiles > 0 
+                      ? "Your project has files ready to analyze. Click 'Run Analysis' to get AI-powered insights!"
+                      : "Upload code files to your project first (via GitHub import or file upload), then run analysis."}
+                  </p>
+                  <div className="flex flex-wrap items-center gap-2 justify-center md:justify-start">
+                    {projects.find(p => p.id === projectId)?._count?.codeFiles > 0 ? (
+                      <Button 
+                        onClick={handleRunAnalysis}
+                        disabled={analyzing}
+                        className="gap-2 bg-brand-primary hover:bg-brand-secondary text-white"
+                      >
+                        <Sparkles className={`h-4 w-4 ${analyzing ? 'animate-spin' : ''}`} />
+                        {analyzing ? 'Analyzing...' : 'Run Analysis Now'}
+                      </Button>
+                    ) : (
+                      <>
+                        <Button 
+                          onClick={() => navigate('/app/projects')}
+                          className="gap-2 bg-brand-primary hover:bg-brand-secondary text-white"
+                        >
+                          <FileCode className="h-4 w-4" />
+                          Upload Files
+                        </Button>
+                        <span className="text-xs text-neutral-500">or</span>
+                        <Button 
+                          onClick={() => navigate('/app/projects')}
+                          variant="outline"
+                          className="gap-2 border-brand-primary text-brand-primary hover:bg-brand-bg"
+                        >
+                          <GitBranch className="h-4 w-4" />
+                          Import from GitHub
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
         <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4 mb-6 md:mb-8">
           <Card className="border-neutral-200 hover:shadow-lg transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
@@ -1036,41 +1127,60 @@ ${improvementPlan.recommendations.map((rec: string, i: number) => `${i + 1}. ${r
                 <CardDescription className="text-neutral-600 text-xs sm:text-sm">Smart recommendations from our AI</CardDescription>
               </CardHeader>
               <CardContent className="space-y-2 sm:space-y-3">
-                <div className="rounded-lg bg-white p-3 sm:p-4 shadow-sm border border-neutral-100">
-                  <div className="flex items-start gap-2 sm:gap-3">
-                    <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-600 flex-shrink-0 mt-0.5" />
-                    <div>
-                      <h4 className="text-xs sm:text-sm font-semibold text-brand-primary mb-1">Great Progress!</h4>
-                      <p className="text-xs text-neutral-600 leading-relaxed">
-                        Your code quality improved by 5% this week. Keep up the excellent work!
-                      </p>
-                    </div>
-                  </div>
-                </div>
+                {analysisData?.recommendations && analysisData.recommendations.length > 0 ? (
+                  analysisData.recommendations.slice(0, 3).map((recommendation: string, index: number) => {
+                    // Parse recommendation to extract icon type
+                    const isPositive = recommendation.toLowerCase().includes('good') || recommendation.toLowerCase().includes('excellent') || recommendation.toLowerCase().includes('improved');
+                    const isWarning = recommendation.includes('⚠️') || recommendation.toLowerCase().includes('consider') || recommendation.toLowerCase().includes('warning');
+                    const isCritical = recommendation.includes('🚨') || recommendation.toLowerCase().includes('critical');
+                    
+                    const Icon = isCritical ? AlertTriangle : isWarning ? Target : isPositive ? CheckCircle2 : Zap;
+                    const iconColor = isCritical ? 'text-red-600' : isWarning ? 'text-amber-600' : isPositive ? 'text-emerald-600' : 'text-brand-primary';
+                    
+                    // Extract title (first part before colon or first sentence)
+                    const parts = recommendation.split(':');
+                    const title = parts[0].replace(/[🚨⚠️✅]/g, '').trim();
+                    const description = parts.length > 1 ? parts.slice(1).join(':').trim() : recommendation;
 
-                <div className="rounded-lg bg-white p-3 sm:p-4 shadow-sm border border-neutral-100">
-                  <div className="flex items-start gap-2 sm:gap-3">
-                    <Target className="h-4 w-4 sm:h-5 sm:w-5 text-brand-primary flex-shrink-0 mt-0.5" />
-                    <div>
-                      <h4 className="text-xs sm:text-sm font-semibold text-brand-primary mb-1">Focus Area</h4>
-                      <p className="text-xs text-neutral-600 leading-relaxed">
-                        Consider improving test coverage in the authentication module to reach 95% coverage.
-                      </p>
+                    return (
+                      <div key={index} className="rounded-lg bg-white p-3 sm:p-4 shadow-sm border border-neutral-100">
+                        <div className="flex items-start gap-2 sm:gap-3">
+                          <Icon className={`h-4 w-4 sm:h-5 sm:w-5 ${iconColor} flex-shrink-0 mt-0.5`} />
+                          <div>
+                            <h4 className="text-xs sm:text-sm font-semibold text-brand-primary mb-1">{title}</h4>
+                            <p className="text-xs text-neutral-600 leading-relaxed">
+                              {description}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })
+                ) : analysisData ? (
+                  <div className="rounded-lg bg-white p-3 sm:p-4 shadow-sm border border-neutral-100">
+                    <div className="flex items-start gap-2 sm:gap-3">
+                      <Sparkles className="h-4 w-4 sm:h-5 sm:w-5 text-brand-primary flex-shrink-0 mt-0.5 animate-pulse" />
+                      <div>
+                        <h4 className="text-xs sm:text-sm font-semibold text-brand-primary mb-1">No AI Recommendations Yet</h4>
+                        <p className="text-xs text-neutral-600 leading-relaxed">
+                          Click "Run Analysis" to get AI-powered insights and recommendations for your codebase.
+                        </p>
+                      </div>
                     </div>
                   </div>
-                </div>
-
-                <div className="rounded-lg bg-white p-3 sm:p-4 shadow-sm border border-neutral-100">
-                  <div className="flex items-start gap-2 sm:gap-3">
-                    <Zap className="h-4 w-4 sm:h-5 sm:w-5 text-amber-600 flex-shrink-0 mt-0.5" />
-                    <div>
-                      <h4 className="text-xs sm:text-sm font-semibold text-neutral-900 mb-1">Performance Tip</h4>
-                      <p className="text-xs text-neutral-600 leading-relaxed">
-                        Implementing lazy loading could reduce initial bundle size by approximately 23%.
-                      </p>
+                ) : (
+                  <div className="rounded-lg bg-white p-3 sm:p-4 shadow-sm border border-neutral-100">
+                    <div className="flex items-start gap-2 sm:gap-3">
+                      <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <h4 className="text-xs sm:text-sm font-semibold text-neutral-900 mb-1">No Analysis Data</h4>
+                        <p className="text-xs text-neutral-600 leading-relaxed">
+                          Select a project and run analysis to see AI-powered insights.
+                        </p>
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
               </CardContent>
             </Card>
 
@@ -1211,6 +1321,7 @@ ${improvementPlan.recommendations.map((rec: string, i: number) => `${i + 1}. ${r
           </div>
         </div>
       </div>
+      )}
     </PremiumLayout>
   );
 };
