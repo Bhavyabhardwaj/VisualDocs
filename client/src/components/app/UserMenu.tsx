@@ -67,43 +67,43 @@ export const UserMenu = () => {
         </button>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent align="end" className="w-64 p-2 bg-white border-neutral-200">
+      <DropdownMenuContent align="end" className="w-64 p-2 !bg-white !border-neutral-200 shadow-lg">
         {/* User Info Section */}
-        <div className="px-3 py-2 mb-2 bg-brand-bg rounded-lg">
-          <p className="text-sm font-semibold text-brand-primary">{user?.name || 'User'}</p>
-          <p className="text-xs text-neutral-600 truncate">{user?.email || 'user@example.com'}</p>
+        <div className="px-3 py-2 mb-2 !bg-neutral-50 rounded-lg border border-neutral-100">
+          <p className="text-sm font-semibold !text-neutral-900">{user?.name || 'User'}</p>
+          <p className="text-xs !text-neutral-600 truncate">{user?.email || 'user@example.com'}</p>
         </div>
 
-        <DropdownMenuSeparator className="bg-neutral-200" />
+        <DropdownMenuSeparator className="!bg-neutral-200" />
 
         {/* Profile */}
         <DropdownMenuItem 
           onClick={() => navigate('/app/settings')}
-          className="flex items-center gap-3 px-3 py-2 cursor-pointer rounded-md hover:bg-brand-bg focus:bg-brand-bg text-brand-primary"
+          className="flex items-center gap-3 px-3 py-2 cursor-pointer rounded-md hover:!bg-neutral-50 focus:!bg-neutral-50 !text-neutral-900"
         >
-          <User className="w-4 h-4 text-neutral-600" />
+          <User className="w-4 h-4 !text-neutral-600" />
           <span className="text-sm">Profile Settings</span>
         </DropdownMenuItem>
 
         {/* Team Settings */}
         <DropdownMenuItem 
           onClick={() => navigate('/app/team')}
-          className="flex items-center gap-3 px-3 py-2 cursor-pointer rounded-md hover:bg-brand-bg focus:bg-brand-bg text-brand-primary"
+          className="flex items-center gap-3 px-3 py-2 cursor-pointer rounded-md hover:!bg-neutral-50 focus:!bg-neutral-50 !text-neutral-900"
         >
-          <TeamIcon className="w-4 h-4 text-neutral-600" />
+          <TeamIcon className="w-4 h-4 !text-neutral-600" />
           <span className="text-sm">Team Settings</span>
         </DropdownMenuItem>
 
         {/* Billing */}
         <DropdownMenuItem 
           onClick={() => navigate('/app/settings')}
-          className="flex items-center gap-3 px-3 py-2 cursor-pointer rounded-md hover:bg-brand-bg focus:bg-brand-bg text-brand-primary"
+          className="flex items-center gap-3 px-3 py-2 cursor-pointer rounded-md hover:!bg-neutral-50 focus:!bg-neutral-50 !text-neutral-900"
         >
-          <CreditCard className="w-4 h-4 text-neutral-600" />
+          <CreditCard className="w-4 h-4 !text-neutral-600" />
           <span className="text-sm">Billing</span>
         </DropdownMenuItem>
 
-        <DropdownMenuSeparator className="bg-neutral-200" />
+        <DropdownMenuSeparator className="!bg-neutral-200" />
 
         {/* Keyboard Shortcuts */}
         <DropdownMenuItem 
@@ -111,23 +111,23 @@ export const UserMenu = () => {
             setIsOpen(false);
             setShortcutsModalOpen(true);
           }}
-          className="flex items-center gap-3 px-3 py-2 cursor-pointer rounded-md hover:bg-brand-bg focus:bg-brand-bg text-brand-primary"
+          className="flex items-center gap-3 px-3 py-2 cursor-pointer rounded-md hover:!bg-neutral-50 focus:!bg-neutral-50 !text-neutral-900"
         >
-          <Keyboard className="w-4 h-4 text-neutral-600" />
+          <Keyboard className="w-4 h-4 !text-neutral-600" />
           <span className="text-sm">Keyboard Shortcuts</span>
-          <kbd className="ml-auto text-xs text-neutral-500 font-mono">⌘/</kbd>
+          <kbd className="ml-auto text-xs !text-neutral-500 font-mono">⌘/</kbd>
         </DropdownMenuItem>
 
         {/* Help & Support */}
         <DropdownMenuItem 
           onClick={() => navigate('/help')}
-          className="flex items-center gap-3 px-3 py-2 cursor-pointer rounded-md hover:bg-brand-bg focus:bg-brand-bg text-brand-primary"
+          className="flex items-center gap-3 px-3 py-2 cursor-pointer rounded-md hover:!bg-neutral-50 focus:!bg-neutral-50 !text-neutral-900"
         >
-          <HelpCircle className="w-4 h-4 text-neutral-600" />
+          <HelpCircle className="w-4 h-4 !text-neutral-600" />
           <span className="text-sm">Help & Support</span>
         </DropdownMenuItem>
 
-        <DropdownMenuSeparator className="bg-neutral-200" />
+        <DropdownMenuSeparator className="!bg-neutral-200" />
 
         {/* Log Out */}
         <DropdownMenuItem 
