@@ -99,71 +99,74 @@ export const WorldClassDashboard = () => {
       {/* Unified Sidebar Navigation */}
       <UnifiedSidebar />
 
-      {/* Main Content with Sidebar Offset */}
-      <main className="ml-64 pt-16">
-        <div className="mx-auto max-w-[1400px] px-6 py-8">
+      {/* Main Content with Responsive Sidebar Offset */}
+      <main className="lg:ml-64 pt-14 sm:pt-16">
+        <div className="mx-auto max-w-[1400px] px-3 sm:px-4 md:px-6 py-4 sm:py-6 md:py-8">
           {/* Page Header with Quick Actions */}
-          <div className="mb-8">
-            <div className="flex items-start justify-between">
-              <div>
-                <h1 className="text-3xl font-semibold tracking-tight text-brand-primary">Dashboard</h1>
-                <p className="mt-2 text-sm text-neutral-600">
+          <div className="mb-6 sm:mb-8">
+            <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
+              <div className="w-full sm:w-auto">
+                <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-brand-primary">Dashboard</h1>
+                <p className="mt-1 sm:mt-2 text-xs sm:text-sm text-neutral-600">
                   Welcome back! Here's what's happening with your projects today.
                 </p>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full sm:w-auto">
                 <Button
                   variant="outline"
                   size="sm"
-                  className="gap-2 border-neutral-300 hover:bg-brand-bg"
+                  className="gap-2 border-neutral-300 hover:bg-brand-bg flex-1 sm:flex-none text-xs sm:text-sm"
                   onClick={() => {
                     setSelectedProjectId(projects.length > 0 ? projects[0].id : null);
                     setUploadDialogOpen(true);
                   }}
                 >
-                  <Upload className="h-4 w-4" />
-                  Upload Files
+                  <Upload className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  <span className="hidden xs:inline">Upload Files</span>
+                  <span className="xs:hidden">Upload</span>
               </Button>
               <Button
                 variant="outline"
                 size="sm"
-                className="gap-2 hover:bg-gray-50"
+                className="gap-2 hover:bg-gray-50 flex-1 sm:flex-none text-xs sm:text-sm"
                 onClick={() => navigate('/app/analysis')}
               >
-                <BarChart3 className="h-4 w-4" />
-                Analytics
+                <BarChart3 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                <span className="hidden xs:inline">Analytics</span>
+                <span className="xs:hidden">Stats</span>
               </Button>
               <Button
                 size="sm"
-                className="gap-2 bg-gray-900 hover:bg-gray-800 shadow-sm"
+                className="gap-2 bg-gray-900 hover:bg-gray-800 shadow-sm w-full sm:w-auto text-xs sm:text-sm"
                 onClick={() => setGithubDialogOpen(true)}
               >
-                <Github className="h-4 w-4" />
-                Import from GitHub
+                <Github className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                <span>Import from GitHub</span>
               </Button>
             </div>
           </div>
         </div>
 
-        {/* Premium Stats Grid */}
-        <div className="mb-8 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        {/* Premium Stats Grid - Responsive */}
+        <div className="mb-6 sm:mb-8 grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4 px-3 sm:px-4 md:px-6 max-w-[1400px] mx-auto">
           <Card
             className="border-gray-200 hover:shadow-lg hover:scale-[1.02] transition-all duration-200 cursor-pointer"
             onClick={() => navigate('/app/projects')}
           >
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-zinc-600">
-                Projects Analyzed
+            <CardHeader className="flex flex-row items-center justify-between pb-2 p-3 sm:p-4 lg:p-6">
+              <CardTitle className="text-xs sm:text-sm font-medium text-zinc-600">
+                Projects
               </CardTitle>
-              <div className="rounded-lg bg-zinc-100 p-2.5">
-                <FolderGit2 className="h-5 w-5 text-zinc-700" />
+              <div className="rounded-lg bg-zinc-100 p-1.5 sm:p-2.5">
+                <FolderGit2 className="h-3.5 w-3.5 sm:h-5 sm:w-5 text-zinc-700" />
               </div>
             </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-zinc-900">{stats.totalProjects}</div>
-              <div className="mt-2 flex items-center gap-1.5 text-xs text-zinc-600">
-                <TrendingUp className="h-3.5 w-3.5" />
-                <span className="font-medium">+12% from last month</span>
+            <CardContent className="p-3 sm:p-4 lg:p-6 pt-0">
+              <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-zinc-900">{stats.totalProjects}</div>
+              <div className="mt-1 sm:mt-2 flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs text-zinc-600">
+                <TrendingUp className="h-2.5 w-2.5 sm:h-3.5 sm:w-3.5" />
+                <span className="font-medium hidden sm:inline">+12% from last month</span>
+                <span className="font-medium sm:hidden">+12%</span>
               </div>
             </CardContent>
           </Card>
@@ -172,15 +175,16 @@ export const WorldClassDashboard = () => {
             className="border-gray-200 hover:shadow-lg hover:scale-[1.02] transition-all duration-200 cursor-pointer"
             onClick={() => navigate('/app/projects')}
           >
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-zinc-600">Docs Generated</CardTitle>
-              <div className="rounded-lg bg-zinc-100 p-2.5">
-                <FileText className="h-5 w-5 text-zinc-700" />
+            <CardHeader className="flex flex-row items-center justify-between pb-2 p-3 sm:p-4 lg:p-6">
+              <CardTitle className="text-xs sm:text-sm font-medium text-zinc-600">Docs</CardTitle>
+              <div className="rounded-lg bg-zinc-100 p-1.5 sm:p-2.5">
+                <FileText className="h-3.5 w-3.5 sm:h-5 sm:w-5 text-zinc-700" />
               </div>
             </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-zinc-900">{stats.docsGenerated}</div>
-              <p className="mt-2 text-xs text-zinc-600">Across all projects</p>
+            <CardContent className="p-3 sm:p-4 lg:p-6 pt-0">
+              <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-zinc-900">{stats.docsGenerated}</div>
+              <p className="mt-1 sm:mt-2 text-[10px] sm:text-xs text-zinc-600 hidden sm:block">Across all projects</p>
+              <p className="mt-1 sm:mt-2 text-[10px] sm:text-xs text-zinc-600 sm:hidden">Total</p>
             </CardContent>
           </Card>
 
@@ -188,15 +192,16 @@ export const WorldClassDashboard = () => {
             className="border-gray-200 hover:shadow-lg hover:scale-[1.02] transition-all duration-200 cursor-pointer"
             onClick={() => navigate('/app/analysis')}
           >
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">AI Insights</CardTitle>
-              <div className="rounded-lg bg-amber-50 p-2.5">
-                <Zap className="h-5 w-5 text-amber-600" />
+            <CardHeader className="flex flex-row items-center justify-between pb-2 p-3 sm:p-4 lg:p-6">
+              <CardTitle className="text-xs sm:text-sm font-medium text-gray-600">AI Insights</CardTitle>
+              <div className="rounded-lg bg-amber-50 p-1.5 sm:p-2.5">
+                <Zap className="h-3.5 w-3.5 sm:h-5 sm:w-5 text-amber-600" />
               </div>
             </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-gray-900">{stats.aiInsights}</div>
-              <p className="mt-2 text-xs text-gray-600">Smart suggestions</p>
+            <CardContent className="p-3 sm:p-4 lg:p-6 pt-0">
+              <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">{stats.aiInsights}</div>
+              <p className="mt-1 sm:mt-2 text-[10px] sm:text-xs text-gray-600 hidden sm:block">Smart suggestions</p>
+              <p className="mt-1 sm:mt-2 text-[10px] sm:text-xs text-gray-600 sm:hidden">Tips</p>
             </CardContent>
           </Card>
 
@@ -204,51 +209,53 @@ export const WorldClassDashboard = () => {
             className="border-gray-200 hover:shadow-lg hover:scale-[1.02] transition-all duration-200 cursor-pointer"
             onClick={() => navigate('/app/team')}
           >
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-zinc-600">Team Members</CardTitle>
-              <div className="rounded-lg bg-zinc-100 p-2.5">
-                <Users className="h-5 w-5 text-zinc-700" />
+            <CardHeader className="flex flex-row items-center justify-between pb-2 p-3 sm:p-4 lg:p-6">
+              <CardTitle className="text-xs sm:text-sm font-medium text-zinc-600">Team</CardTitle>
+              <div className="rounded-lg bg-zinc-100 p-1.5 sm:p-2.5">
+                <Users className="h-3.5 w-3.5 sm:h-5 sm:w-5 text-zinc-700" />
               </div>
             </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-zinc-900">{stats.teamMembers}</div>
-              <p className="mt-2 text-xs text-zinc-600">Active collaborators</p>
+            <CardContent className="p-3 sm:p-4 lg:p-6 pt-0">
+              <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-zinc-900">{stats.teamMembers}</div>
+              <p className="mt-1 sm:mt-2 text-[10px] sm:text-xs text-zinc-600 hidden sm:block">Active collaborators</p>
+              <p className="mt-1 sm:mt-2 text-[10px] sm:text-xs text-zinc-600 sm:hidden">Members</p>
             </CardContent>
           </Card>
         </div>
 
-        {/* Projects Section */}
-        <div className="space-y-5">
-          <div className="flex items-center justify-between">
+        {/* Projects Section - Responsive */}
+        <div className="space-y-4 sm:space-y-5 px-3 sm:px-4 md:px-6 max-w-[1400px] mx-auto">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
             <div>
-              <h2 className="text-xl font-semibold tracking-tight text-gray-900">
+              <h2 className="text-lg sm:text-xl font-semibold tracking-tight text-gray-900">
                 Recent Projects
               </h2>
-              <p className="text-sm text-gray-600 mt-1">
+              <p className="text-xs sm:text-sm text-gray-600 mt-0.5 sm:mt-1">
                 {filteredProjects.length}{' '}
                 {filteredProjects.length === 1 ? 'project' : 'projects'}
               </p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 sm:gap-2 w-full sm:w-auto overflow-x-auto pb-1">
               <Button
                 variant={filterStatus === 'all' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setFilterStatus('all')}
-                className={
+                className={`text-xs sm:text-sm whitespace-nowrap ${
                   filterStatus === 'all' ? 'bg-gray-900 hover:bg-gray-800' : 'hover:bg-gray-50'
-                }
+                }`}
               >
                 All
               </Button>
               <Button
                 variant={filterStatus === 'active' ? 'default' : 'outline'}
                 size="sm"
+                className="text-xs sm:text-sm whitespace-nowrap"
                 onClick={() => setFilterStatus('active')}
-                className={
+                className={`text-xs sm:text-sm whitespace-nowrap ${
                   filterStatus === 'active'
                     ? 'bg-gray-900 hover:bg-gray-800'
                     : 'hover:bg-gray-50'
-                }
+                }`}
               >
                 Ready
               </Button>
@@ -256,60 +263,60 @@ export const WorldClassDashboard = () => {
                 variant={filterStatus === 'analyzing' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setFilterStatus('analyzing')}
-                className={
+                className={`text-xs sm:text-sm whitespace-nowrap ${
                   filterStatus === 'analyzing'
                     ? 'bg-gray-900 hover:bg-gray-800'
                     : 'hover:bg-gray-50'
-                }
+                }`}
               >
                 Analyzing
               </Button>
-              <Button variant="outline" size="icon" className="hover:bg-gray-50">
-                <Filter className="h-4 w-4" />
+              <Button variant="outline" size="icon" className="hover:bg-gray-50 flex-shrink-0 h-9 w-9 sm:h-10 sm:w-10">
+                <Filter className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               </Button>
             </div>
           </div>
 
           {loading ? (
-            <div className="flex flex-col items-center justify-center py-20">
-              <Loader2 className="h-10 w-10 animate-spin text-gray-400 mb-4" />
-              <p className="text-sm font-medium text-gray-600">Loading your projects...</p>
-              <p className="text-xs text-gray-500 mt-1">This won't take long</p>
+            <div className="flex flex-col items-center justify-center py-12 sm:py-20">
+              <Loader2 className="h-8 w-8 sm:h-10 sm:w-10 animate-spin text-gray-400 mb-3 sm:mb-4" />
+              <p className="text-xs sm:text-sm font-medium text-gray-600">Loading your projects...</p>
+              <p className="text-[10px] sm:text-xs text-gray-500 mt-1">This won't take long</p>
             </div>
           ) : filteredProjects.length === 0 ? (
             <Card className="border-zinc-200 border-2 border-dashed bg-zinc-50/50">
-              <CardContent className="flex flex-col items-center justify-center py-20">
-                <div className="rounded-full bg-zinc-100 p-5 mb-5">
-                  <FolderGit2 className="h-14 w-14 text-zinc-400" />
+              <CardContent className="flex flex-col items-center justify-center py-12 sm:py-20 px-4">
+                <div className="rounded-full bg-zinc-100 p-4 sm:p-5 mb-4 sm:mb-5">
+                  <FolderGit2 className="h-10 w-10 sm:h-14 sm:w-14 text-zinc-400" />
                 </div>
-                <h3 className="text-xl font-semibold text-zinc-900 mb-2">
+                <h3 className="text-lg sm:text-xl font-semibold text-zinc-900 mb-1.5 sm:mb-2 text-center">
                   {filterStatus !== 'all'
                     ? 'No projects found'
                     : 'Welcome to VisualDocs!'}
                 </h3>
-                <p className="text-sm text-zinc-600 mb-8 text-center max-w-md leading-relaxed">
+                <p className="text-xs sm:text-sm text-zinc-600 mb-6 sm:mb-8 text-center max-w-md leading-relaxed px-2">
                   {filterStatus !== 'all'
                     ? "Try adjusting your filter criteria to find what you're looking for."
                     : 'Transform your codebase into beautiful documentation. Start by importing your first repository from GitHub or uploading project files.'}
                 </p>
                 {filterStatus === 'all' && (
-                  <div className="flex items-center gap-3">
+                  <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3 w-full sm:w-auto px-4 sm:px-0">
                     <Button
-                      className="gap-2 bg-gray-900 hover:bg-gray-800 shadow-md"
+                      className="gap-2 bg-gray-900 hover:bg-gray-800 shadow-md w-full sm:w-auto text-xs sm:text-sm"
                       onClick={() => setGithubDialogOpen(true)}
                     >
-                      <Github className="h-4 w-4" />
+                      <Github className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                       Import from GitHub
                     </Button>
                     <Button
                       variant="outline"
-                      className="gap-2 hover:bg-gray-50"
+                      className="gap-2 hover:bg-gray-50 w-full sm:w-auto text-xs sm:text-sm"
                       onClick={() => {
                         setSelectedProjectId(null);
                         setUploadDialogOpen(true);
                       }}
                     >
-                      <Upload className="h-4 w-4" />
+                      <Upload className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                       Upload Files
                     </Button>
                   </div>
@@ -317,7 +324,7 @@ export const WorldClassDashboard = () => {
               </CardContent>
             </Card>
           ) : (
-            <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-4 sm:gap-5 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
               {filteredProjects.map((project) => {
                 const qualityScore = getQualityScore(project);
                 return (
@@ -326,21 +333,21 @@ export const WorldClassDashboard = () => {
                     className="group cursor-pointer border-zinc-200 hover:shadow-xl hover:border-zinc-300 transition-all duration-300 hover:scale-[1.02]"
                     onClick={() => navigate(`/app/projects/${project.id}`)}
                   >
-                    <CardHeader className="pb-3">
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="rounded-lg bg-zinc-900 p-2.5 shadow-sm">
-                          <FolderGit2 className="h-5 w-5 text-white" />
+                    <CardHeader className="pb-3 p-4 sm:p-6">
+                      <div className="flex items-start justify-between mb-2 sm:mb-3">
+                        <div className="rounded-lg bg-zinc-900 p-2 sm:p-2.5 shadow-sm">
+                          <FolderGit2 className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
                         </div>
                         {getStatusBadge(project.status || 'active')}
                       </div>
-                      <CardTitle className="text-lg font-semibold group-hover:text-zinc-700 transition-colors leading-snug">
+                      <CardTitle className="text-base sm:text-lg font-semibold group-hover:text-zinc-700 transition-colors leading-snug">
                         {project.name}
                       </CardTitle>
-                      <CardDescription className="line-clamp-2 text-sm leading-relaxed mt-1.5">
+                      <CardDescription className="line-clamp-2 text-xs sm:text-sm leading-relaxed mt-1 sm:mt-1.5">
                         {project.description || 'No description provided'}
                       </CardDescription>
                     </CardHeader>
-                    <CardContent className="space-y-4">
+                    <CardContent className="space-y-3 sm:space-y-4 p-4 sm:p-6 pt-0">
                       {/* Quality Score */}
                       <div className="space-y-2.5">
                         <div className="flex items-center justify-between text-xs">

@@ -22,6 +22,7 @@ import {
 interface AppSidebarProps {
   collapsed?: boolean;
   onToggleCollapse?: () => void;
+  onNavigate?: () => void;
 }
 
 const mainNavigation = [
@@ -38,24 +39,31 @@ const bottomNavigation = [
 
 export const AppSidebar: React.FC<AppSidebarProps> = ({ 
   collapsed = false, 
-  onToggleCollapse 
+  onToggleCollapse,
+  onNavigate
 }) => {
   const location = useLocation();
 
+  const handleNavClick = () => {
+    if (onNavigate) {
+      onNavigate();
+    }
+  };
+
   return (
     <aside className={`
-      ${collapsed ? 'w-16' : 'w-64'} 
+      ${collapsed ? 'w-16' : 'w-full lg:w-64'} 
       flex-shrink-0 bg-white dark:bg-dark-bg-secondary border-r app-border 
-      transition-all duration-200 flex flex-col
+      transition-all duration-200 flex flex-col h-full overflow-hidden
     `}>
       {/* Logo & Collapse Toggle */}
-      <div className="h-16 flex items-center justify-between px-4 border-b app-border">
+      <div className="h-14 sm:h-16 flex items-center justify-between px-4 border-b app-border flex-shrink-0">
         {!collapsed && (
-          <Link to="/app/dashboard" className="flex items-center space-x-3 group">
+          <Link to="/app/dashboard" className="flex items-center space-x-3 group" onClick={handleNavClick}>
             <div className="w-8 h-8 bg-primary-500 rounded-lg flex items-center justify-center">
               <Sparkles className="w-5 h-5 text-white" />
             </div>
-            <span className="text-lg font-bold text-light-text dark:text-dark-text">
+            <span className="text-base sm:text-lg font-bold text-light-text dark:text-dark-text">
               VisualDocs
             </span>
           </Link>
@@ -72,7 +80,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
             variant="ghost"
             size="sm"
             onClick={onToggleCollapse}
-            className="w-8 h-8 p-0"
+            className="w-8 h-8 p-0 hidden lg:flex"
             title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           >
             {collapsed ? (
@@ -86,23 +94,24 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
 
       {/* Quick Actions */}
       {!collapsed && (
-        <div className="p-4 space-y-2 border-b app-border">
-          <Button size="sm" className="w-full justify-start" icon={<Plus className="w-4 h-4" />}>
-            New Project
+        <div className="p-3 sm:p-4 space-y-2 border-b app-border flex-shrink-0">
+          <Button size="sm" className="w-full justify-start gap-2">
+            <Plus className="w-4 h-4" />
+            <span>New Project</span>
           </Button>
           <Button 
             variant="outline" 
             size="sm" 
-            className="w-full justify-start"
-            icon={<Github className="w-4 h-4" />}
+            className="w-full justify-start gap-2"
           >
-            Import Repo
+            <Github className="w-4 h-4" />
+            <span>Import Repo</span>
           </Button>
         </div>
       )}
 
       {collapsed && (
-        <div className="p-2 space-y-2 border-b app-border">
+        <div className="p-2 space-y-2 border-b app-border flex-shrink-0">
           <Button
             size="sm"
             className="w-full p-2"
@@ -122,19 +131,20 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
       )}
 
       {/* Main Navigation */}
-      <div className="flex-1 overflow-y-auto py-6">
-        <div className="space-y-6">
+      <div className="flex-1 overflow-y-auto py-4 sm:py-6">
+        <div className="space-y-4 sm:space-y-6">
           {!collapsed ? (
             <NavSection title="Main">
               {mainNavigation.map((item) => (
-                <NavItem
-                  key={item.name}
-                  href={item.href}
-                  icon={<item.icon className="w-5 h-5" />}
-                  badge={item.badge}
-                >
-                  {item.name}
-                </NavItem>
+                <div key={item.name} onClick={handleNavClick}>
+                  <NavItem
+                    href={item.href}
+                    icon={<item.icon className="w-5 h-5" />}
+                    badge={item.badge}
+                  >
+                    {item.name}
+                  </NavItem>
+                </div>
               ))}
             </NavSection>
           ) : (
@@ -143,6 +153,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
                 <Link
                   key={item.name}
                   to={item.href}
+                  onClick={handleNavClick}
                   className={`
                     w-12 h-12 flex items-center justify-center rounded-md relative
                     transition-colors duration-150
@@ -234,10 +245,10 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
             <Button
               variant="outline"
               size="sm"
-              className="w-full justify-start text-error-600 border-error-200 hover:bg-error-50 dark:text-error-400 dark:border-error-800 dark:hover:bg-error-900/20"
-              icon={<LogOut className="w-4 h-4" />}
+              className="w-full justify-start gap-2 text-error-600 border-error-200 hover:bg-error-50 dark:text-error-400 dark:border-error-800 dark:hover:bg-error-900/20"
             >
-              Sign Out
+              <LogOut className="w-4 h-4" />
+              <span>Sign Out</span>
             </Button>
           </div>
         ) : (

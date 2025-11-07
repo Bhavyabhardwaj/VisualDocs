@@ -59,45 +59,45 @@ export const PremiumSettings = () => {
   return (
     <PremiumLayout>
       <div className="min-h-screen bg-white">
-        {/* Header */}
+        {/* Header - Responsive */}
         <div className="border-b border-neutral-200 bg-white">
-          <div className="mx-auto px-8 py-8">
-            <h1 className="text-3xl font-semibold tracking-tight text-neutral-900">Settings</h1>
-            <p className="text-neutral-600 mt-2 text-[15px]">
+          <div className="mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 md:py-8">
+            <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-neutral-900">Settings</h1>
+            <p className="text-neutral-600 mt-1 sm:mt-2 text-sm sm:text-[15px]">
               Manage your account settings and preferences
             </p>
           </div>
         </div>
 
-        {/* Settings Content */}
-        <div className="mx-auto px-8 py-8">
-          <Tabs defaultValue="profile" className="space-y-8">
-            <TabsList className="bg-neutral-100 p-1">
-              <TabsTrigger value="profile" className="data-[state=active]:bg-white">
-                <User className="w-4 h-4 mr-2" />
-                Profile
+        {/* Settings Content - Responsive */}
+        <div className="mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 md:py-8">
+          <Tabs defaultValue="profile" className="space-y-6 sm:space-y-8">
+            <TabsList className="bg-neutral-100 p-1 w-full overflow-x-auto flex-nowrap justify-start sm:justify-center">
+              <TabsTrigger value="profile" className="data-[state=active]:bg-white text-xs sm:text-sm whitespace-nowrap px-2 sm:px-3">
+                <User className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
+                <span className="hidden xs:inline">Profile</span>
               </TabsTrigger>
-              <TabsTrigger value="account" className="data-[state=active]:bg-white">
-                <Building className="w-4 h-4 mr-2" />
-                Account
+              <TabsTrigger value="account" className="data-[state=active]:bg-white text-xs sm:text-sm whitespace-nowrap px-2 sm:px-3">
+                <Building className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
+                <span className="hidden xs:inline">Account</span>
               </TabsTrigger>
-              <TabsTrigger value="notifications" className="data-[state=active]:bg-white">
-                <Bell className="w-4 h-4 mr-2" />
-                Notifications
+              <TabsTrigger value="notifications" className="data-[state=active]:bg-white text-xs sm:text-sm whitespace-nowrap px-2 sm:px-3">
+                <Bell className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
+                <span className="hidden xs:inline">Notifications</span>
               </TabsTrigger>
-              <TabsTrigger value="integrations" className="data-[state=active]:bg-white">
-                <Plug className="w-4 h-4 mr-2" />
-                Integrations
+              <TabsTrigger value="integrations" className="data-[state=active]:bg-white text-xs sm:text-sm whitespace-nowrap px-2 sm:px-3">
+                <Plug className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
+                <span className="hidden xs:inline">Integrations</span>
               </TabsTrigger>
-              <TabsTrigger value="billing" className="data-[state=active]:bg-white">
-                <CreditCard className="w-4 h-4 mr-2" />
-                Billing
+              <TabsTrigger value="billing" className="data-[state=active]:bg-white text-xs sm:text-sm whitespace-nowrap px-2 sm:px-3">
+                <CreditCard className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
+                <span className="hidden xs:inline">Billing</span>
               </TabsTrigger>
             </TabsList>
 
             {/* Profile Tab */}
-            <TabsContent value="profile" className="space-y-6">
-              <Card className="border-neutral-200 shadow-none">
+            <TabsContent value="profile" className="space-y-4 sm:space-y-6">
+              <Card className="border-neutral-200 shadow-none"
                 <CardHeader>
                   <CardTitle className="text-lg">Personal Information</CardTitle>
                   <CardDescription>Update your personal details and profile picture</CardDescription>

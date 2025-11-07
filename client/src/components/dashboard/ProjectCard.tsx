@@ -67,34 +67,36 @@ export const ProjectCard = ({ project, onViewDocs, onRegenerate, onShare }: Proj
       whileHover={{ y: -6, transition: { duration: 0.2 } }}
       onHoverStart={() => setShowActions(true)}
       onHoverEnd={() => setShowActions(false)}
-      className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm hover:shadow-lg transition-all cursor-pointer group"
+      className="bg-white rounded-xl p-4 sm:p-6 border border-slate-200 shadow-sm hover:shadow-lg transition-all cursor-pointer group"
     >
       {/* Header */}
-      <div className="flex items-start justify-between mb-4">
-        <div className="flex-1">
-          <div className="flex items-center gap-2 mb-2">
-            <h3 className="text-lg font-semibold text-slate-900 group-hover:text-indigo-600 transition-colors">
+      <div className="flex items-start justify-between mb-3 sm:mb-4">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-1.5 sm:mb-2 flex-wrap">
+            <h3 className="text-base sm:text-lg font-semibold text-slate-900 group-hover:text-indigo-600 transition-colors truncate">
               {project.name}
             </h3>
-            <span className={`px-2 py-1 text-xs font-medium rounded-full ${statusConfig.bg} ${statusConfig.text} border ${statusConfig.border}`}>
+            <span className={`px-2 py-0.5 sm:py-1 text-[10px] sm:text-xs font-medium rounded-full whitespace-nowrap ${statusConfig.bg} ${statusConfig.text} border ${statusConfig.border}`}>
               {statusConfig.label}
             </span>
           </div>
-          <p className="text-sm text-slate-600 line-clamp-2">{project.description}</p>
+          <p className="text-xs sm:text-sm text-slate-600 line-clamp-2">{project.description}</p>
         </div>
-        <button className="p-2 hover:bg-slate-100 rounded-lg transition-colors">
-          <MoreVertical className="h-5 w-5 text-slate-400" />
+        <button className="p-1.5 sm:p-2 hover:bg-slate-100 rounded-lg transition-colors flex-shrink-0 ml-2">
+          <MoreVertical className="h-4 w-4 sm:h-5 sm:w-5 text-slate-400" />
         </button>
       </div>
 
       {/* Repository Info */}
-      <div className="flex items-center gap-2 mb-4 text-sm text-slate-600">
-        {getProviderIcon()}
-        <span className="truncate">{project.repository.url || 'Uploaded files'}</span>
+      <div className="flex items-center gap-1.5 sm:gap-2 mb-3 sm:mb-4 text-xs sm:text-sm text-slate-600 overflow-hidden">
+        <div className="flex-shrink-0">
+          {getProviderIcon()}
+        </div>
+        <span className="truncate flex-1 min-w-0">{project.repository.url || 'Uploaded files'}</span>
         {project.repository.branch && (
           <>
-            <span className="text-slate-400">•</span>
-            <span className="text-slate-500">{project.repository.branch}</span>
+            <span className="text-slate-400 hidden xs:inline">•</span>
+            <span className="text-slate-500 truncate hidden xs:inline">{project.repository.branch}</span>
           </>
         )}
       </div>
