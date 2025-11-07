@@ -8,7 +8,7 @@ import type { NextFunction, Request, Response } from 'express';
 import { PaymentService } from '../services/paymentService';
 import { successResponse } from '../utils';
 import { BadRequestError } from '../errors';
-import { prisma } from '../generated/prisma';
+import prisma from '../config/db';
 
 export class PaymentController {
   /**
@@ -109,7 +109,7 @@ export class PaymentController {
           verified: true,
           payment: {
             id: payment.id,
-            amount: payment.amount / 100,
+            amount: Number(payment.amount) / 100,
             status: payment.status,
             method: payment.method,
           },
@@ -189,11 +189,15 @@ export class PaymentController {
         throw new BadRequestError('User not authenticated');
       }
 
+      if (!subscriptionId) {
+        throw new BadRequestError('Subscription ID is required');
+      }
+
       // Get subscription from Razorpay
       const subscription = await PaymentService.getSubscription(subscriptionId);
 
       // Verify this subscription belongs to the user
-      if (subscription.notes.userId !== userId) {
+      if (subscription.notes && subscription.notes.userId !== userId) {
         throw new BadRequestError('Unauthorized access to subscription');
       }
 
@@ -202,7 +206,7 @@ export class PaymentController {
         {
           subscription: {
             id: subscription.id,
-            planId: subscription.notes.planId,
+            planId: subscription.notes?.planId || '',
             status: subscription.status,
             currentStart: subscription.current_start,
             currentEnd: subscription.current_end,
@@ -232,9 +236,13 @@ export class PaymentController {
         throw new BadRequestError('User not authenticated');
       }
 
+      if (!subscriptionId) {
+        throw new BadRequestError('Subscription ID is required');
+      }
+
       // Verify subscription belongs to user
       const subscription = await PaymentService.getSubscription(subscriptionId);
-      if (subscription.notes.userId !== userId) {
+      if (subscription.notes && subscription.notes.userId !== userId) {
         throw new BadRequestError('Unauthorized access to subscription');
       }
 
