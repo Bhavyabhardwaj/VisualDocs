@@ -21,6 +21,7 @@ interface NavItem {
 interface UnifiedSidebarProps {
   isOpen?: boolean;
   onToggle?: () => void;
+  onNavigate?: () => void;
 }
 
 const navigationItems: NavItem[] = [
@@ -66,12 +67,17 @@ const navigationItems: NavItem[] = [
   },
 ];
 
-export const UnifiedSidebar = ({ isOpen = true }: UnifiedSidebarProps) => {
+export const UnifiedSidebar = ({ isOpen = true, onNavigate }: UnifiedSidebarProps) => {
   const navigate = useNavigate();
   const location = useLocation();
 
   const isActive = (path: string) => {
     return location.pathname === path || location.pathname.startsWith(path + '/');
+  };
+
+  const handleNavigation = (path: string) => {
+    navigate(path);
+    onNavigate?.();
   };
 
   return (
@@ -90,7 +96,7 @@ export const UnifiedSidebar = ({ isOpen = true }: UnifiedSidebarProps) => {
             return (
               <button
                 key={item.path}
-                onClick={() => navigate(item.path)}
+                onClick={() => handleNavigation(item.path)}
                 className={cn(
                   'group flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all',
                   active

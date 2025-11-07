@@ -20,11 +20,12 @@ export const TopNavBar = ({ onCommandPalette, onShortcutsModal, onMenuClick }: T
           <button
             onClick={onMenuClick}
             className="lg:hidden flex items-center justify-center w-10 h-10 hover:bg-neutral-100 rounded-lg transition-colors"
+            aria-label="Open menu"
           >
             <Menu className="w-5 h-5 text-neutral-600" />
           </button>
         )}
-        <h1 className="text-base sm:text-lg font-bold text-neutral-900 whitespace-nowrap">VisualDocs</h1>
+        <h1 className="hidden sm:block text-base sm:text-lg font-bold text-neutral-900 whitespace-nowrap">VisualDocs</h1>
       </div>
 
       {/* Center: Search (Desktop & Tablet) */}
