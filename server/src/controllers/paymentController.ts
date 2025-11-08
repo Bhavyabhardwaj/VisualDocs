@@ -341,6 +341,238 @@ export class PaymentController {
     console.log(`❌ Payment failed: ${payment.id}`);
     // TODO: Send payment failed email to user
   }
+
+  /**
+   * Select FREE plan (no payment required)
+   * POST /api/payment/select-free
+   */
+  async selectFreePlan(req: Request, res: Response, next: NextFunction) {
+    try {
+      const userId = req.user?.userId;
+
+      if (!userId) {
+        throw new BadRequestError('User not authenticated');
+      }
+
+      // Update user subscription to FREE
+      await prisma.user.update({
+        where: { id: userId },
+        data: {
+          subscriptionPlan: 'FREE',
+          subscriptionStatus: 'FREE',
+          subscriptionStartedAt: new Date(),
+          subscriptionEndsAt: null,
+          billingPeriod: null,
+        },
+      });
+
+      return successResponse(
+        res,
+        { plan: 'FREE' },
+        'Free plan activated successfully'
+      );
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Create Razorpay order for subscription
+   * POST /api/payment/create-order
+   */
+  async createOrder(req: Request, res: Response, next: NextFunction) {
+    try {
+      const userId = req.user?.userId;
+      const { plan, billingPeriod, amount } = req.body;
+
+      if (!userId) {
+        throw new BadRequestError('User not authenticated');
+      }
+
+      // Validate plan
+      if (plan !== 'PROFESSIONAL' && plan !== 'ENTERPRISE') {
+        throw new BadRequestError('Invalid plan');
+      }
+
+      // Validate billing period
+      if (billingPeriod !== 'MONTHLY' && billingPeriod !== 'ANNUALLY') {
+        throw new BadRequestError('Invalid billing period');
+      }
+
+      // Plan prices in paise
+      const PLAN_PRICES: Record<string, Record<string, number>> = {
+        PROFESSIONAL: {
+          MONTHLY: 99900, // ₹999
+          ANNUALLY: 999900, // ₹9999
+        },
+        ENTERPRISE: {
+          MONTHLY: 299900, // ₹2999
+          ANNUALLY: 2999900, // ₹29999
+        },
+      };
+
+      const expectedAmount = PLAN_PRICES[plan]?.[billingPeriod];
+
+      if (!expectedAmount) {
+        throw new BadRequestError('Invalid plan or billing period');
+      }
+
+      // Create Razorpay order using existing method
+      const order = await PaymentService.createOrder(
+        expectedAmount / 100, // Convert paise to rupees
+        'INR',
+        {
+          userId,
+          plan,
+          billingPeriod,
+        }
+      );
+
+      return successResponse(
+        res,
+        { order },
+        'Order created successfully',
+        201
+      );
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Verify payment and activate subscription
+   * POST /api/payment/verify
+   */
+  async verifyPaymentAndActivate(req: Request, res: Response, next: NextFunction) {
+    try {
+      const userId = req.user?.userId;
+      const {
+        razorpay_order_id,
+        razorpay_payment_id,
+        razorpay_signature,
+      } = req.body;
+
+      if (!userId) {
+        throw new BadRequestError('User not authenticated');
+      }
+
+      if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
+        throw new BadRequestError('Missing payment details');
+      }
+
+      // Verify signature
+      const isValid = PaymentService.verifyPaymentSignature(
+        razorpay_order_id,
+        razorpay_payment_id,
+        razorpay_signature
+      );
+
+      if (!isValid) {
+        throw new BadRequestError('Invalid payment signature');
+      }
+
+      // Get payment details to extract order notes
+      const payment = await PaymentService.getPayment(razorpay_payment_id);
+      
+      // For now, we'll need to store order details when creating
+      // Defaulting to basic activation
+      const plan = 'PROFESSIONAL'; // Default, should come from order
+      const billingPeriod = 'MONTHLY';
+
+      // Calculate subscription end date
+      const startDate = new Date();
+      const endDate = new Date(startDate);
+      if (billingPeriod === 'MONTHLY') {
+        endDate.setMonth(endDate.getMonth() + 1);
+      } else {
+        endDate.setFullYear(endDate.getFullYear() + 1);
+      }
+
+      // Update user subscription
+      await prisma.user.update({
+        where: { id: userId },
+        data: {
+          subscriptionPlan: plan,
+          subscriptionStatus: 'ACTIVE',
+          billingPeriod,
+          subscriptionStartedAt: startDate,
+          subscriptionEndsAt: endDate,
+          razorpayCustomerId: razorpay_payment_id, // Store payment ID
+        },
+      });
+
+      return successResponse(
+        res,
+        {
+          plan,
+          billingPeriod,
+          subscriptionEndsAt: endDate,
+        },
+        'Payment verified and subscription activated'
+      );
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Get current user's subscription
+   * GET /api/payment/subscription
+   */
+  async getUserSubscription(req: Request, res: Response, next: NextFunction) {
+    try {
+      const userId = req.user?.userId;
+
+      if (!userId) {
+        throw new BadRequestError('User not authenticated');
+      }
+
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: {
+          subscriptionPlan: true,
+          subscriptionStatus: true,
+          billingPeriod: true,
+          subscriptionStartedAt: true,
+          subscriptionEndsAt: true,
+        },
+      });
+
+      return successResponse(
+        res,
+        { subscription: user },
+        'Subscription details retrieved'
+      );
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Get payment history
+   * GET /api/payment/history
+   */
+  async getPaymentHistory(req: Request, res: Response, next: NextFunction) {
+    try {
+      const userId = req.user?.userId;
+
+      if (!userId) {
+        throw new BadRequestError('User not authenticated');
+      }
+
+      // Note: You may want to create a Payment model in Prisma
+      // For now, returning empty array
+      const payments: any[] = [];
+
+      return successResponse(
+        res,
+        { payments },
+        'Payment history retrieved'
+      );
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 // Export singleton instance

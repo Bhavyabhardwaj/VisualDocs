@@ -48,8 +48,8 @@ export default function LandingRegister() {
       const savedToken = localStorage.getItem('authToken');
       console.log('✅ LandingRegister: Token in localStorage:', savedToken ? 'Found ✓' : 'NOT FOUND ✗');
       
-      // Use React Router navigate instead of window.location.href
-      navigate('/app/dashboard', { replace: true });
+      // Redirect to pricing selection page instead of dashboard
+      navigate('/select-plan', { replace: true });
     } catch (err: unknown) {
       console.error('❌ LandingRegister: Registration error:', err);
       if (err && typeof err === 'object' && 'userMessage' in err) {

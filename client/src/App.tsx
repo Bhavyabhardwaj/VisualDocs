@@ -12,6 +12,7 @@ import NewLanding from './pages/NewLanding';
 import LandingLogin from './pages/auth/LandingLogin';
 import LandingRegister from './pages/auth/LandingRegister';
 import { ForgotPassword } from './pages/ForgotPassword';
+import { PricingSelection } from './pages/auth/PricingSelection';
 
 // App Pages - World-Class Platform
 import { RealDashboard } from '@/pages/app/RealDashboard';
@@ -39,6 +40,11 @@ function App() {
             <Route path="/login" element={<LandingLogin />} />
             <Route path="/register" element={<LandingRegister />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/select-plan" element={
+              <ProtectedRoute>
+                <PricingSelection />
+              </ProtectedRoute>
+            } />
             
             {/* Dashboard - World-Class Project Command Center */}
             <Route path="/app/dashboard" element={

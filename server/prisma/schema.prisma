@@ -35,9 +35,9 @@ model User {
   // Razorpay Subscription fields
   razorpayCustomerId    String?   // Razorpay customer ID
   subscriptionId        String?   @unique // Razorpay subscription ID
-  subscriptionStatus    String?   // active, cancelled, paused, completed, expired
-  subscriptionPlan      String?   // professional, enterprise
-  billingPeriod         String?   // monthly, annually
+  subscriptionStatus    SubscriptionStatus @default(FREE) // Subscription status
+  subscriptionPlan      SubscriptionPlan   @default(FREE) // Subscription plan
+  billingPeriod         BillingPeriod?     // monthly, annually
   subscriptionStartedAt DateTime? // When subscription started
   subscriptionEndsAt    DateTime? // When subscription ends/renews
   trialEndsAt           DateTime? // Trial expiration (if applicable)
@@ -48,11 +48,12 @@ model User {
   // Relationships
   projects  Project[]
   sessions  Session[]
+  payments  Payment[]
 
   // Indexes
   @@index([providerId])
   @@index([subscriptionId])
-  @@index([subscriptionStatus])
+  @@index([subscriptionPlan])
   @@map("users")
 }
 
@@ -303,6 +304,61 @@ enum DiagramStatus {
   GENERATING
   COMPLETED
   FAILED
+}
+
+enum SubscriptionPlan {
+  FREE
+  PROFESSIONAL
+  ENTERPRISE
+}
+
+enum SubscriptionStatus {
+  FREE           // Free plan user
+  ACTIVE         // Active paid subscription
+  CANCELLED      // Cancelled but still valid until period ends
+  PAUSED         // Temporarily paused
+  EXPIRED        // Subscription expired
+  TRIAL          // In trial period
+  PENDING        // Payment pending
+}
+
+enum BillingPeriod {
+  MONTHLY
+  ANNUALLY
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+// Payment/Transaction model
+model Payment {
+  id                    String        @id @default(uuid())
+  userId                String
+  amount                Float         // Amount in INR
+  currency              String        @default("INR")
+  razorpayOrderId       String?       @unique
+  razorpayPaymentId     String?       @unique
+  razorpaySignature     String?
+  subscriptionPlan      SubscriptionPlan
+  billingPeriod         BillingPeriod
+  status                PaymentStatus @default(PENDING)
+  metadata              Json?         // Additional payment metadata
+  
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+
+  // Relationships
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
+  @@index([razorpayOrderId])
+  @@index([razorpayPaymentId])
+  @@map("payments")
 }
 
 // AI Code Analysis model

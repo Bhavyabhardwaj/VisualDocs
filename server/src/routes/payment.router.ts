@@ -18,16 +18,26 @@ import { isAuthenticated, generalLimiter } from '../middleware';
 const router = Router();
 
 /**
- * Create a new subscription
- * POST /api/payment/create-subscription
+ * Select FREE plan (no payment required)
+ * POST /api/payment/select-free
  * Protected route - requires authentication
  */
 router.post(
-  '/create-subscription',
+  '/select-free',
+  isAuthenticated,
+  paymentController.selectFreePlan.bind(paymentController)
+);
+
+/**
+ * Create Razorpay order for subscription
+ * POST /api/payment/create-order
+ * Protected route - requires authentication
+ */
+router.post(
+  '/create-order',
   isAuthenticated,
   generalLimiter,
-  validate(createSubscriptionSchema),
-  paymentController.createSubscription.bind(paymentController)
+  paymentController.createOrder.bind(paymentController)
 );
 
 /**
@@ -38,8 +48,42 @@ router.post(
 router.post(
   '/verify',
   isAuthenticated,
-  validate(verifyPaymentSchema),
-  paymentController.verifyPayment.bind(paymentController)
+  paymentController.verifyPaymentAndActivate.bind(paymentController)
+);
+
+/**
+ * Get current user's subscription
+ * GET /api/payment/subscription
+ * Protected route - requires authentication
+ */
+router.get(
+  '/subscription',
+  isAuthenticated,
+  paymentController.getUserSubscription.bind(paymentController)
+);
+
+/**
+ * Get payment history
+ * GET /api/payment/history
+ * Protected route - requires authentication
+ */
+router.get(
+  '/history',
+  isAuthenticated,
+  paymentController.getPaymentHistory.bind(paymentController)
+);
+
+/**
+ * Create a new subscription (Legacy)
+ * POST /api/payment/create-subscription
+ * Protected route - requires authentication
+ */
+router.post(
+  '/create-subscription',
+  isAuthenticated,
+  generalLimiter,
+  validate(createSubscriptionSchema),
+  paymentController.createSubscription.bind(paymentController)
 );
 
 /**
@@ -54,7 +98,7 @@ router.post(
 );
 
 /**
- * Get subscription details
+ * Get subscription details (Legacy)
  * GET /api/payment/subscription/:subscriptionId
  * Protected route - requires authentication
  */
