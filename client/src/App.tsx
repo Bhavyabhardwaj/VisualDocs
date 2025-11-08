@@ -23,6 +23,8 @@ import { AIAnalysisDashboard } from '@/pages/app/AIAnalysisDashboard';
 import { DiagramStudio } from '@/pages/app/DiagramStudio';
 import { PremiumTeamManagement } from '@/pages/app/PremiumTeamManagement';
 import { PremiumSettings } from '@/pages/app/PremiumSettings';
+import { Documentation } from '@/pages/app/Documentation';
+import { Analytics } from '@/pages/app/Analytics';
 import CodeEditorPage from '@/pages/app/CodeEditorPage';
 
 function App() {
@@ -101,17 +103,17 @@ function App() {
               </ProtectedRoute>
             } />
             
-            {/* Analytics - Redirect to Analysis */}
+            {/* Analytics - Performance & Insights Dashboard */}
             <Route path="/app/analytics" element={
               <ProtectedRoute>
-                <Navigate to="/app/analysis" replace />
+                <Analytics />
               </ProtectedRoute>
             } />
             
-            {/* Documentation - Redirect to Projects */}
+            {/* Documentation - Help & Guides */}
             <Route path="/app/documentation" element={
               <ProtectedRoute>
-                <Navigate to="/app/projects" replace />
+                <Documentation />
               </ProtectedRoute>
             } />
             
