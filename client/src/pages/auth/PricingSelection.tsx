@@ -86,15 +86,23 @@ export const PricingSelection = () => {
   const [loading, setLoading] = useState<string | null>(null);
 
   const handlePlanSelect = async (plan: PricingPlan) => {
+    const token = localStorage.getItem('authToken');
+    
+    // Check if user is authenticated
+    if (!token) {
+      alert('Please login first to select a plan');
+      navigate('/login');
+      return;
+    }
+
     // If FREE plan, directly go to dashboard
     if (plan.id === 'FREE') {
       try {
         setLoading('FREE');
-        const token = localStorage.getItem('authToken');
         
         // Update user subscription to FREE
         await axios.post(
-          `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/payments/select-free`,
+          `${import.meta.env.VITE_API_URL}/api/payment/select-free`,
           {},
           {
             headers: {
@@ -105,9 +113,10 @@ export const PricingSelection = () => {
 
         // Navigate to dashboard
         navigate('/app/dashboard');
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error selecting free plan:', error);
-        alert('Failed to select free plan. Please try again.');
+        const errorMsg = error.response?.data?.message || 'Failed to select free plan. Please try again.';
+        alert(errorMsg);
       } finally {
         setLoading(null);
       }
@@ -117,13 +126,12 @@ export const PricingSelection = () => {
     // For paid plans, initiate payment
     try {
       setLoading(plan.id);
-      const token = localStorage.getItem('authToken');
       const amount = isAnnual ? plan.annualPrice : plan.monthlyPrice;
       const billingPeriod = isAnnual ? 'ANNUALLY' : 'MONTHLY';
 
       // Create Razorpay order
       const { data } = await axios.post(
-        `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/payments/create-order`,
+        `${import.meta.env.VITE_API_URL}/api/payment/create-order`,
         {
           plan: plan.id,
           billingPeriod,
@@ -148,7 +156,7 @@ export const PricingSelection = () => {
           try {
             // Verify payment
             await axios.post(
-              `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/payments/verify`,
+              `${import.meta.env.VITE_API_URL}/api/payment/verify`,
               {
                 razorpay_order_id: response.razorpay_order_id,
                 razorpay_payment_id: response.razorpay_payment_id,
@@ -163,9 +171,10 @@ export const PricingSelection = () => {
 
             // Payment successful, navigate to dashboard
             navigate('/app/dashboard');
-          } catch (error) {
+          } catch (error: any) {
             console.error('Payment verification failed:', error);
-            alert('Payment verification failed. Please contact support.');
+            const errorMsg = error.response?.data?.message || 'Payment verification failed. Please contact support.';
+            alert(errorMsg);
           }
         },
         prefill: {
@@ -184,9 +193,10 @@ export const PricingSelection = () => {
 
       const razorpay = new window.Razorpay(options);
       razorpay.open();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating order:', error);
-      alert('Failed to initiate payment. Please try again.');
+      const errorMsg = error.response?.data?.message || 'Failed to initiate payment. Please try again.';
+      alert(errorMsg);
       setLoading(null);
     }
   };
