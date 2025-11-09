@@ -385,6 +385,8 @@ export class PaymentController {
       const userId = req.user?.userId;
       const { plan, billingPeriod, amount } = req.body;
 
+      console.log('📝 Create Order Request:', { userId, plan, billingPeriod, amount });
+
       if (!userId) {
         throw new BadRequestError('User not authenticated');
       }
@@ -399,15 +401,15 @@ export class PaymentController {
         throw new BadRequestError('Invalid billing period');
       }
 
-      // Plan prices in paise
+      // Plan prices in rupees (not paise)
       const PLAN_PRICES: Record<string, Record<string, number>> = {
         PROFESSIONAL: {
-          MONTHLY: 99900, // ₹999
-          ANNUALLY: 999900, // ₹9999
+          MONTHLY: 999, // ₹999
+          ANNUALLY: 9999, // ₹9999
         },
         ENTERPRISE: {
-          MONTHLY: 299900, // ₹2999
-          ANNUALLY: 2999900, // ₹29999
+          MONTHLY: 2999, // ₹2999
+          ANNUALLY: 29999, // ₹29999
         },
       };
 
@@ -417,9 +419,14 @@ export class PaymentController {
         throw new BadRequestError('Invalid plan or billing period');
       }
 
-      // Create Razorpay order using existing method
+      // Verify amount matches (in rupees)
+      if (amount && amount !== expectedAmount) {
+        throw new BadRequestError('Amount mismatch');
+      }
+
+      // Create Razorpay order (amount in rupees, will be converted to paise in service)
       const order = await PaymentService.createOrder(
-        expectedAmount / 100, // Convert paise to rupees
+        expectedAmount,
         'INR',
         {
           userId,
@@ -428,13 +435,16 @@ export class PaymentController {
         }
       );
 
+      console.log('✅ Order created successfully:', order.id);
+
       return successResponse(
         res,
         { order },
         'Order created successfully',
         201
       );
-    } catch (error) {
+    } catch (error: any) {
+      console.error('❌ Create Order Error:', error.message);
       next(error);
     }
   }

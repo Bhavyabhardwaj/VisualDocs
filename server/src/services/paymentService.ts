@@ -8,10 +8,24 @@ import Razorpay from 'razorpay';
 import crypto from 'crypto';
 import { BadRequestError } from '../errors';
 
+// Verify Razorpay credentials are loaded
+const RAZORPAY_KEY_ID = process.env.RAZORPAY_KEY_ID || '';
+const RAZORPAY_KEY_SECRET = process.env.RAZORPAY_KEY_SECRET || '';
+
+if (!RAZORPAY_KEY_ID || !RAZORPAY_KEY_SECRET) {
+  console.error('❌ RAZORPAY CREDENTIALS MISSING!');
+  console.error('Please set RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET in .env file');
+} else {
+  console.log('✅ Razorpay credentials loaded:', {
+    key_id: RAZORPAY_KEY_ID.substring(0, 12) + '...',
+    key_secret: '***' + RAZORPAY_KEY_SECRET.slice(-4)
+  });
+}
+
 // Razorpay instance
 const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID || '',
-  key_secret: process.env.RAZORPAY_KEY_SECRET || '',
+  key_id: RAZORPAY_KEY_ID,
+  key_secret: RAZORPAY_KEY_SECRET,
 });
 
 // Plan pricing (in paise - ₹1 = 100 paise)
@@ -41,6 +55,8 @@ export class PaymentService {
    */
   static async createOrder(amount: number, currency: string = 'INR', notes?: any) {
     try {
+      console.log('🔧 Creating Razorpay order:', { amount, currency, notes });
+      
       const options = {
         amount: amount * 100, // Amount in paise
         currency,
@@ -48,9 +64,15 @@ export class PaymentService {
         notes: notes || {},
       };
 
+      console.log('📤 Razorpay order options:', options);
+      
       const order = await razorpay.orders.create(options);
+      
+      console.log('✅ Razorpay order created:', order.id);
+      
       return order;
     } catch (error: any) {
+      console.error('❌ Razorpay order creation failed:', error);
       throw new Error(
         `Failed to create Razorpay order: ${error.message}`
       );
