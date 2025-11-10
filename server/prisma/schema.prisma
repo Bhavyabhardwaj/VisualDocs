@@ -416,3 +416,58 @@ model AppliedFix {
   @@index([fileId])
   @@map("applied_fixes")
 }
+
+// Team Member model
+model TeamMember {
+  id         String     @id @default(uuid())
+  userId     String
+  teamId     String     // For future multi-team support, currently "default"
+  role       TeamRole   @default(MEMBER)
+  invitedBy  String?    // User ID who invited this member
+  joinedAt   DateTime   @default(now())
+  
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+
+  @@unique([userId, teamId])
+  @@index([userId])
+  @@index([teamId])
+  @@map("team_members")
+}
+
+// Team Invitation model
+model TeamInvitation {
+  id         String            @id @default(uuid())
+  email      String
+  teamId     String            @default("default")
+  role       TeamRole          @default(MEMBER)
+  invitedBy  String            // User ID who sent invitation
+  status     InvitationStatus  @default(PENDING)
+  token      String            @unique // Unique invitation token
+  expiresAt  DateTime          // Invitation expiry
+  
+  acceptedAt DateTime?
+  
+  createdAt  DateTime          @default(now())
+  updatedAt  DateTime          @updatedAt
+
+  @@index([email])
+  @@index([token])
+  @@index([status])
+  @@index([teamId])
+  @@map("team_invitations")
+}
+
+enum TeamRole {
+  OWNER
+  ADMIN
+  MEMBER
+  VIEWER
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  EXPIRED
+  CANCELLED
+}

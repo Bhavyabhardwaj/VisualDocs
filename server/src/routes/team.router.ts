@@ -6,26 +6,50 @@ const router = Router();
 
 // Team routes require authentication (applied in main router)
 
+// Initialize team membership (auto-add current user)
+router.post('/initialize', 
+  generalLimiter,
+  teamController.initializeTeamMember
+);
+
 // Get team members
-router.get('/:id/members', 
+router.get('/members', 
   generalLimiter,
   teamController.getTeamMembers
 );
 
 // Get team activity
-router.get('/:id/activity', 
+router.get('/activity', 
   generalLimiter,
   teamController.getTeamActivity
 );
 
+// Get pending invitations
+router.get('/invitations', 
+  generalLimiter,
+  teamController.getPendingInvitations
+);
+
 // Invite team member
-router.post('/:id/invite', 
+router.post('/invite', 
   generalLimiter,
   teamController.inviteTeamMember
 );
 
+// Accept invitation
+router.post('/invitations/:token/accept', 
+  generalLimiter,
+  teamController.acceptInvitation
+);
+
+// Update member role
+router.patch('/members/:userId/role', 
+  generalLimiter,
+  teamController.updateMemberRole
+);
+
 // Remove team member
-router.delete('/:id/members/:userId', 
+router.delete('/members/:userId', 
   generalLimiter,
   teamController.removeTeamMember
 );

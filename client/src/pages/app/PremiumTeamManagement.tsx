@@ -15,6 +15,16 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import {
   Users,
   UserPlus,
   Search,
@@ -30,10 +40,14 @@ import {
   UserMinus,
   Settings as SettingsIcon,
   Download,
-  Activity
+  Activity,
+  Eye
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { teamService, type TeamMember } from '@/services/team.service';
+import { InviteMemberDialog } from '@/components/app/InviteMemberDialog';
+import { toast } from 'sonner';
+import { apiClient } from '@/lib/api-client';
 
 export const PremiumTeamManagement = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -41,27 +55,76 @@ export const PremiumTeamManagement = () => {
   const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [loading, setLoading] = useState(true);
+  const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
+  const [memberToRemove, setMemberToRemove] = useState<TeamMember | null>(null);
+  const [memberToChangeRole, setMemberToChangeRole] = useState<TeamMember | null>(null);
 
   // Load team members
-  useEffect(() => {
-    const loadTeamMembers = async () => {
-      try {
-        setLoading(true);
-        // Use "default" as teamId since we don't have multi-team support yet
-        const response = await teamService.getTeamMembers('default');
-        if (response.data) {
-          setTeamMembers(response.data.members);
-        }
-      } catch (error) {
-        console.error('Failed to load team members:', error);
-        setTeamMembers([]);
-      } finally {
-        setLoading(false);
+  const loadTeamMembers = async () => {
+    try {
+      setLoading(true);
+      
+      // First initialize team membership for current user
+      await apiClient.post('/team/initialize');
+      
+      // Then fetch all team members
+      const response = await apiClient.get('/team/members');
+      if (response.data?.success) {
+        setTeamMembers(response.data.data.members || []);
       }
-    };
+    } catch (error) {
+      console.error('Failed to load team members:', error);
+      toast.error('Failed to load team members');
+      setTeamMembers([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     loadTeamMembers();
   }, []);
+
+  // Remove member handler
+  const handleRemoveMember = async (member: TeamMember) => {
+    try {
+      const response = await apiClient.delete(
+        `/team/members/${member.userId}`
+      );
+
+      if (response.data?.success) {
+        toast.success(`${member.name} has been removed from the team`);
+        loadTeamMembers();
+        setMemberToRemove(null);
+      } else {
+        throw new Error(response.data?.error || 'Failed to remove member');
+      }
+    } catch (error: any) {
+      console.error('Remove member error:', error);
+      toast.error(error.message || 'Failed to remove member');
+    }
+  };
+
+  // Change role handler
+  const handleChangeRole = async (member: TeamMember, newRole: string) => {
+    try {
+      const response = await apiClient.patch(
+        `/team/members/${member.userId}/role`,
+        { role: newRole }
+      );
+
+      if (response.data?.success) {
+        toast.success(`${member.name}'s role updated to ${newRole}`);
+        loadTeamMembers();
+        setMemberToChangeRole(null);
+      } else {
+        throw new Error(response.data?.error || 'Failed to update role');
+      }
+    } catch (error: any) {
+      console.error('Change role error:', error);
+      toast.error(error.message || 'Failed to update role');
+    }
+  };
 
   const stats = {
     totalMembers: teamMembers.length,
@@ -144,7 +207,7 @@ export const PremiumTeamManagement = () => {
                   <Download className="w-4 h-4 mr-2" />
                   Export
                 </Button>
-                <Button className="h-9">
+                <Button className="h-9" onClick={() => setInviteDialogOpen(true)}>
                   <UserPlus className="w-4 h-4 mr-2" />
                   Invite Members
                 </Button>
@@ -345,7 +408,7 @@ export const PremiumTeamManagement = () => {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => window.location.href = `mailto:${member.email}`}>
                               <Mail className="w-4 h-4 mr-2" />
                               Send Email
                             </DropdownMenuItem>
@@ -353,12 +416,15 @@ export const PremiumTeamManagement = () => {
                               <Activity className="w-4 h-4 mr-2" />
                               View Activity
                             </DropdownMenuItem>
-                            <DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setMemberToChangeRole(member)}>
                               <SettingsIcon className="w-4 h-4 mr-2" />
                               Change Role
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem className="text-red-600">
+                            <DropdownMenuItem 
+                              className="text-red-600"
+                              onClick={() => setMemberToRemove(member)}
+                            >
                               <UserMinus className="w-4 h-4 mr-2" />
                               Remove Member
                             </DropdownMenuItem>
@@ -383,6 +449,64 @@ export const PremiumTeamManagement = () => {
           </Card>
         </div>
       </div>
+
+      {/* Invite Member Dialog */}
+      <InviteMemberDialog
+        open={inviteDialogOpen}
+        onOpenChange={setInviteDialogOpen}
+        teamId="default"
+        onMemberInvited={loadTeamMembers}
+      />
+
+      {/* Remove Member Confirmation */}
+      <AlertDialog open={!!memberToRemove} onOpenChange={() => setMemberToRemove(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove Team Member</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to remove <strong>{memberToRemove?.name}</strong> from the team?
+              They will lose access to all team projects and resources.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-red-600 hover:bg-red-700"
+              onClick={() => memberToRemove && handleRemoveMember(memberToRemove)}
+            >
+              Remove Member
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Change Role Dialog */}
+      <AlertDialog open={!!memberToChangeRole} onOpenChange={() => setMemberToChangeRole(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Change Member Role</AlertDialogTitle>
+            <AlertDialogDescription>
+              Select a new role for <strong>{memberToChangeRole?.name}</strong>:
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="py-4 space-y-2">
+            {['OWNER', 'ADMIN', 'MEMBER', 'VIEWER'].map((role) => (
+              <Button
+                key={role}
+                variant={memberToChangeRole?.role === role ? "default" : "outline"}
+                className="w-full justify-start"
+                onClick={() => memberToChangeRole && handleChangeRole(memberToChangeRole, role)}
+              >
+                {getRoleIcon(role.toLowerCase())}
+                <span className="ml-2">{role}</span>
+              </Button>
+            ))}
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </PremiumLayout>
   );
 };

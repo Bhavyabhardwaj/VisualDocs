@@ -9,6 +9,8 @@
     "start:build": "node dist/server.js",
     "make-admin": "ts-node src/scripts/make-admin.ts",
     "make-admin-interactive": "ts-node src/scripts/make-admin-interactive.ts",
+    "init-team": "ts-node src/scripts/init-team.ts",
+    "init-team-simple": "ts-node src/scripts/init-team-simple.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
