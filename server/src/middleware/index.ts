@@ -6,6 +6,7 @@ export * from './requestLogger';
 export * from './security';
 export * from './oauthMiddleware';
 export * from './database';
+export * from './subscription.middleware';
 
 // Export grouped middleware for easy import
 export { isAuthenticated, requireRole, requireAdmin, requireSuperAdmin, optionalAuth } from './authMiddleware';
@@ -22,6 +23,13 @@ export {
   handleOAuthSuccess, 
   handleOAuthError 
 } from './oauthMiddleware';
+export {
+  requireFeature,
+  checkProjectLimit,
+  checkStorageLimit,
+  getPlanInfo,
+  PLAN_LIMITS,
+} from './subscription.middleware';
 
 // Export aliases for commonly used middleware
 export { fileUploadLimiter as uploadLimiter } from './rateLimiter';

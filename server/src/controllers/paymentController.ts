@@ -588,6 +588,57 @@ export class PaymentController {
       next(error);
     }
   }
+
+  /**
+   * Get plan limits and features
+   * GET /api/payment/plan-limits
+   */
+  async getPlanLimits(req: Request, res: Response, next: NextFunction) {
+    try {
+      const userId = req.user?.userId;
+
+      if (!userId) {
+        throw new BadRequestError('User not authenticated');
+      }
+
+      // Import PLAN_LIMITS from middleware
+      const { PLAN_LIMITS } = require('../middleware/subscription.middleware');
+
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: {
+          subscriptionPlan: true,
+          subscriptionStatus: true,
+          _count: {
+            select: { projects: true },
+          },
+        },
+      });
+
+      if (!user) {
+        throw new BadRequestError('User not found');
+      }
+
+      const plan = user.subscriptionPlan || 'FREE';
+      const planLimits = PLAN_LIMITS[plan];
+
+      return successResponse(
+        res,
+        {
+          plan,
+          status: user.subscriptionStatus,
+          limits: planLimits,
+          usage: {
+            projects: user._count.projects,
+            projectsLimit: planLimits.maxProjects === Infinity ? 'Unlimited' : planLimits.maxProjects,
+          },
+        },
+        'Plan limits retrieved'
+      );
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 // Export singleton instance

@@ -158,6 +158,15 @@ export const PricingSelection = () => {
         throw new Error('Invalid order response from server');
       }
 
+      console.log('💳 Razorpay Order Details:', {
+        orderId: order.id,
+        amountInPaise: order.amount,
+        amountInRupees: order.amount / 100,
+        currency: order.currency,
+        plan: plan.name,
+        billingPeriod
+      });
+
       // Initialize Razorpay
       const options = {
         key: import.meta.env.VITE_RAZORPAY_KEY_ID,

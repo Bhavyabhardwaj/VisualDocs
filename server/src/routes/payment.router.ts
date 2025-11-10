@@ -74,6 +74,17 @@ router.get(
 );
 
 /**
+ * Get plan limits and features
+ * GET /api/payment/plan-limits
+ * Protected route - requires authentication
+ */
+router.get(
+  '/plan-limits',
+  isAuthenticated,
+  paymentController.getPlanLimits.bind(paymentController)
+);
+
+/**
  * Create a new subscription (Legacy)
  * POST /api/payment/create-subscription
  * Protected route - requires authentication

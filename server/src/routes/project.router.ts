@@ -13,7 +13,8 @@ import {
 import { 
   generalLimiter,
   uploadLimiter,
-  aiLimiter
+  aiLimiter,
+  checkProjectLimit
 } from '../middleware';
 import { multipleFilesUpload, handleUploadError } from '../middleware/upload';
 
@@ -24,6 +25,7 @@ const router = Router();
 // Project CRUD
 router.post('/', 
   generalLimiter,
+  checkProjectLimit, // Check if user can create more projects
   validate(createProjectSchema),
   projectController.createProject
 );
