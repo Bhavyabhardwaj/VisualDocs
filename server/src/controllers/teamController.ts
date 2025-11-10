@@ -71,11 +71,11 @@ export const teamController = {
           }
         },
         orderBy: { joinedAt: 'asc' }
-      });
+      } as any);
 
       // Get project counts for each member
       const membersWithDetails = await Promise.all(
-        teamMembers.map(async (member) => {
+        teamMembers.map(async (member: any) => {
           const projectCount = await prisma.project.count({
             where: { userId: member.userId }
           });
