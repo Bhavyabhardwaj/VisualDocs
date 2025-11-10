@@ -100,8 +100,10 @@ export const PricingSelection = () => {
       try {
         setLoading('FREE');
         
+        console.log('📝 Selecting FREE plan...');
+        
         // Update user subscription to FREE
-        await axios.post(
+        const response = await axios.post(
           `${import.meta.env.VITE_API_URL}/api/payment/select-free`,
           {},
           {
@@ -111,10 +113,13 @@ export const PricingSelection = () => {
           }
         );
 
+        console.log('✅ FREE plan selected:', response.data);
+
         // Navigate to dashboard
         navigate('/app/dashboard');
       } catch (error: any) {
-        console.error('Error selecting free plan:', error);
+        console.error('❌ Error selecting free plan:', error);
+        console.error('Error details:', error.response?.data);
         const errorMsg = error.response?.data?.message || 'Failed to select free plan. Please try again.';
         alert(errorMsg);
       } finally {
@@ -144,14 +149,23 @@ export const PricingSelection = () => {
         }
       );
 
+      console.log('✅ Order response received:', data);
+
+      // Extract order from response (backend wraps in { success, data: { order } })
+      const order = data.data?.order || data.order;
+
+      if (!order || !order.id) {
+        throw new Error('Invalid order response from server');
+      }
+
       // Initialize Razorpay
       const options = {
         key: import.meta.env.VITE_RAZORPAY_KEY_ID,
-        amount: data.order.amount,
-        currency: data.order.currency,
+        amount: order.amount,
+        currency: order.currency,
         name: 'VisualDocs',
         description: `${plan.name} Plan - ${billingPeriod}`,
-        order_id: data.order.id,
+        order_id: order.id,
         handler: async (response: any) => {
           try {
             // Verify payment
@@ -194,8 +208,11 @@ export const PricingSelection = () => {
       const razorpay = new window.Razorpay(options);
       razorpay.open();
     } catch (error: any) {
-      console.error('Error creating order:', error);
-      const errorMsg = error.response?.data?.message || 'Failed to initiate payment. Please try again.';
+      console.error('❌ Error creating order:', error);
+      console.error('Error response:', error.response?.data);
+      console.error('Error status:', error.response?.status);
+      
+      const errorMsg = error.response?.data?.message || error.message || 'Failed to initiate payment. Please try again.';
       alert(errorMsg);
       setLoading(null);
     }

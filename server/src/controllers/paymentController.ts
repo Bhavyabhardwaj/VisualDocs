@@ -350,6 +350,8 @@ export class PaymentController {
     try {
       const userId = req.user?.userId;
 
+      console.log('📝 Select FREE Plan Request:', { userId });
+
       if (!userId) {
         throw new BadRequestError('User not authenticated');
       }
@@ -366,12 +368,15 @@ export class PaymentController {
         },
       });
 
+      console.log('✅ FREE plan activated for user:', userId);
+
       return successResponse(
         res,
         { plan: 'FREE' },
         'Free plan activated successfully'
       );
-    } catch (error) {
+    } catch (error: any) {
+      console.error('❌ Select FREE Plan Error:', error.message);
       next(error);
     }
   }
