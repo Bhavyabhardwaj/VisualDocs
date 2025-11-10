@@ -7,6 +7,8 @@
     "build": "tsc",
     "start": "node dist/server.js",
     "start:build": "node dist/server.js",
+    "make-admin": "ts-node src/scripts/make-admin.ts",
+    "make-admin-interactive": "ts-node src/scripts/make-admin-interactive.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
