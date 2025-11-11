@@ -46,9 +46,10 @@ model User {
   updatedAt     DateTime @updatedAt
 
   // Relationships
-  projects  Project[]
-  sessions  Session[]
-  payments  Payment[]
+  projects      Project[]
+  sessions      Session[]
+  payments      Payment[]
+  teamMemberships TeamMember[] @relation("UserTeamMemberships")
 
   // Indexes
   @@index([providerId])
@@ -428,6 +429,9 @@ model TeamMember {
   
   createdAt  DateTime   @default(now())
   updatedAt  DateTime   @updatedAt
+
+  // Relationships
+  user       User       @relation("UserTeamMemberships", fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, teamId])
   @@index([userId])

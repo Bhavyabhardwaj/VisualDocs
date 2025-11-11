@@ -65,10 +65,10 @@ export const PremiumTeamManagement = () => {
       setLoading(true);
       
       // First initialize team membership for current user
-      await apiClient.post('/team/initialize');
+      await apiClient.post('/api/teams/initialize');
       
       // Then fetch all team members
-      const response = await apiClient.get('/team/members');
+      const response = await apiClient.get('/api/teams/members');
       if (response.data?.success) {
         setTeamMembers(response.data.data.members || []);
       }
@@ -89,7 +89,7 @@ export const PremiumTeamManagement = () => {
   const handleRemoveMember = async (member: TeamMember) => {
     try {
       const response = await apiClient.delete(
-        `/team/members/${member.userId}`
+        `/api/teams/members/${member.userId}`
       );
 
       if (response.data?.success) {
@@ -109,7 +109,7 @@ export const PremiumTeamManagement = () => {
   const handleChangeRole = async (member: TeamMember, newRole: string) => {
     try {
       const response = await apiClient.patch(
-        `/team/members/${member.userId}/role`,
+        `/api/teams/members/${member.userId}/role`,
         { role: newRole }
       );
 

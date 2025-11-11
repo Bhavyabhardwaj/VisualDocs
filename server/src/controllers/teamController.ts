@@ -3,6 +3,7 @@ import { successResponse } from '../utils';
 import prisma from '../config/db';
 import crypto from 'crypto';
 import { TeamRole, InvitationStatus } from '@prisma/client';
+import { emailService } from '../services/emailService';
 
 export const teamController = {
   // Initialize team membership (auto-add current user as OWNER if not already a member)
@@ -276,19 +277,34 @@ export const teamController = {
         );
       }
 
-      // TODO: Send invitation email with token
-      // For now, just return success
+      // Get inviter details for email
+      const inviter = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { name: true }
+      });
+
+      // Send invitation email
+      const emailSent = await emailService.sendTeamInvitation({
+        email,
+        token,
+        inviterName: inviter?.name || 'A team member',
+        role: role as TeamRole,
+        expiresAt,
+      });
+
       return successResponse(
         res,
         { 
-          message: `Invitation sent to ${email}`,
+          message: emailSent 
+            ? `Invitation sent to ${email}` 
+            : `Invitation created for ${email} (email service not configured)`,
           invitation: {
             id: invitation.id,
             email: invitation.email,
             role: invitation.role,
             expiresAt: invitation.expiresAt,
-            token: invitation.token,
-          }
+          },
+          emailSent,
         },
         'Team member invited successfully'
       );
