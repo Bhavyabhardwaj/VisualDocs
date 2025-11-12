@@ -1,7 +1,7 @@
 /**
  * Payment Routes
- * Razorpay integration for subscription payments
- * FREE for Indian developers - 2% fee only on successful transactions
+ * DodoPay integration for subscription payments
+ * Supports Professional and Enterprise plans
  */
 
 import { Router } from 'express';
@@ -29,7 +29,7 @@ router.post(
 );
 
 /**
- * Create Razorpay order for subscription
+ * Create DodoPay checkout session for subscription
  * POST /api/payment/create-order
  * Protected route - requires authentication
  */
@@ -85,7 +85,7 @@ router.get(
 );
 
 /**
- * Create a new subscription (Legacy)
+ * Create a new subscription
  * POST /api/payment/create-subscription
  * Protected route - requires authentication
  */
@@ -98,9 +98,9 @@ router.post(
 );
 
 /**
- * Razorpay webhook endpoint
+ * DodoPay webhook endpoint
  * POST /api/payment/webhook
- * Public route - Razorpay sends events here
+ * Public route - DodoPay sends events here
  * No authentication required - signature verification done in controller
  */
 router.post(
@@ -109,7 +109,7 @@ router.post(
 );
 
 /**
- * Get subscription details (Legacy)
+ * Get subscription details
  * GET /api/payment/subscription/:subscriptionId
  * Protected route - requires authentication
  */

@@ -8,12 +8,6 @@ import { Label } from '@/components/ui/label';
 import { Check, Zap, Crown, Rocket } from 'lucide-react';
 import axios from 'axios';
 
-declare global {
-  interface Window {
-    Razorpay: any;
-  }
-}
-
 interface PricingPlan {
   id: 'FREE' | 'PROFESSIONAL' | 'ENTERPRISE';
   name: string;
@@ -34,11 +28,12 @@ const plans: PricingPlan[] = [
     monthlyPrice: 0,
     annualPrice: 0,
     features: [
-      'Up to 3 projects',
+      'Up to 5 documents',
       'Basic diagrams',
       'Community support',
       '100 MB storage',
       'Basic AI analysis',
+      '2 collaborators',
     ],
   },
   {
@@ -46,16 +41,16 @@ const plans: PricingPlan[] = [
     name: 'Professional',
     description: 'For professional developers',
     icon: Zap,
-    monthlyPrice: 999,
-    annualPrice: 9999,
+    monthlyPrice: 20,
+    annualPrice: 192,
     popular: true,
     features: [
-      'Unlimited projects',
+      '50 documents',
       'Advanced diagrams',
       'Priority support',
-      '10 GB storage',
+      '1 GB storage',
       'Advanced AI analysis',
-      'Team collaboration',
+      'Team collaboration (10 members)',
       'Custom templates',
       'Export options',
     ],
@@ -65,17 +60,17 @@ const plans: PricingPlan[] = [
     name: 'Enterprise',
     description: 'For large teams',
     icon: Crown,
-    monthlyPrice: 2999,
-    annualPrice: 29999,
+    monthlyPrice: 200,
+    annualPrice: 1920,
     features: [
       'Everything in Professional',
+      'Unlimited documents',
       'Unlimited storage',
+      'Unlimited collaborators',
       'Dedicated support',
       'Custom integrations',
       'SSO & Advanced security',
       'SLA guarantee',
-      'Custom training',
-      'On-premise option',
     ],
   },
 ];
@@ -131,16 +126,17 @@ export const PricingSelection = () => {
     // For paid plans, initiate payment
     try {
       setLoading(plan.id);
-      const amount = isAnnual ? plan.annualPrice : plan.monthlyPrice;
-      const billingPeriod = isAnnual ? 'ANNUALLY' : 'MONTHLY';
+      const billingPeriod = isAnnual ? 'annually' : 'monthly';
+      const planId = plan.id.toLowerCase(); // Convert to lowercase for backend
 
-      // Create Razorpay order
+      console.log('💳 Creating DodoPay checkout session...', { planId, billingPeriod });
+
+      // Create DodoPay checkout session
       const { data } = await axios.post(
         `${import.meta.env.VITE_API_URL}/api/payment/create-order`,
         {
-          plan: plan.id,
+          planId,
           billingPeriod,
-          amount,
         },
         {
           headers: {
@@ -149,75 +145,22 @@ export const PricingSelection = () => {
         }
       );
 
-      console.log('✅ Order response received:', data);
+      console.log('✅ Checkout session created:', data);
 
-      // Extract order from response (backend wraps in { success, data: { order } })
-      const order = data.data?.order || data.order;
+      // Extract checkout URL from response
+      const checkoutUrl = data.data?.checkoutUrl || data.checkoutUrl;
 
-      if (!order || !order.id) {
-        throw new Error('Invalid order response from server');
+      if (!checkoutUrl) {
+        throw new Error('Invalid checkout response from server');
       }
 
-      console.log('💳 Razorpay Order Details:', {
-        orderId: order.id,
-        amountInPaise: order.amount,
-        amountInRupees: order.amount / 100,
-        currency: order.currency,
-        plan: plan.name,
-        billingPeriod
-      });
+      console.log('� Redirecting to DodoPay checkout:', checkoutUrl);
 
-      // Initialize Razorpay
-      const options = {
-        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
-        amount: order.amount,
-        currency: order.currency,
-        name: 'VisualDocs',
-        description: `${plan.name} Plan - ${billingPeriod}`,
-        order_id: order.id,
-        handler: async (response: any) => {
-          try {
-            // Verify payment
-            await axios.post(
-              `${import.meta.env.VITE_API_URL}/api/payment/verify`,
-              {
-                razorpay_order_id: response.razorpay_order_id,
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_signature: response.razorpay_signature,
-              },
-              {
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                },
-              }
-            );
+      // Redirect to DodoPay checkout page
+      window.location.href = checkoutUrl;
 
-            // Payment successful, navigate to dashboard
-            navigate('/app/dashboard');
-          } catch (error: any) {
-            console.error('Payment verification failed:', error);
-            const errorMsg = error.response?.data?.message || 'Payment verification failed. Please contact support.';
-            alert(errorMsg);
-          }
-        },
-        prefill: {
-          email: localStorage.getItem('userEmail') || '',
-          name: localStorage.getItem('userName') || '',
-        },
-        theme: {
-          color: '#6366f1',
-        },
-        modal: {
-          ondismiss: () => {
-            setLoading(null);
-          },
-        },
-      };
-
-      const razorpay = new window.Razorpay(options);
-      razorpay.open();
     } catch (error: any) {
-      console.error('❌ Error creating order:', error);
+      console.error('❌ Error creating checkout session:', error);
       console.error('Error response:', error.response?.data);
       console.error('Error status:', error.response?.status);
       
@@ -296,7 +239,7 @@ export const PricingSelection = () => {
                   <CardDescription>{plan.description}</CardDescription>
                   <div className="mt-4">
                     <div className="text-4xl font-bold">
-                      ₹{price.toLocaleString()}
+                      ${price.toLocaleString()}
                     </div>
                     {plan.id !== 'FREE' && (
                       <div className="text-sm text-gray-600">
