@@ -72,10 +72,12 @@ export class CodeAnalysisController {
 
       return res.json({
         success: true,
-        analysis: {
-          id: savedAnalysis.id,
-          ...analysis,
-          projectId: projectId
+        data: {
+          analysis: {
+            id: savedAnalysis.id,
+            ...analysis,
+            projectId: projectId
+          }
         }
       });
 
@@ -128,17 +130,19 @@ export class CodeAnalysisController {
 
       return res.json({
         success: true,
-        analysis: {
-          id: analysis.id,
-          projectId: analysis.projectId,
-          totalIssues: analysis.totalIssues,
-          criticalIssues: analysis.criticalIssues,
-          highIssues: analysis.highIssues,
-          mediumIssues: analysis.mediumIssues,
-          lowIssues: analysis.lowIssues,
-          issues: JSON.parse(analysis.issues as string),
-          summary: analysis.summary,
-          analyzedAt: analysis.analyzedAt
+        data: {
+          analysis: {
+            id: analysis.id,
+            projectId: analysis.projectId,
+            totalIssues: analysis.totalIssues,
+            criticalIssues: analysis.criticalIssues,
+            highIssues: analysis.highIssues,
+            mediumIssues: analysis.mediumIssues,
+            lowIssues: analysis.lowIssues,
+            issues: JSON.parse(analysis.issues as string),
+            summary: analysis.summary,
+            analyzedAt: analysis.analyzedAt
+          }
         }
       });
 

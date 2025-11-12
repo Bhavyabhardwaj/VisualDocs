@@ -74,9 +74,25 @@ export const AIAnalysisDashboard = () => {
           setProjects(data.data.items);
           const firstProject = data.data.items[0];
           setProjectId(firstProject.id);
+          
+          // Check if project has files
+          if (firstProject._count?.codeFiles === 0) {
+            console.warn('⚠️ Project has no code files - upload files first');
+            toast({
+              title: "No Code Files",
+              description: "Please upload code files to your project first before running analysis.",
+              variant: "default",
+            });
+          }
+          
           await loadAnalysis(firstProject.id);
         } else {
           console.warn('⚠️ No projects found - please create a project first');
+          toast({
+            title: "No Projects Found",
+            description: "Create a project and upload code files to start AI analysis.",
+            variant: "default",
+          });
         }
       } catch (error) {
         console.error('Failed to load projects:', error);
@@ -138,17 +154,20 @@ export const AIAnalysisDashboard = () => {
         const data = await response.json();
         console.log('🤖 AI Code Analysis:', data);
         
+        // Extract analysis from response (handle different response structures)
+        const aiAnalysis = data.data?.analysis || data.analysis || data.data;
+        
         // Merge AI issues with analysis data
-        if (data.data && analysisData) {
+        if (aiAnalysis && analysisData) {
           setAnalysisData({
             ...analysisData,
-            aiAnalysis: data.data,
-            issues: data.data.issues || [],
-            totalIssues: data.data.totalIssues || 0,
-            criticalIssues: data.data.criticalIssues || 0,
-            highIssues: data.data.highIssues || 0,
-            mediumIssues: data.data.mediumIssues || 0,
-            lowIssues: data.data.lowIssues || 0,
+            aiAnalysis: aiAnalysis,
+            issues: aiAnalysis.issues || [],
+            totalIssues: aiAnalysis.totalIssues || 0,
+            criticalIssues: aiAnalysis.criticalIssues || 0,
+            highIssues: aiAnalysis.highIssues || 0,
+            mediumIssues: aiAnalysis.mediumIssues || 0,
+            lowIssues: aiAnalysis.lowIssues || 0,
           });
         }
       }
@@ -326,8 +345,19 @@ export const AIAnalysisDashboard = () => {
   const handleRunAnalysis = async () => {
     if (!projectId) {
       toast({
-        title: "No Project",
-        description: "Please create a project first",
+        title: "No Project Selected",
+        description: "Please create a project first to run AI analysis.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Check if project has files
+    const currentProject = projects.find(p => p.id === projectId);
+    if (currentProject && currentProject._count?.codeFiles === 0) {
+      toast({
+        title: "No Code Files",
+        description: "Please upload code files to your project before running analysis. Go to the editor to add files.",
         variant: "destructive",
       });
       return;
@@ -353,7 +383,8 @@ export const AIAnalysisDashboard = () => {
       });
 
       if (!analysisResponse.ok) {
-        throw new Error('Analysis failed');
+        const errorData = await analysisResponse.json();
+        throw new Error(errorData.message || 'Analysis failed');
       }
 
       const analysisData = await analysisResponse.json();
@@ -379,13 +410,14 @@ export const AIAnalysisDashboard = () => {
         
         toast({
           title: "Analysis Complete!",
-          description: `Found ${aiData.data?.totalIssues || 0} issues. ${aiData.data?.criticalIssues || 0} critical, ${aiData.data?.highIssues || 0} high priority.`,
+          description: `Found ${aiData.data?.totalIssues || aiData.analysis?.totalIssues || 0} issues. ${aiData.data?.criticalIssues || aiData.analysis?.criticalIssues || 0} critical, ${aiData.data?.highIssues || aiData.analysis?.highIssues || 0} high priority.`,
         });
       } else {
-        console.log('⚠️ AI analysis not available, using basic analysis only');
+        const errorData = await aiAnalysisResponse.json();
+        console.log('⚠️ AI analysis error:', errorData);
         toast({
-          title: "Analysis Complete",
-          description: "Basic analysis finished successfully!",
+          title: "Analysis Complete (Basic)",
+          description: "Basic analysis finished successfully! AI analysis requires Gemini API key.",
         });
       }
 
