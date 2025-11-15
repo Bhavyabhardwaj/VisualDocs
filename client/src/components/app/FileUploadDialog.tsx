@@ -34,6 +34,7 @@ interface UploadFile {
   id: string;
   status: 'pending' | 'uploading' | 'success' | 'error';
   progress: number;
+  relativePath: string;
   error?: string;
 }
 
@@ -50,6 +51,7 @@ export const FileUploadDialog = ({
   const [projectDescription, setProjectDescription] = useState('');
   const [projectLanguage, setProjectLanguage] = useState<'typescript' | 'javascript' | 'python' | 'java' | 'csharp' | 'cpp' | 'php' | 'ruby' | 'go'>('typescript');
   const [needsProjectCreation, setNeedsProjectCreation] = useState(false);
+  const [uploadedCount, setUploadedCount] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 

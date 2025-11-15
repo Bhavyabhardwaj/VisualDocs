@@ -1,5 +1,8 @@
 import rateLimit from 'express-rate-limit';
-import type { Request, Response } from 'express';
+import type { Request } from 'express';
+
+const UPLOAD_RATE_LIMIT = Number(process.env.UPLOAD_REQUEST_LIMIT || 60);
+const UPLOAD_WINDOW_MS = Number(process.env.UPLOAD_RATE_WINDOW_MS || 15 * 60 * 1000);
 
 export const generalLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
@@ -31,12 +34,16 @@ export const authLimiter = rateLimit({
 })
 
 export const fileUploadLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 5,
+    windowMs: UPLOAD_WINDOW_MS,
+    max: UPLOAD_RATE_LIMIT,
     message: {
         success: false,
-        error: 'Too many file upload requests from this IP, please try again later.',
+        error: 'Too many file upload requests, please slow down and try again shortly.',
         timestamp: new Date().toISOString(),
+    },
+    keyGenerator: (req: Request) => {
+        const typedReq = req as Request & { user?: { userId?: string } };
+        return typedReq.user?.userId || req.ip;
     },
     standardHeaders: true,
     legacyHeaders: false,

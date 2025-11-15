@@ -11,7 +11,28 @@ import type {
   Collaborator,
   GitHubImportInput,
   GitHubRepoInfo,
+  UploadFilesResponse,
+  UploadedFileSummary,
 } from '@/types/api';
+
+interface UploadFilesOptions {
+  batchSize?: number;
+  onChunkStart?: (info: {
+    chunkIndex: number;
+    totalChunks: number;
+    from: number;
+    to: number;
+    chunkSize: number;
+  }) => void;
+  onChunkComplete?: (info: {
+    chunkIndex: number;
+    totalChunks: number;
+    from: number;
+    to: number;
+    chunkSize: number;
+    response: ApiResponse<UploadFilesResponse>;
+  }) => void;
+}
 
 export const projectService = {
   // CRUD Operations
@@ -53,17 +74,103 @@ export const projectService = {
   },
 
   // File Management
-  async uploadFiles(id: string, files: File[]): Promise<ApiResponse<ProjectFile[]>> {
-    const formData = new FormData();
-    files.forEach((file) => {
-      formData.append('files', file);
-    });
+  async uploadFiles(
+    id: string,
+    files: File[],
+    options?: UploadFilesOptions
+  ): Promise<ApiResponse<UploadFilesResponse>> {
+    if (!files.length) {
+      return {
+        success: true,
+        data: {
+          uploadedFiles: [],
+          totalUploaded: 0,
+          totalUpdated: 0,
+          totalSkipped: 0,
+          totalFailed: 0,
+          totalProcessed: 0,
+          projectId: id,
+          processingTimeMs: 0,
+        },
+        message: 'No files provided',
+      };
+    }
 
-    return apiClient.post<ApiResponse<ProjectFile[]>>(`/api/projects/${id}/files`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
+    const batchSize = options?.batchSize ?? Number(import.meta.env.VITE_UPLOAD_BATCH_SIZE ?? 250);
+    const totalChunks = Math.ceil(files.length / batchSize);
+
+    const aggregatedFiles: UploadedFileSummary[] = [];
+    let totalUploaded = 0;
+    let totalUpdated = 0;
+    let totalSkipped = 0;
+    let totalFailed = 0;
+    let totalProcessingTimeMs = 0;
+    let wasTruncated = false;
+    let lastMessage: string | undefined;
+
+    for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
+      const from = chunkIndex * batchSize;
+      const chunk = files.slice(from, from + batchSize);
+      const to = from + chunk.length;
+
+      options?.onChunkStart?.({
+        chunkIndex,
+        totalChunks,
+        from,
+        to,
+        chunkSize: chunk.length,
+      });
+
+      const formData = new FormData();
+      chunk.forEach((file) => {
+        const relativeName = (file as File & { webkitRelativePath?: string }).webkitRelativePath || file.name;
+        formData.append('files', file, relativeName);
+      });
+
+      const response = await apiClient.post<ApiResponse<UploadFilesResponse>>(`/api/projects/${id}/files`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      lastMessage = response.message;
+
+      const payload = response.data;
+      if (payload) {
+        aggregatedFiles.push(...(payload.uploadedFiles || []));
+        totalUploaded += payload.totalUploaded || 0;
+        totalUpdated += payload.totalUpdated || 0;
+        totalSkipped += payload.totalSkipped || 0;
+        totalFailed += payload.totalFailed || 0;
+        totalProcessingTimeMs += payload.processingTimeMs || 0;
+        wasTruncated = wasTruncated || Boolean(payload.responseTruncated);
+      }
+
+      options?.onChunkComplete?.({
+        chunkIndex,
+        totalChunks,
+        from,
+        to,
+        chunkSize: chunk.length,
+        response,
+      });
+    }
+
+    return {
+      success: true,
+      message: lastMessage || 'Files uploaded',
+      data: {
+        uploadedFiles: aggregatedFiles,
+        totalUploaded,
+        totalUpdated,
+        totalSkipped,
+        totalFailed,
+        totalProcessed: aggregatedFiles.length,
+        projectId: id,
+        processingTimeMs: totalProcessingTimeMs,
+        responseTruncated: wasTruncated,
       },
-    });
+    };
   },
 
   async getProjectFiles(id: string): Promise<ApiResponse<ProjectFile[]>> {

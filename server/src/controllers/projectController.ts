@@ -5,7 +5,22 @@ import { paginatedResponse, successResponse, logger } from "../utils";
 import { promises as fs } from 'fs';
 import * as path from 'path';
 import * as crypto from 'crypto';
+import pLimit from 'p-limit';
 import prisma from "../config/db";
+
+const FILE_PROCESSING_CONCURRENCY = Number(process.env.FILE_PROCESSING_CONCURRENCY || 10);
+const UPLOAD_RESPONSE_FILE_LIMIT = Number(process.env.UPLOAD_RESPONSE_MAX_FILES || 2000);
+
+type UploadedFileResult = {
+    id: string;
+    name: string;
+    path: string;
+    language: string | null;
+    size: number;
+    createdAt: Date;
+    status: 'created' | 'updated' | 'skipped';
+    message: string;
+};
 
 // Extend Express Request interface to include multer files
 declare global {
@@ -232,32 +247,60 @@ export class ProjectController {
                 );
             }
 
-            // Process and store each file
+            const uploadStartedAt = Date.now();
+            const limit = pLimit(FILE_PROCESSING_CONCURRENCY);
+
             const processedFiles = await Promise.all(
-                uploadedFiles.map(file => this.processUploadedFile(file, projectId))
+                uploadedFiles.map(file => limit(() => this.processUploadedFile(file, projectId)))
             );
 
-            // Filter out failed uploads
-            const successfulUploads = processedFiles.filter(file => file !== null);
-            const failedUploads = processedFiles.length - successfulUploads.length;
+            const successfulUploads = processedFiles.filter((file): file is UploadedFileResult => file !== null);
+            const failedUploads = uploadedFiles.length - successfulUploads.length;
+
+            const summary = successfulUploads.reduce(
+                (acc, file) => {
+                    acc[file.status] = (acc[file.status] || 0) + 1;
+                    return acc;
+                },
+                { created: 0, updated: 0, skipped: 0 } as Record<'created' | 'updated' | 'skipped', number>
+            );
+
+            const responseFiles = successfulUploads.slice(0, UPLOAD_RESPONSE_FILE_LIMIT);
+            const durationMs = Date.now() - uploadStartedAt;
+
+            const messageParts: string[] = [];
+            if (summary.created) messageParts.push(`${summary.created} new`);
+            if (summary.updated) messageParts.push(`${summary.updated} updated`);
+            if (summary.skipped) messageParts.push(`${summary.skipped} skipped`);
+            if (failedUploads) messageParts.push(`${failedUploads} failed`);
+            const resultMessage = messageParts.length
+                ? `${messageParts.join(', ')} file${successfulUploads.length === 1 ? '' : 's'} processed`
+                : 'No files required changes';
 
             logger.info('Files uploaded to project', {
                 projectId,
                 userId,
                 totalFiles: uploadedFiles.length,
                 successful: successfulUploads.length,
-                failed: failedUploads
+                failed: failedUploads,
+                summary,
+                durationMs
             });
 
             return successResponse(
                 res,
                 {
-                    uploadedFiles: successfulUploads,
-                    totalUploaded: successfulUploads.length,
+                    uploadedFiles: responseFiles,
+                    totalUploaded: summary.created + summary.updated,
+                    totalUpdated: summary.updated,
+                    totalSkipped: summary.skipped,
                     totalFailed: failedUploads,
-                    projectId
+                    totalProcessed: successfulUploads.length,
+                    projectId,
+                    processingTimeMs: durationMs,
+                    responseTruncated: successfulUploads.length > responseFiles.length
                 },
-                `${successfulUploads.length} files uploaded successfully${failedUploads > 0 ? `, ${failedUploads} failed` : ''}`
+                resultMessage
             );
         } catch (error) {
             logger.error('File upload failed', {
@@ -272,46 +315,87 @@ export class ProjectController {
     // Helper method to process individual uploaded files
     private async processUploadedFile(file: Express.Multer.File, projectId: string) {
         try {
+            const relativePath = this.extractRelativePath(file);
+            const normalizedPath = this.generateFilePath(relativePath || file.originalname);
+
             // Read file content
             const content = await fs.readFile(file.path, 'utf-8');
 
-            // Generate file hash for deduplication
+            // Generate file hash for change detection
             const hash = crypto.createHash('sha256').update(content).digest('hex');
 
             // Detect programming language from file extension
             const language = this.detectLanguage(file.originalname);
 
-            // Check if file already exists in project (by hash)
             const existingFile = await prisma.codeFile.findFirst({
                 where: {
                     projectId,
-                    hash
+                    path: normalizedPath
                 }
             });
 
             if (existingFile) {
-                logger.info('Duplicate file detected, skipping', {
-                    fileName: file.originalname,
-                    hash,
-                    existingFileId: existingFile.id
+                if (existingFile.hash === hash) {
+                    logger.info('Existing file unchanged, skipping', {
+                        fileName: file.originalname,
+                        filePath: normalizedPath,
+                        fileId: existingFile.id
+                    });
+
+                    await this.removeTempFile(file.path);
+
+                    return {
+                        id: existingFile.id,
+                        name: existingFile.name,
+                        path: existingFile.path,
+                        language: existingFile.language,
+                        size: existingFile.size,
+                        createdAt: existingFile.createdAt,
+                        status: 'skipped' as const,
+                        message: 'File already up to date'
+                    };
+                }
+
+                const updatedFile = await prisma.codeFile.update({
+                    where: { id: existingFile.id },
+                    data: {
+                        content,
+                        language,
+                        size: file.size,
+                        hash,
+                        metadata: {
+                            ...(existingFile.metadata as Record<string, unknown> || {}),
+                            originalName: file.originalname,
+                            relativePath: normalizedPath,
+                            mimeType: file.mimetype,
+                            uploadedAt: new Date().toISOString(),
+                            fileExtension: path.extname(file.originalname)
+                        }
+                    },
+                    select: {
+                        id: true,
+                        name: true,
+                        path: true,
+                        language: true,
+                        size: true,
+                        createdAt: true
+                    }
                 });
 
-                // Clean up uploaded file
-                await fs.unlink(file.path).catch(() => { });
+                await this.removeTempFile(file.path);
 
                 return {
-                    id: existingFile.id,
-                    name: existingFile.name,
-                    status: 'duplicate',
-                    message: 'File already exists in project'
+                    ...updatedFile,
+                    status: 'updated' as const,
+                    message: 'File updated successfully'
                 };
             }
 
             // Create code file record in database
             const codeFile = await prisma.codeFile.create({
                 data: {
-                    name: file.originalname,
-                    path: this.generateFilePath(file.originalname),
+                    name: path.basename(normalizedPath),
+                    path: normalizedPath,
                     content,
                     language,
                     size: file.size,
@@ -320,6 +404,7 @@ export class ProjectController {
                     projectId,
                     metadata: {
                         originalName: file.originalname,
+                        relativePath: normalizedPath,
                         mimeType: file.mimetype,
                         uploadedAt: new Date().toISOString(),
                         fileExtension: path.extname(file.originalname)
@@ -335,19 +420,19 @@ export class ProjectController {
                 }
             });
 
-            // Clean up uploaded file from temp location
-            await fs.unlink(file.path).catch(() => { });
+            await this.removeTempFile(file.path);
 
             logger.info('File processed successfully', {
                 fileId: codeFile.id,
                 fileName: file.originalname,
+                filePath: normalizedPath,
                 language,
                 size: file.size
             });
 
             return {
                 ...codeFile,
-                status: 'success',
+                status: 'created' as const,
                 message: 'File uploaded and processed successfully'
             };
 
@@ -357,8 +442,7 @@ export class ProjectController {
                 error: error instanceof Error ? error.message : 'Unknown error'
             });
 
-            // Clean up uploaded file on error
-            await fs.unlink(file.path).catch(() => { });
+            await this.removeTempFile(file.path);
 
             return null;
         }
@@ -414,9 +498,35 @@ export class ProjectController {
     }
 
     // Helper method to generate consistent file paths
-    private generateFilePath(filename: string): string {
-        const sanitizedName = filename.replace(/[^a-zA-Z0-9.-]/g, '_');
-        return `/${sanitizedName}`;
+    private generateFilePath(rawPath: string): string {
+        const normalized = (rawPath || '').replace(/\\/g, '/');
+        const parts = normalized
+            .split('/')
+            .map(part => part.trim())
+            .filter(part => part.length > 0 && part !== '.' && part !== '..');
+
+        if (!parts.length) {
+            return `/${this.sanitizePathSegment(rawPath || 'file')}`;
+        }
+
+        const sanitized = parts.map(part => this.sanitizePathSegment(part));
+        return `/${sanitized.join('/')}`;
+    }
+
+    private sanitizePathSegment(segment: string): string {
+        return segment.replace(/[^a-zA-Z0-9._-]/g, '_') || 'file';
+    }
+
+    private extractRelativePath(file: Express.Multer.File): string | undefined {
+        if (!file?.originalname) {
+            return undefined;
+        }
+        return file.originalname.replace(/\\/g, '/');
+    }
+
+    private async removeTempFile(filePath: string) {
+        if (!filePath) return;
+        await fs.unlink(filePath).catch(() => undefined);
     }
     async getProjectFiles(req: Request, res: Response, next: NextFunction) {
         try {

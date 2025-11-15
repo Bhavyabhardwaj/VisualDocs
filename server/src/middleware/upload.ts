@@ -2,17 +2,19 @@ import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 
+const MAX_FILE_SIZE_MB = Number(process.env.UPLOAD_MAX_FILE_SIZE_MB || 10);
+const MAX_FILES_PER_REQUEST = Number(process.env.UPLOAD_MAX_FILES_PER_REQUEST || 500);
+const TEMP_UPLOAD_DIR = process.env.UPLOAD_TEMP_DIR || path.join(process.cwd(), 'uploads', 'temp');
+
 // Configure storage
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const uploadDir = path.join(process.cwd(), 'uploads', 'temp');
-    
     // Create directory if it doesn't exist
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
+    if (!fs.existsSync(TEMP_UPLOAD_DIR)) {
+      fs.mkdirSync(TEMP_UPLOAD_DIR, { recursive: true });
     }
     
-    cb(null, uploadDir);
+    cb(null, TEMP_UPLOAD_DIR);
   },
   filename: (req, file, cb) => {
     // Generate unique filename
@@ -48,13 +50,13 @@ const upload = multer({
   storage: storage,
   fileFilter: fileFilter,
   limits: {
-    fileSize: 10 * 1024 * 1024, // 10MB per file
-    files: 100 // Maximum 100 files per upload
+    fileSize: MAX_FILE_SIZE_MB * 1024 * 1024,
+    files: MAX_FILES_PER_REQUEST
   }
 });
 
 // Middleware for multiple file uploads
-export const multipleFilesUpload = upload.array('files', 100);
+export const multipleFilesUpload = upload.array('files', MAX_FILES_PER_REQUEST);
 
 // Middleware for single file upload
 export const singleFileUpload = upload.single('file');
@@ -65,14 +67,14 @@ export const handleUploadError = (err: any, req: any, res: any, next: any) => {
     if (err.code === 'LIMIT_FILE_SIZE') {
       return res.status(400).json({
         success: false,
-        error: 'File size exceeds 10MB limit',
+        error: `File size exceeds ${MAX_FILE_SIZE_MB}MB limit`,
         code: 'FILE_TOO_LARGE'
       });
     }
     if (err.code === 'LIMIT_FILE_COUNT') {
       return res.status(400).json({
         success: false,
-        error: 'Too many files. Maximum 100 files allowed',
+        error: `Too many files. Maximum ${MAX_FILES_PER_REQUEST} files allowed per request`,
         code: 'TOO_MANY_FILES'
       });
     }

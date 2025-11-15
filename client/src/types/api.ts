@@ -195,6 +195,29 @@ export interface ProjectFile {
   uploadedAt: string;
 }
 
+export interface UploadedFileSummary {
+  id: string;
+  name: string;
+  path: string;
+  language?: string;
+  size: number;
+  createdAt: string;
+  status: 'created' | 'updated' | 'skipped';
+  message: string;
+}
+
+export interface UploadFilesResponse {
+  uploadedFiles: UploadedFileSummary[];
+  totalUploaded: number;
+  totalUpdated: number;
+  totalSkipped: number;
+  totalFailed: number;
+  totalProcessed: number;
+  projectId: string;
+  processingTimeMs: number;
+  responseTruncated?: boolean;
+}
+
 // Collaborator Types
 export interface Collaborator {
   id: string;
