@@ -301,7 +301,9 @@ export class ProjectController {
                     responseTruncated: successfulUploads.length > responseFiles.length
                 },
                 resultMessage
-            );
+                    totalCreated: summary.created,
+                    totalUpdated: summary.updated,
+                    totalUploaded: summary.created + summary.updated,
         } catch (error) {
             logger.error('File upload failed', {
                 projectId: req.params.id,
@@ -313,7 +315,7 @@ export class ProjectController {
     }
 
     // Helper method to process individual uploaded files
-    private async processUploadedFile(file: Express.Multer.File, projectId: string) {
+    private async processUploadedFile(file: Express.Multer.File, projectId: string): Promise<UploadedFileResult | null> {
         try {
             const relativePath = this.extractRelativePath(file);
             const normalizedPath = this.generateFilePath(relativePath || file.originalname);

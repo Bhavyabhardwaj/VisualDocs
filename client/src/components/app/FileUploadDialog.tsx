@@ -21,6 +21,7 @@ import {
 } from '@/components/ui/select';
 import { projectService } from '@/services/project.service';
 import { useToast } from '@/components/ui/use-toast';
+import type { UploadFilesResponse } from '@/types/api';
 
 interface FileUploadDialogProps {
   open: boolean;
@@ -51,9 +52,21 @@ export const FileUploadDialog = ({
   const [projectDescription, setProjectDescription] = useState('');
   const [projectLanguage, setProjectLanguage] = useState<'typescript' | 'javascript' | 'python' | 'java' | 'csharp' | 'cpp' | 'php' | 'ruby' | 'go'>('typescript');
   const [needsProjectCreation, setNeedsProjectCreation] = useState(false);
-  const [uploadedCount, setUploadedCount] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+  const [uploadedCount, setUploadedCount] = useState(0);
+  const uploadBatchSize = Math.max(1, Number(import.meta.env.VITE_UPLOAD_BATCH_SIZE ?? 250) || 250);
+  const [lastSummary, setLastSummary] = useState<UploadFilesResponse | null>(null);
+
+  const resetFormState = () => {
+    setFiles([]);
+    setNeedsProjectCreation(false);
+    setProjectName('');
+    setProjectDescription('');
+    setProjectLanguage('typescript');
+    setUploadedCount(0);
+    setLastSummary(null);
+  };
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -81,13 +94,18 @@ export const FileUploadDialog = ({
   };
 
   const addFiles = (newFiles: File[]) => {
-    const uploadFiles: UploadFile[] = newFiles.map((file) => ({
-      file,
-      id: `${file.name}-${Date.now()}-${Math.random()}`,
-      status: 'pending',
-      progress: 0,
-    }));
+    const uploadFiles: UploadFile[] = newFiles.map((file) => {
+      const relativePath = (file as File & { webkitRelativePath?: string }).webkitRelativePath || file.name;
+      return {
+        file,
+        id: `${file.name}-${Date.now()}-${Math.random()}`,
+        status: 'pending' as const,
+        progress: 0,
+        relativePath,
+      };
+    });
     setFiles((prev) => [...prev, ...uploadFiles]);
+    setUploadedCount(0);
   };
 
   const removeFile = (id: string) => {
@@ -174,40 +192,47 @@ export const FileUploadDialog = ({
         prev.map((f) => ({ ...f, status: 'uploading' as const, progress: 0 }))
       );
 
-      // Simulate progress (in real scenario, you'd track actual upload progress)
-      const progressInterval = setInterval(() => {
-        setFiles((prev) =>
-          prev.map((f) => ({
-            ...f,
-            progress: f.status === 'uploading' ? Math.min(f.progress + 10, 90) : f.progress,
-          }))
-        );
-      }, 200);
+      const totalFiles = files.length;
 
-      // Upload files
-      const fileArray = files.map((f) => f.file);
-      await projectService.uploadFiles(targetProjectId, fileArray);
-
-      clearInterval(progressInterval);
-
-      // Mark all as success
-      setFiles((prev) =>
-        prev.map((f) => ({ ...f, status: 'success' as const, progress: 100 }))
+      const uploadResponse = await projectService.uploadFiles(
+        targetProjectId,
+        files.map((f) => f.file),
+        {
+          batchSize: uploadBatchSize,
+          onChunkStart: ({ chunkIndex, totalChunks }) => {
+            setFiles((prev) =>
+              prev.map((file, index) => {
+                const chunkStart = chunkIndex * uploadBatchSize;
+                const chunkEnd = chunkStart + uploadBatchSize;
+                if (index >= chunkStart && index < chunkEnd) {
+                  return { ...file, progress: 5 };
+                }
+                return file;
+              })
+            );
+          },
+          onChunkComplete: ({ chunkIndex, chunkSize, from }) => {
+            setUploadedCount((prev) => prev + chunkSize);
+            setFiles((prev) =>
+              prev.map((file, index) => {
+                if (index >= from && index < from + chunkSize) {
+                  return { ...file, status: 'success', progress: 100 };
+                }
+                return file;
+              })
+            );
+          },
+        }
       );
 
       toast({
-        title: 'Upload successful',
-        description: `Successfully uploaded ${files.length} file(s)`,
+        title: 'Upload complete',
+        description: uploadResponse.message || `Uploaded ${totalFiles} file(s)`
       });
 
-      // Close dialog after a short delay
       setTimeout(() => {
         onOpenChange(false);
-        setFiles([]);
-        setProjectName('');
-        setProjectDescription('');
-        setProjectLanguage('typescript');
-        setNeedsProjectCreation(false);
+        resetFormState();
         if (onUploadComplete) onUploadComplete(targetProjectId || undefined);
       }, 1500);
     } catch (error) {

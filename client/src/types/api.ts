@@ -208,6 +208,7 @@ export interface UploadedFileSummary {
 
 export interface UploadFilesResponse {
   uploadedFiles: UploadedFileSummary[];
+  totalCreated: number;
   totalUploaded: number;
   totalUpdated: number;
   totalSkipped: number;

@@ -84,6 +84,7 @@ export const projectService = {
         success: true,
         data: {
           uploadedFiles: [],
+          totalCreated: 0,
           totalUploaded: 0,
           totalUpdated: 0,
           totalSkipped: 0,
@@ -96,21 +97,23 @@ export const projectService = {
       };
     }
 
-    const batchSize = options?.batchSize ?? Number(import.meta.env.VITE_UPLOAD_BATCH_SIZE ?? 250);
-    const totalChunks = Math.ceil(files.length / batchSize);
+    const resolvedBatchSize = Math.max(1, options?.batchSize ?? Number(import.meta.env.VITE_UPLOAD_BATCH_SIZE ?? 250) || 250);
+    const totalChunks = Math.ceil(files.length / resolvedBatchSize);
 
     const aggregatedFiles: UploadedFileSummary[] = [];
+    let totalCreated = 0;
     let totalUploaded = 0;
     let totalUpdated = 0;
     let totalSkipped = 0;
     let totalFailed = 0;
     let totalProcessingTimeMs = 0;
+    let totalProcessed = 0;
     let wasTruncated = false;
     let lastMessage: string | undefined;
 
     for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
-      const from = chunkIndex * batchSize;
-      const chunk = files.slice(from, from + batchSize);
+      const from = chunkIndex * resolvedBatchSize;
+      const chunk = files.slice(from, from + resolvedBatchSize);
       const to = from + chunk.length;
 
       options?.onChunkStart?.({
@@ -138,11 +141,13 @@ export const projectService = {
       const payload = response.data;
       if (payload) {
         aggregatedFiles.push(...(payload.uploadedFiles || []));
+        totalCreated += payload.totalCreated || 0;
         totalUploaded += payload.totalUploaded || 0;
         totalUpdated += payload.totalUpdated || 0;
         totalSkipped += payload.totalSkipped || 0;
         totalFailed += payload.totalFailed || 0;
         totalProcessingTimeMs += payload.processingTimeMs || 0;
+        totalProcessed += payload.totalProcessed || 0;
         wasTruncated = wasTruncated || Boolean(payload.responseTruncated);
       }
 
@@ -161,11 +166,12 @@ export const projectService = {
       message: lastMessage || 'Files uploaded',
       data: {
         uploadedFiles: aggregatedFiles,
+        totalCreated,
         totalUploaded,
         totalUpdated,
         totalSkipped,
         totalFailed,
-        totalProcessed: aggregatedFiles.length,
+        totalProcessed: totalProcessed || totalUploaded + totalSkipped,
         projectId: id,
         processingTimeMs: totalProcessingTimeMs,
         responseTruncated: wasTruncated,
