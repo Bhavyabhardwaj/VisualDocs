@@ -11,12 +11,16 @@ import {
   Save,
   Users,
   Code2,
+  MessageSquare,
+  SendHorizontal,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useToast } from '@/components/ui/use-toast';
 import { cn } from '@/lib/utils';
+import { Textarea } from '@/components/ui/textarea';
+import { formatDistanceToNow } from 'date-fns';
 
 interface FileNode {
   id: string;
@@ -42,10 +46,20 @@ interface EditorChange {
   timestamp: number;
 }
 
+interface ProjectComment {
+  id: string;
+  projectId?: string;
+  userId: string;
+  userName?: string;
+  content: string;
+  timestamp: string;
+}
+
 export default function CodeEditorPage() {
   const { projectId } = useParams<{ projectId: string }>();
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
+  const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3004';
 
   // Get file and line from URL params (for navigation from analysis)
   const initialFile = searchParams.get('file');
@@ -57,6 +71,10 @@ export default function CodeEditorPage() {
   const [code, setCode] = useState<string>('');
   const [language, setLanguage] = useState<string>('typescript');
   const [projectName, setProjectName] = useState<string>('');
+  const [comments, setComments] = useState<ProjectComment[]>([]);
+  const [newComment, setNewComment] = useState('');
+  const [isSubmittingComment, setIsSubmittingComment] = useState(false);
+  const [isCommentsLoading, setIsCommentsLoading] = useState(true);
   const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
   const [isConnected, setIsConnected] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -71,13 +89,32 @@ export default function CodeEditorPage() {
     const token = localStorage.getItem('authToken');
     if (!token || !projectId) return;
 
-    const socket = io('http://localhost:3004', {
+    const socket = io(apiBaseUrl, {
       auth: { token },
       query: { projectId },
     });
 
+    const handleNewComment = (incoming: any) => {
+      setComments((prev) => {
+        const normalised: ProjectComment = {
+          id: incoming.id,
+          projectId: incoming.projectId,
+          userId: incoming.userId,
+          userName: incoming.userName || incoming.user?.name || 'Collaborator',
+          content: incoming.content,
+          timestamp: incoming.timestamp || new Date().toISOString(),
+        };
+
+        if (prev.some((comment) => comment.id === normalised.id)) {
+          return prev;
+        }
+        return [...prev, normalised];
+      });
+    };
+
     socket.on('connect', () => {
       setIsConnected(true);
+      socket.emit('join-project', { projectId });
       toast({
         title: 'Connected',
         description: 'Live collaboration enabled',
@@ -118,13 +155,15 @@ export default function CodeEditorPage() {
         )
       );
     });
+    socket.on('new-comment', handleNewComment);
 
     socketRef.current = socket;
 
     return () => {
+      socket.off('new-comment', handleNewComment);
       socket.disconnect();
     };
-  }, [projectId, toast]);
+  }, [projectId, toast, apiBaseUrl]);
 
   // Load project files
   useEffect(() => {
@@ -133,7 +172,7 @@ export default function CodeEditorPage() {
     const loadFiles = async () => {
       try {
         const token = localStorage.getItem('authToken');
-        const response = await fetch(`http://localhost:3004/api/projects/${projectId}`, {
+        const response = await fetch(`${apiBaseUrl}/api/projects/${projectId}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -173,7 +212,53 @@ export default function CodeEditorPage() {
     };
 
     loadFiles();
-  }, [projectId, initialFile, toast]);
+  }, [projectId, initialFile, toast, apiBaseUrl]);
+
+  useEffect(() => {
+    if (!projectId) return;
+
+    let isMounted = true;
+
+    const loadComments = async () => {
+      try {
+        setIsCommentsLoading(true);
+        const token = localStorage.getItem('authToken');
+        const response = await fetch(`${apiBaseUrl}/api/comments/projects/${projectId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to load comments');
+        }
+
+        const data = await response.json();
+        if (!isMounted) return;
+
+        const items: ProjectComment[] = data.data || data.comments || [];
+        const normalized = items.map((comment) => ({
+          ...comment,
+          userName: comment.userName || comment.user?.name || 'Collaborator',
+        }));
+        setComments(normalized);
+      } catch (error) {
+        if (error instanceof Error) {
+          console.error('Failed to load comments', error.message);
+        }
+      } finally {
+        if (isMounted) {
+          setIsCommentsLoading(false);
+        }
+      }
+    };
+
+    loadComments();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [projectId, apiBaseUrl]);
 
   // Navigate to specific line when file is loaded
   useEffect(() => {
@@ -311,7 +396,7 @@ export default function CodeEditorPage() {
     try {
       const token = localStorage.getItem('authToken');
       const response = await fetch(
-        `http://localhost:3004/api/projects/${projectId}/files/${selectedFile.id}`,
+        `${apiBaseUrl}/api/projects/${projectId}/files/${selectedFile.id}`,
         {
           method: 'PUT',
           headers: {
@@ -345,6 +430,39 @@ export default function CodeEditorPage() {
     } finally {
       setIsSaving(false);
     }
+  };
+
+  const handleCommentSubmit = () => {
+    if (!projectId) {
+      toast({
+        title: 'Missing project',
+        description: 'Select a project before commenting.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    const message = newComment.trim();
+    if (!message) return;
+
+    if (!socketRef.current) {
+      toast({
+        title: 'Connection required',
+        description: 'Reconnect to collaboration to share comments.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setIsSubmittingComment(true);
+
+    socketRef.current.emit('project-comment', {
+      projectId,
+      content: message,
+    });
+
+    setNewComment('');
+    setTimeout(() => setIsSubmittingComment(false), 300);
   };
 
   // Detect language from file extension
@@ -423,6 +541,14 @@ export default function CodeEditorPage() {
         )}
       </div>
     ));
+  };
+
+  const getCommentTimestamp = (value: string) => {
+    try {
+      return formatDistanceToNow(new Date(value), { addSuffix: true });
+    } catch {
+      return 'just now';
+    }
   };
 
   const quickLinks = [
@@ -526,56 +652,130 @@ export default function CodeEditorPage() {
           </div>
         </div>
 
-        {/* Monaco Editor */}
-        <div className="flex-1">
-          {selectedFile ? (
-            <Editor
-              height="100%"
-              language={language}
-              value={code}
-              onChange={handleEditorChange}
-              onMount={(editor, monaco) => {
-                editorRef.current = editor;
-                monacoRef.current = monaco;
+        {/* Monaco Editor & Comments */}
+        <div className="flex-1 flex overflow-hidden">
+          <div className="flex-1">
+            {selectedFile ? (
+              <Editor
+                height="100%"
+                language={language}
+                value={code}
+                onChange={handleEditorChange}
+                onMount={(editor, monaco) => {
+                  editorRef.current = editor;
+                  monacoRef.current = monaco;
 
-                // Listen for cursor position changes
-                editor.onDidChangeCursorPosition(handleCursorChange);
+                  // Listen for cursor position changes
+                  editor.onDidChangeCursorPosition(handleCursorChange);
 
-                // Enable keyboard shortcuts
-                editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, handleSave);
-              }}
-              theme="vs-light"
-              options={{
-                minimap: { enabled: true },
-                fontSize: 14,
-                lineNumbers: 'on',
-                roundedSelection: true,
-                scrollBeyondLastLine: false,
-                automaticLayout: true,
-                tabSize: 2,
-                wordWrap: 'on',
-                quickSuggestions: true,
-                suggestOnTriggerCharacters: true,
-                acceptSuggestionOnEnter: 'on',
-                folding: true,
-                foldingStrategy: 'indentation',
-                showFoldingControls: 'always',
-                matchBrackets: 'always',
-                autoClosingBrackets: 'always',
-                autoClosingQuotes: 'always',
-                formatOnPaste: true,
-                formatOnType: true,
-              }}
-            />
-          ) : (
-            <div className="flex items-center justify-center h-full text-neutral-500">
-              <div className="text-center">
-                <Code2 className="h-16 w-16 mx-auto mb-4 text-neutral-400" />
-                <p className="text-lg font-medium">No file selected</p>
-                <p className="text-sm mt-2">Select a file from the sidebar to start editing</p>
+                  // Enable keyboard shortcuts
+                  editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, handleSave);
+                }}
+                theme="vs-light"
+                options={{
+                  minimap: { enabled: true },
+                  fontSize: 14,
+                  lineNumbers: 'on',
+                  roundedSelection: true,
+                  scrollBeyondLastLine: false,
+                  automaticLayout: true,
+                  tabSize: 2,
+                  wordWrap: 'on',
+                  quickSuggestions: true,
+                  suggestOnTriggerCharacters: true,
+                  acceptSuggestionOnEnter: 'on',
+                  folding: true,
+                  foldingStrategy: 'indentation',
+                  showFoldingControls: 'always',
+                  matchBrackets: 'always',
+                  autoClosingBrackets: 'always',
+                  autoClosingQuotes: 'always',
+                  formatOnPaste: true,
+                  formatOnType: true,
+                }}
+              />
+            ) : (
+              <div className="flex items-center justify-center h-full text-neutral-500">
+                <div className="text-center">
+                  <Code2 className="h-16 w-16 mx-auto mb-4 text-neutral-400" />
+                  <p className="text-lg font-medium">No file selected</p>
+                  <p className="text-sm mt-2">Select a file from the sidebar to start editing</p>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Comments Panel */}
+          <aside className="w-80 border-l border-neutral-200 bg-white flex flex-col">
+            <div className="px-4 py-3 border-b border-neutral-200">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-semibold text-neutral-900 flex items-center gap-2">
+                    <MessageSquare className="h-4 w-4 text-neutral-500" />
+                    Comments
+                  </p>
+                  <p className="text-xs text-neutral-500">Keep everyone in sync on this project</p>
+                </div>
+                <Badge variant="outline" className="text-xs">
+                  {comments.length}
+                </Badge>
               </div>
             </div>
-          )}
+
+            <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
+              {isCommentsLoading ? (
+                <p className="text-sm text-neutral-500">Loading comments...</p>
+              ) : comments.length === 0 ? (
+                <div className="text-center text-neutral-500 text-sm mt-8">
+                  <p>No comments yet</p>
+                  <p className="text-xs mt-1">Start the discussion below</p>
+                </div>
+              ) : (
+                comments.map((comment) => (
+                  <div key={comment.id} className="rounded-lg border border-neutral-200 p-3">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="font-medium text-neutral-900">
+                        {comment.userName || 'Collaborator'}
+                      </span>
+                      <span className="text-xs text-neutral-500">
+                        {getCommentTimestamp(comment.timestamp)}
+                      </span>
+                    </div>
+                    <p className="text-sm text-neutral-700 mt-2 whitespace-pre-line">
+                      {comment.content}
+                    </p>
+                  </div>
+                ))
+              )}
+            </div>
+
+            <div className="border-t border-neutral-200 p-3 space-y-2">
+              <Textarea
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                placeholder="Share feedback or leave a note"
+                className="min-h-[80px]"
+                onKeyDown={(event) => {
+                  if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
+                    event.preventDefault();
+                    handleCommentSubmit();
+                  }
+                }}
+              />
+              <div className="flex items-center justify-between text-xs text-neutral-500">
+                <span>Press ⌘/Ctrl + Enter to send</span>
+                <Button
+                  size="sm"
+                  className="gap-2"
+                  disabled={!newComment.trim() || isSubmittingComment}
+                  onClick={handleCommentSubmit}
+                >
+                  <SendHorizontal className="h-4 w-4" />
+                  {isSubmittingComment ? 'Sending...' : 'Send'}
+                </Button>
+              </div>
+            </div>
+          </aside>
         </div>
       </div>
     </div>
