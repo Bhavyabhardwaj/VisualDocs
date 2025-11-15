@@ -57,6 +57,7 @@ export const FileUploadDialog = ({
   const [uploadedCount, setUploadedCount] = useState(0);
   const uploadBatchSize = Math.max(1, Number(import.meta.env.VITE_UPLOAD_BATCH_SIZE ?? 250) || 250);
   const [lastSummary, setLastSummary] = useState<UploadFilesResponse | null>(null);
+  const [currentChunk, setCurrentChunk] = useState(0);
 
   const resetFormState = () => {
     setFiles([]);
@@ -66,6 +67,7 @@ export const FileUploadDialog = ({
     setProjectLanguage('typescript');
     setUploadedCount(0);
     setLastSummary(null);
+    setCurrentChunk(0);
   };
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
@@ -148,6 +150,9 @@ export const FileUploadDialog = ({
 
     console.log('🚀 Starting upload process...');
     setIsUploading(true);
+    setUploadedCount(0);
+    setCurrentChunk(0);
+    setLastSummary(null);
 
     try {
       let targetProjectId = projectId;
@@ -193,30 +198,33 @@ export const FileUploadDialog = ({
       );
 
       const totalFiles = files.length;
+      const totalChunks = Math.ceil(totalFiles / uploadBatchSize) || 1;
 
       const uploadResponse = await projectService.uploadFiles(
         targetProjectId,
         files.map((f) => f.file),
         {
           batchSize: uploadBatchSize,
-          onChunkStart: ({ chunkIndex, totalChunks }) => {
+          onChunkStart: ({ chunkIndex }) => {
+            setCurrentChunk(chunkIndex + 1);
             setFiles((prev) =>
               prev.map((file, index) => {
                 const chunkStart = chunkIndex * uploadBatchSize;
                 const chunkEnd = chunkStart + uploadBatchSize;
                 if (index >= chunkStart && index < chunkEnd) {
-                  return { ...file, progress: 5 };
+                  return { ...file, progress: Math.max(file.progress, 10) };
                 }
                 return file;
               })
             );
           },
           onChunkComplete: ({ chunkIndex, chunkSize, from }) => {
-            setUploadedCount((prev) => prev + chunkSize);
+            setUploadedCount((prev) => Math.min(totalFiles, prev + chunkSize));
+            setCurrentChunk(Math.min(totalChunks, chunkIndex + 1));
             setFiles((prev) =>
               prev.map((file, index) => {
                 if (index >= from && index < from + chunkSize) {
-                  return { ...file, status: 'success', progress: 100 };
+                  return { ...file, status: 'success' as const, progress: 100 };
                 }
                 return file;
               })
@@ -225,9 +233,18 @@ export const FileUploadDialog = ({
         }
       );
 
+      const summary = uploadResponse.data || null;
+      setLastSummary(summary);
+
+      const summaryDescription = summary
+        ? `${summary.totalCreated} new, ${summary.totalUpdated} updated, ${summary.totalSkipped} skipped`
+        : `Uploaded ${totalFiles} file(s)`;
+
       toast({
         title: 'Upload complete',
-        description: uploadResponse.message || `Uploaded ${totalFiles} file(s)`
+        description: summary?.responseTruncated
+          ? `${summaryDescription} (showing first ${summary?.uploadedFiles?.length ?? 0} files)`
+          : summaryDescription,
       });
 
       setTimeout(() => {
@@ -252,6 +269,9 @@ export const FileUploadDialog = ({
         description: error instanceof Error ? error.message : 'Failed to upload files',
         variant: 'destructive',
       });
+      setCurrentChunk(0);
+      setUploadedCount(0);
+      setLastSummary(null);
     } finally {
       setIsUploading(false);
     }
@@ -277,6 +297,17 @@ export const FileUploadDialog = ({
         return <FileText className="h-4 w-4 text-gray-400" />;
     }
   };
+
+  const totalFilesQueued = files.length;
+  const overallProgress = totalFilesQueued
+    ? Math.min(100, Math.round((uploadedCount / totalFilesQueued) * 100))
+    : 0;
+  const totalChunkCount = totalFilesQueued ? Math.ceil(totalFilesQueued / uploadBatchSize) : 1;
+  const fallbackChunk = Math.min(totalChunkCount, Math.max(1, Math.ceil(Math.max(uploadedCount, 1) / uploadBatchSize)));
+  const activeChunk = currentChunk > 0 ? Math.min(currentChunk, totalChunkCount) : fallbackChunk;
+  const lastSummarySeconds = lastSummary
+    ? Math.max(0.1, Math.round((lastSummary.processingTimeMs / 1000) * 10) / 10)
+    : 0;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -388,6 +419,21 @@ export const FileUploadDialog = ({
               />
             </div>
 
+            {isUploading && totalFilesQueued > 0 && (
+              <div className="mt-4 space-y-2 rounded-lg border border-gray-200 bg-white p-3">
+                <div className="flex items-center justify-between text-xs text-gray-600">
+                  <span>
+                    Uploading {uploadedCount}/{totalFilesQueued} file{totalFilesQueued === 1 ? '' : 's'}
+                  </span>
+                  <span>{overallProgress}%</span>
+                </div>
+                <Progress value={overallProgress} className="h-2" />
+                <p className="text-[11px] text-gray-500">
+                  Batch {activeChunk} of {totalChunkCount} (max {uploadBatchSize} files/batch)
+                </p>
+              </div>
+            )}
+
             {/* File List */}
             {files.length > 0 && (
               <div className="mt-4 max-h-[300px] overflow-y-auto space-y-2">
@@ -401,7 +447,10 @@ export const FileUploadDialog = ({
                       <p className="text-sm font-medium text-gray-900 truncate">
                         {uploadFile.file.name}
                       </p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-gray-500 truncate">
+                        {uploadFile.relativePath}
+                      </p>
+                      <p className="text-[11px] text-gray-400">
                         {formatFileSize(uploadFile.file.size)}
                       </p>
                       {uploadFile.status === 'uploading' && (
@@ -425,6 +474,19 @@ export const FileUploadDialog = ({
                     )}
                   </div>
                 ))}
+              </div>
+            )}
+
+            {!isUploading && lastSummary && (
+              <div className="mt-4 rounded-lg border border-green-200 bg-green-50 p-3 text-xs text-green-900">
+                <p className="text-sm font-semibold text-green-900">Most recent upload</p>
+                <p className="mt-1">
+                  {lastSummary.totalCreated} new • {lastSummary.totalUpdated} updated • {lastSummary.totalSkipped} skipped
+                </p>
+                <p className="text-[11px] text-green-800">
+                  Processed {lastSummary.totalProcessed} file{lastSummary.totalProcessed === 1 ? '' : 's'} in {lastSummarySeconds}s
+                  {lastSummary.responseTruncated ? ' (file preview truncated)' : ''}
+                </p>
               </div>
             )}
           </>
@@ -464,11 +526,7 @@ export const FileUploadDialog = ({
                 variant="outline"
                 onClick={() => {
                   onOpenChange(false);
-                  setFiles([]);
-                  setNeedsProjectCreation(false);
-                  setProjectName('');
-                  setProjectDescription('');
-                  setProjectLanguage('typescript');
+                  resetFormState();
                 }}
                 disabled={isUploading}
               >
@@ -487,7 +545,7 @@ export const FileUploadDialog = ({
                 {isUploading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Uploading...
+                    Uploading {Math.min(uploadedCount, files.length)}/{files.length || 0}
                   </>
                 ) : projectId ? (
                   `Upload ${files.length} file(s)`

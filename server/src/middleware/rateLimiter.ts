@@ -41,10 +41,8 @@ export const fileUploadLimiter = rateLimit({
         error: 'Too many file upload requests, please slow down and try again shortly.',
         timestamp: new Date().toISOString(),
     },
-    keyGenerator: (req: Request) => {
-        const typedReq = req as Request & { user?: { userId?: string } };
-        return typedReq.user?.userId || req.ip;
-    },
+    // Skip keyGenerator to use default IP-based rate limiting
+    // Users are authenticated via middleware, so rate limiting per IP is sufficient
     standardHeaders: true,
     legacyHeaders: false,
 })

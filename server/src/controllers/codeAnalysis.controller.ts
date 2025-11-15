@@ -48,7 +48,7 @@ export class CodeAnalysisController {
       }
 
       // Run AI analysis
-      const analysis = await codeAnalysisService.analyzeCodeWithAI(files);
+      const analysis = await codeAnalysisService.analyzeCodeWithAI(files, projectId);
 
       // Store analysis results in database
       const savedAnalysis = await prisma.aICodeAnalysis.create({
@@ -238,13 +238,17 @@ export class CodeAnalysisController {
         return res.status(404).json({ error: 'File not found' });
       }
 
+      // Get current file content
+      const currentContent = projectFile.content || '';
+
       // Apply the fix
       const result = await codeAnalysisService.applyFix(
         projectId,
         issueId,
         file,
         originalCode,
-        fixCode
+        fixCode,
+        currentContent
       );
 
       if (result.success) {

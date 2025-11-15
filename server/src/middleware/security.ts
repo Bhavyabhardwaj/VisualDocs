@@ -1,15 +1,18 @@
 import helmet from 'helmet';
 import cors from 'cors';
 import type { Request } from 'express';
+import config from '../config';
 
 // CORS configuration
 export const corsOptions = {
   origin: function (origin: string | undefined, callback: Function) {
-    const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3005'];
-    
+    const allowedOrigins = config.cors.allowedOrigins.map(o => o.replace(/\/$/, ''));
+
     if (!origin) return callback(null, true);
-    
-    if (allowedOrigins.includes(origin)) {
+
+    const normalizedOrigin = origin.replace(/\/$/, '');
+
+    if (allowedOrigins.includes(normalizedOrigin)) {
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'));

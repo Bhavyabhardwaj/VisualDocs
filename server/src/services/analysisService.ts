@@ -479,7 +479,7 @@ export class AnalysisService {
                 return ['Add code files to get AI-powered recommendations'];
             }
 
-            const analysis = await codeAnalysisService.analyzeCodeWithAI(filesToAnalyze);
+            const analysis = await codeAnalysisService.analyzeCodeWithAI(filesToAnalyze, projectId);
             
             // Generate recommendations from AI analysis
             const recommendations: string[] = [];

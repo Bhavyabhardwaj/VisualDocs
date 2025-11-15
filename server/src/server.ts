@@ -22,7 +22,7 @@ const httpServer = createServer(app);
 // create socket.io server
 const io = new SocketIoServer(httpServer, {
   cors: {
-    origin: "config.cors.allowedOrigins",
+    origin: config.cors.allowedOrigins,
     credentials: true
   },
   transports: ['websocket', 'polling']

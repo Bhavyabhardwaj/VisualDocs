@@ -39,8 +39,11 @@ export const config = {
 
   // CORS configuration
   cors: {
-    clientUrl: process.env.CLIENT_URL || 'http://localhost:3005',
-    allowedOrigins: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3005'],
+    clientUrl: process.env.CLIENT_URL || 'http://localhost:3000',
+    allowedOrigins:
+      process.env.ALLOWED_ORIGINS?.split(',')
+        .map(origin => origin.trim())
+        .filter(Boolean) || ['http://localhost:3000', 'http://localhost:3005'],
   },
 
   // AI configuration

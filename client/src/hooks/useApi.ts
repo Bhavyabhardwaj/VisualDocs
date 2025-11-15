@@ -20,6 +20,8 @@ import {
   type TeamMember,
   type SearchResult,
 } from '@/lib/api';
+import { projectService, type UploadFilesOptions } from '@/services/project.service';
+import type { UploadFilesResponse } from '@/types/api';
 
 // ============================================
 // PROJECTS HOOKS
@@ -380,20 +382,25 @@ export const useUploadFiles = () => {
   const [error, setError] = useState<string | null>(null);
   const [progress, setProgress] = useState(0);
 
-  const uploadFiles = async (projectId: string, files: FileList) => {
+  const uploadFiles = async (
+    projectId: string,
+    files: FileList | File[],
+    options?: UploadFilesOptions
+  ): Promise<UploadFilesResponse> => {
     setIsLoading(true);
     setError(null);
     setProgress(0);
 
     try {
-      const response = await projectsApi.uploadFiles(projectId, files);
+      const fileArray = Array.isArray(files) ? files : Array.from(files);
+      const response = await projectService.uploadFiles(projectId, fileArray, options);
       setProgress(100);
       
       if (response.success && response.data) {
-        return response.data.files;
-      } else {
-        throw new Error(response.error || 'Failed to upload files');
+        return response.data;
       }
+
+      throw new Error(response.error || 'Failed to upload files');
     } catch (err: any) {
       setError(err.message || 'Failed to upload files');
       throw err;

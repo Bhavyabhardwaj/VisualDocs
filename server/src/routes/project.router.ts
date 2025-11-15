@@ -76,6 +76,11 @@ router.get('/:id/files',
   projectController.getProjectFiles
 );
 
+router.put('/:id/files/:fileId', 
+  validate(getProjectSchema),
+  projectController.updateFile
+);
+
 // Collaboration (future feature)
 router.get('/:id/collaborators', 
   validate(getProjectSchema),

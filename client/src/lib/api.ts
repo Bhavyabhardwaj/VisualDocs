@@ -3,6 +3,8 @@
  * Centralized API communication layer with TypeScript support
  */
 
+import type { UploadFilesResponse } from '@/types/api';
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3004';
 
 // Types
@@ -274,12 +276,14 @@ export const projectsApi = {
     apiRequest(`/api/projects/${id}/stats`),
 
   // Upload files to project
-  uploadFiles: (id: string, files: FileList) => {
+  uploadFiles: (id: string, files: FileList | File[]) => {
     const formData = new FormData();
-    Array.from(files).forEach((file) => {
-      formData.append('files', file);
+    const fileArray = Array.isArray(files) ? files : Array.from(files);
+    fileArray.forEach((file) => {
+      const relativeName = (file as File & { webkitRelativePath?: string }).webkitRelativePath || file.name;
+      formData.append('files', file, relativeName);
     });
-    return apiUpload<{ files: ProjectFile[] }>(`/api/projects/${id}/files`, formData);
+    return apiUpload<UploadFilesResponse>(`/api/projects/${id}/files`, formData);
   },
 
   // Get project files

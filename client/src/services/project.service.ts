@@ -15,7 +15,7 @@ import type {
   UploadedFileSummary,
 } from '@/types/api';
 
-interface UploadFilesOptions {
+export interface UploadFilesOptions {
   batchSize?: number;
   onChunkStart?: (info: {
     chunkIndex: number;
@@ -97,7 +97,9 @@ export const projectService = {
       };
     }
 
-    const resolvedBatchSize = Math.max(1, options?.batchSize ?? Number(import.meta.env.VITE_UPLOAD_BATCH_SIZE ?? 250) || 250);
+    const envBatchSizeRaw = Number(import.meta.env.VITE_UPLOAD_BATCH_SIZE ?? 250);
+    const defaultBatchSize = Number.isFinite(envBatchSizeRaw) && envBatchSizeRaw > 0 ? envBatchSizeRaw : 250;
+    const resolvedBatchSize = Math.max(1, options?.batchSize ?? defaultBatchSize);
     const totalChunks = Math.ceil(files.length / resolvedBatchSize);
 
     const aggregatedFiles: UploadedFileSummary[] = [];

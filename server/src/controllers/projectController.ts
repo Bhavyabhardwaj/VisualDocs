@@ -61,6 +61,7 @@ export class ProjectController {
         this.importFromGitHub = this.importFromGitHub.bind(this);
         this.validateGitHubRepository = this.validateGitHubRepository.bind(this);
         this.getGitHubRepositoryInfo = this.getGitHubRepositoryInfo.bind(this);
+        this.updateFile = this.updateFile.bind(this);
     }
 
     // create new project
@@ -291,6 +292,7 @@ export class ProjectController {
                 res,
                 {
                     uploadedFiles: responseFiles,
+                    totalCreated: summary.created,
                     totalUploaded: summary.created + summary.updated,
                     totalUpdated: summary.updated,
                     totalSkipped: summary.skipped,
@@ -301,9 +303,7 @@ export class ProjectController {
                     responseTruncated: successfulUploads.length > responseFiles.length
                 },
                 resultMessage
-                    totalCreated: summary.created,
-                    totalUpdated: summary.updated,
-                    totalUploaded: summary.created + summary.updated,
+            );
         } catch (error) {
             logger.error('File upload failed', {
                 projectId: req.params.id,
@@ -547,6 +547,47 @@ export class ProjectController {
                 'Project files retrieved successfully'
             );
         } catch (error) {
+            next(error);
+        }
+    }
+
+    async updateFile(req: Request, res: Response, next: NextFunction) {
+        try {
+            const userId = req.user!.userId;
+            const projectId = req.params.id as string;
+            const fileId = req.params.fileId as string;
+            const { content } = req.body;
+
+            if (!content || typeof content !== 'string') {
+                return successResponse(res, null, 'Invalid file content', 400);
+            }
+
+            // Verify project access
+            const project = await projectService.getProjectById(userId, projectId);
+
+            // Update file content
+            const updatedFile = await prisma.codeFile.update({
+                where: {
+                    id: fileId,
+                    projectId: projectId,
+                },
+                data: {
+                    content,
+                    updatedAt: new Date(),
+                },
+            });
+
+            logger.info('File updated', { projectId, fileId, userId });
+
+            return successResponse(
+                res,
+                { file: updatedFile },
+                'File updated successfully'
+            );
+        } catch (error) {
+            logger.error('File update failed', {
+                error: error instanceof Error ? error.message : 'Unknown error',
+            });
             next(error);
         }
     }

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useParams, useSearchParams } from 'react-router-dom';
+import { Link, useParams, useSearchParams } from 'react-router-dom';
 import Editor from '@monaco-editor/react';
 import { io, Socket } from 'socket.io-client';
 import {
@@ -56,6 +56,7 @@ export default function CodeEditorPage() {
   const [selectedFile, setSelectedFile] = useState<FileNode | null>(null);
   const [code, setCode] = useState<string>('');
   const [language, setLanguage] = useState<string>('typescript');
+  const [projectName, setProjectName] = useState<string>('');
   const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
   const [isConnected, setIsConnected] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -141,10 +142,19 @@ export default function CodeEditorPage() {
         if (!response.ok) throw new Error('Failed to load project');
 
         const data = await response.json();
+        const projectData =
+          data.data?.project || data.project || data?.data || data;
         
-        // Build file tree from project files
-        const fileTree = buildFileTree(data.project.codeFiles || []);
+        // Build file tree from project files (check both data and nested project)
+        const codeFiles =
+          projectData?.codeFiles ||
+          data.data?.project?.codeFiles ||
+          data.project?.codeFiles ||
+          data.codeFiles ||
+          [];
+        const fileTree = buildFileTree(codeFiles);
         setFiles(fileTree);
+        setProjectName(projectData?.name || 'Code Editor');
 
         // If initial file specified, select it
         if (initialFile) {
@@ -415,6 +425,13 @@ export default function CodeEditorPage() {
     ));
   };
 
+  const quickLinks = [
+    { label: 'Dashboard', href: '/app/dashboard' },
+    { label: 'Projects', href: '/app/projects' },
+    { label: 'Analysis', href: '/app/analysis' },
+    { label: 'Diagrams', href: '/app/diagrams' },
+  ];
+
   return (
     <div className="flex h-screen bg-neutral-50">
       {/* Sidebar - File Tree */}
@@ -436,56 +453,76 @@ export default function CodeEditorPage() {
 
       {/* Main Editor Area */}
       <div className="flex-1 flex flex-col">
-        {/* Top Bar */}
-        <div className="h-14 bg-white border-b border-neutral-200 flex items-center justify-between px-4">
-          <div className="flex items-center gap-3">
-            {selectedFile && (
-              <>
-                <File className="h-4 w-4 text-neutral-600" />
-                <span className="font-medium text-neutral-900">{selectedFile.name}</span>
-                <Badge variant="outline" className="text-xs">
-                  {language}
-                </Badge>
-              </>
-            )}
+        {/* Top Navigation & Status */}
+        <div className="bg-white border-b border-neutral-200 px-4 py-3 space-y-3">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="text-xs uppercase text-neutral-500 tracking-wide">Project</p>
+              <p className="text-lg font-semibold text-neutral-900">{projectName}</p>
+            </div>
+            <nav className="flex flex-wrap items-center gap-2">
+              {quickLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  to={link.href}
+                  className="px-3 py-1.5 rounded-full border border-neutral-200 text-sm text-neutral-700 hover:bg-neutral-100 transition"
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </nav>
           </div>
 
-          <div className="flex items-center gap-2">
-            {/* Collaborators */}
-            {collaborators.length > 0 && (
-              <div className="flex items-center gap-2 mr-4">
-                <Users className="h-4 w-4 text-neutral-600" />
-                <div className="flex -space-x-2">
-                  {collaborators.map((collab) => (
-                    <Avatar
-                      key={collab.id}
-                      className="h-8 w-8 border-2 border-white"
-                      style={{ backgroundColor: collab.color }}
-                    >
-                      <AvatarFallback className="text-white text-xs">
-                        {collab.name.substring(0, 2).toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                  ))}
+          <div className="h-14 bg-white flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              {selectedFile && (
+                <>
+                  <File className="h-4 w-4 text-neutral-600" />
+                  <span className="font-medium text-neutral-900">{selectedFile.name}</span>
+                  <Badge variant="outline" className="text-xs">
+                    {language}
+                  </Badge>
+                </>
+              )}
+            </div>
+
+            <div className="flex items-center gap-2">
+              {/* Collaborators */}
+              {collaborators.length > 0 && (
+                <div className="flex items-center gap-2 mr-4">
+                  <Users className="h-4 w-4 text-neutral-600" />
+                  <div className="flex -space-x-2">
+                    {collaborators.map((collab) => (
+                      <Avatar
+                        key={collab.id}
+                        className="h-8 w-8 border-2 border-white"
+                        style={{ backgroundColor: collab.color }}
+                      >
+                        <AvatarFallback className="text-white text-xs">
+                          {collab.name.substring(0, 2).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* Connection Status */}
-            <Badge variant={isConnected ? 'default' : 'destructive'} className="text-xs">
-              {isConnected ? 'Live' : 'Offline'}
-            </Badge>
+              {/* Connection Status */}
+              <Badge variant={isConnected ? 'default' : 'destructive'} className="text-xs">
+                {isConnected ? 'Live' : 'Offline'}
+              </Badge>
 
-            {/* Save Button */}
-            <Button
-              size="sm"
-              onClick={handleSave}
-              disabled={!selectedFile || isSaving}
-              className="gap-2"
-            >
-              <Save className="h-4 w-4" />
-              {isSaving ? 'Saving...' : 'Save'}
-            </Button>
+              {/* Save Button */}
+              <Button
+                size="sm"
+                onClick={handleSave}
+                disabled={!selectedFile || isSaving}
+                className="gap-2"
+              >
+                <Save className="h-4 w-4" />
+                {isSaving ? 'Saving...' : 'Save'}
+              </Button>
+            </div>
           </div>
         </div>
 
