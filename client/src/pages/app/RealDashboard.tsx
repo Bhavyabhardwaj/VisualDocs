@@ -4,7 +4,7 @@ import { formatDistanceToNow } from 'date-fns';
 import {
   Upload, FileCode, BarChart3,
   Clock, Folder, Activity, ArrowRight, Plus, Github, Search,
-  MoreHorizontal, Eye, Trash2, Sparkles
+  MoreHorizontal, Eye, Trash2, Sparkles, MessageSquare, Users, FileText
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -23,8 +23,127 @@ import { GitHubImportDialog } from '@/components/app/GitHubImportDialog';
 import { PremiumLayout } from '@/components/layout/PremiumLayout';
 import { projectService } from '@/services/project.service';
 import { authService } from '@/services/auth.service';
+import { useUserActivity } from '@/hooks/useApi';
 import type { Project, UserStats } from '@/types/api';
 import { cn } from '@/lib/utils';
+
+// Activity Feed Component
+const ActivityFeed = () => {
+  const navigate = useNavigate();
+  const { activities, isLoading } = useUserActivity();
+
+  const getActivityIcon = (type: string) => {
+    if (type.includes('comment')) return <MessageSquare className="w-4 h-4" />;
+    if (type.includes('analysis')) return <BarChart3 className="w-4 h-4" />;
+    if (type.includes('diagram') || type.includes('export')) return <FileText className="w-4 h-4" />;
+    if (type.includes('team') || type.includes('collaboration')) return <Users className="w-4 h-4" />;
+    return <Sparkles className="w-4 h-4" />;
+  };
+
+  const getIconStyles = (type: string) => {
+    if (type.includes('comment')) return 'bg-emerald-50 text-emerald-600';
+    if (type.includes('analysis')) return 'bg-brand-bg text-brand-primary';
+    if (type.includes('diagram') || type.includes('export')) return 'bg-violet-50 text-violet-600';
+    if (type.includes('collaboration')) return 'bg-sky-50 text-sky-600';
+    return 'bg-neutral-100 text-neutral-600';
+  };
+
+  if (isLoading) {
+    return (
+      <Card className="border border-neutral-200 shadow-sm mb-10">
+        <CardHeader className="pb-4">
+          <div className="flex items-center gap-2">
+            <Activity className="w-5 h-5 text-neutral-400" />
+            <CardTitle className="text-lg">Recent Activity</CardTitle>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="flex items-start gap-3 animate-pulse">
+                <div className="w-8 h-8 rounded-lg bg-neutral-200" />
+                <div className="flex-1 space-y-2">
+                  <div className="h-4 bg-neutral-200 rounded w-3/4" />
+                  <div className="h-3 bg-neutral-100 rounded w-1/2" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (activities.length === 0) {
+    return null;
+  }
+
+  return (
+    <Card className="border border-neutral-200 shadow-sm mb-10">
+      <CardHeader className="pb-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Activity className="w-5 h-5 text-neutral-400" />
+            <CardTitle className="text-lg">Recent Activity</CardTitle>
+            <Badge variant="secondary" className="text-xs">
+              {activities.length} events
+            </Badge>
+          </div>
+        </div>
+        <CardDescription className="text-sm text-neutral-600">
+          Your latest actions and updates across all projects
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-1">
+          {activities.slice(0, 8).map((activity, index) => {
+            const isLast = index === Math.min(activities.length - 1, 7);
+            const actionUrl = activity.metadata?.url || (activity.projectId ? `/app/projects/${activity.projectId}` : undefined);
+            
+            return (
+              <button
+                key={activity.id}
+                onClick={() => actionUrl && navigate(actionUrl)}
+                disabled={!actionUrl}
+                className={cn(
+                  "w-full flex items-start gap-3 px-3 py-3 text-left rounded-lg transition-colors",
+                  actionUrl ? "hover:bg-neutral-50 cursor-pointer" : "cursor-default",
+                  !isLast && "border-b border-neutral-100"
+                )}
+              >
+                <div className={cn(
+                  "w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0",
+                  getIconStyles(activity.type)
+                )}>
+                  {getActivityIcon(activity.type)}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-neutral-900 capitalize">
+                    {activity.action}
+                  </p>
+                  <p className="text-xs text-neutral-600 mt-0.5 truncate">
+                    {activity.target}
+                  </p>
+                  <p className="text-[11px] text-neutral-400 mt-1">
+                    {formatDistanceToNow(new Date(activity.timestamp), { addSuffix: true })}
+                  </p>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+        
+        {activities.length > 8 && (
+          <div className="mt-4 pt-4 border-t border-neutral-100">
+            <p className="text-xs text-center text-neutral-500">
+              Showing 8 of {activities.length} activities
+            </p>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
 
 export const RealDashboard = () => {
   const navigate = useNavigate();
@@ -215,6 +334,9 @@ export const RealDashboard = () => {
             </Card>
           </div>
         ) : null}
+
+        {/* Activity Feed Section */}
+        <ActivityFeed />
 
         {/* Recent Projects Section */}
         <div className="space-y-6">

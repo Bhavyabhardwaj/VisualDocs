@@ -157,9 +157,15 @@ export const NotificationsMenu = () => {
           </div>
           {unreadCount > 0 && (
             <button
+              type="button"
               onClick={(e) => {
+                e.preventDefault();
                 e.stopPropagation();
-                markAllAsRead();
+                // Mark all as read
+                const allIds = notifications.map(n => n.id);
+                const newReadIds = new Set([...readIds, ...allIds]);
+                setReadIds(newReadIds);
+                localStorage.setItem('readNotificationIds', JSON.stringify([...newReadIds]));
               }}
               className="flex items-center gap-1 text-xs !text-neutral-500 hover:!text-neutral-900 font-medium transition-colors px-2 py-1 rounded-md hover:bg-neutral-100"
             >
