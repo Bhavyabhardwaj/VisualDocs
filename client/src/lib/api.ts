@@ -444,6 +444,7 @@ export interface Activity {
   action: string;
   target: string;
   timestamp: string;
+  projectId?: string;
   metadata?: any;
 }
 

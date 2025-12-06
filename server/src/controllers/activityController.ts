@@ -140,7 +140,13 @@ export const activityController = {
         return res.status(401).json({ error: 'Unauthorized' });
       }
 
-      // Get user's recent projects
+      // Get current user info
+      const currentUser = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { id: true, name: true, avatar: true },
+      });
+
+      // Get user's recent projects with analyses and diagrams
       const projects = await prisma.project.findMany({
         where: { userId },
         orderBy: { updatedAt: 'desc' },
@@ -154,18 +160,119 @@ export const activityController = {
         }
       });
 
-      const activities = projects.map((project: any) => ({
-        id: `project-${project.id}`,
-        type: 'project_update',
-        action: project.status === 'ANALYZING' ? 'started analysis on' : 'updated',
-        target: project.name,
-        timestamp: project.updatedAt,
-        projectId: project.id,
-      }));
+      // Get recent analyses
+      const analyses = await prisma.analysis.findMany({
+        where: { project: { userId } },
+        orderBy: { createdAt: 'desc' },
+        take: 10,
+        select: {
+          id: true,
+          createdAt: true,
+          project: { select: { id: true, name: true } },
+        }
+      });
+
+      // Get recent diagrams
+      const diagrams = await prisma.diagram.findMany({
+        where: { project: { userId } },
+        orderBy: { createdAt: 'desc' },
+        take: 10,
+        select: {
+          id: true,
+          type: true,
+          status: true,
+          createdAt: true,
+          project: { select: { id: true, name: true } },
+        }
+      });
+
+      // Get recent comments
+      const comments = await prisma.comment.findMany({
+        where: { userId },
+        orderBy: { createdAt: 'desc' },
+        take: 10,
+        select: {
+          id: true,
+          content: true,
+          createdAt: true,
+          project: { select: { id: true, name: true } },
+        }
+      });
+
+      const activities: any[] = [];
+      const userInfo = {
+        id: currentUser?.id || userId,
+        name: currentUser?.name || 'You',
+        avatar: currentUser?.avatar,
+      };
+
+      // Add project activities
+      projects.forEach((project: any) => {
+        activities.push({
+          id: `project-${project.id}-${project.updatedAt.getTime()}`,
+          type: 'project_update',
+          user: userInfo,
+          action: project.status === 'ANALYZING' ? 'started analysis on' : 'updated',
+          target: project.name,
+          timestamp: project.updatedAt,
+          projectId: project.id,
+          metadata: { url: `/app/projects/${project.id}` },
+        });
+      });
+
+      // Add analysis activities
+      analyses.forEach((analysis: any) => {
+        activities.push({
+          id: `analysis-${analysis.id}`,
+          type: 'analysis',
+          user: userInfo,
+          action: 'completed analysis on',
+          target: analysis.project.name,
+          timestamp: analysis.createdAt,
+          projectId: analysis.project.id,
+          metadata: { url: `/app/projects/${analysis.project.id}` },
+        });
+      });
+
+      // Add diagram activities
+      diagrams.forEach((diagram: any) => {
+        activities.push({
+          id: `diagram-${diagram.id}`,
+          type: diagram.status === 'COMPLETED' ? 'export' : 'project',
+          user: userInfo,
+          action: diagram.status === 'COMPLETED' ? 'generated diagram for' : 'started generating diagram for',
+          target: diagram.project.name,
+          timestamp: diagram.createdAt,
+          projectId: diagram.project.id,
+          metadata: { url: `/app/projects/${diagram.project.id}` },
+        });
+      });
+
+      // Add comment activities
+      comments.forEach((comment: any) => {
+        activities.push({
+          id: `comment-${comment.id}`,
+          type: 'comment',
+          user: userInfo,
+          action: 'commented on',
+          target: comment.project.name,
+          timestamp: comment.createdAt,
+          projectId: comment.project.id,
+          metadata: { url: `/app/projects/${comment.project.id}` },
+        });
+      });
+
+      // Sort by timestamp descending and deduplicate
+      activities.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+      
+      // Remove duplicates based on id
+      const uniqueActivities = activities.filter((activity, index, self) =>
+        index === self.findIndex((a) => a.id === activity.id)
+      );
 
       return successResponse(
         res,
-        { activities, total: activities.length },
+        uniqueActivities.slice(0, limit),
         'User activity fetched successfully'
       );
     } catch (error) {
