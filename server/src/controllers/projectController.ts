@@ -178,7 +178,7 @@ export class ProjectController {
                 );
             }
 
-            await projectService.deleteProject(userId, projectId);
+            await projectService.deleteProject(projectId, userId);
 
             return successResponse(
                 res,

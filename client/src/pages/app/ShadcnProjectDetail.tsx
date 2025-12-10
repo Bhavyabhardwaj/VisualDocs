@@ -18,7 +18,11 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -52,6 +56,10 @@ export const ShadcnProjectDetail = () => {
   const [copied, setCopied] = useState(false);
   const [selectedDiagram, setSelectedDiagram] = useState<Diagram | null>(null);
   const [showDiagramModal, setShowDiagramModal] = useState(false);
+  const [showSettingsDialog, setShowSettingsDialog] = useState(false);
+  const [projectName, setProjectName] = useState('');
+  const [projectDescription, setProjectDescription] = useState('');
+  const [savingSettings, setSavingSettings] = useState(false);
   
   // Collaboration state
   const [isSocketConnected, setIsSocketConnected] = useState(false);
@@ -646,6 +654,36 @@ export const ShadcnProjectDetail = () => {
     }
   };
 
+  const handleSaveSettings = async () => {
+    if (!id || !project) return;
+
+    setSavingSettings(true);
+    try {
+      const response = await projectService.updateProject(id, {
+        name: projectName,
+        description: projectDescription,
+      });
+      
+      if (response.data) {
+        setProject({ ...project, name: projectName, description: projectDescription });
+        toast({
+          title: 'Settings Saved',
+          description: 'Project settings updated successfully',
+        });
+        setShowSettingsDialog(false);
+      }
+    } catch (error) {
+      console.error('Save settings failed:', error);
+      toast({
+        title: 'Save Failed',
+        description: 'Failed to save project settings',
+        variant: 'destructive',
+      });
+    } finally {
+      setSavingSettings(false);
+    }
+  };
+
   const handleDeleteProject = async () => {
     if (!id) return;
 
@@ -758,7 +796,11 @@ export const ShadcnProjectDetail = () => {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => navigate(`/app/projects/${id}/settings`)}>
+                  <DropdownMenuItem onClick={() => {
+                    setProjectName(project.name || '');
+                    setProjectDescription(project.description || '');
+                    setShowSettingsDialog(true);
+                  }}>
                     <Settings className="h-4 w-4 mr-2" />
                     Settings
                   </DropdownMenuItem>
@@ -1549,6 +1591,47 @@ export const ShadcnProjectDetail = () => {
               </div>
             )}
           </ScrollArea>
+        </DialogContent>
+      </Dialog>
+
+      {/* Project Settings Dialog */}
+      <Dialog open={showSettingsDialog} onOpenChange={setShowSettingsDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Project Settings</DialogTitle>
+            <DialogDescription>
+              Update your project name and description.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="projectName">Project Name</Label>
+              <Input
+                id="projectName"
+                value={projectName}
+                onChange={(e) => setProjectName(e.target.value)}
+                placeholder="Enter project name"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="projectDescription">Description</Label>
+              <Textarea
+                id="projectDescription"
+                value={projectDescription}
+                onChange={(e) => setProjectDescription(e.target.value)}
+                placeholder="Enter project description"
+                rows={4}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowSettingsDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSaveSettings} disabled={savingSettings}>
+              {savingSettings ? 'Saving...' : 'Save Changes'}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
