@@ -118,6 +118,8 @@ export const DiagramStudio = () => {
   const [showConnectionMode, setShowConnectionMode] = useState(false);
   const [connectionStart, setConnectionStart] = useState<string | null>(null);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const [showLeftPanel, setShowLeftPanel] = useState(false);
+  const [showRightPanel, setShowRightPanel] = useState(false);
 
   // Excalidraw's signature color palette - beautiful, muted, professional
   const excalidrawColors = [
@@ -1319,23 +1321,23 @@ export const DiagramStudio = () => {
 
     <div className="h-screen bg-white flex flex-col">
       {/* Top Toolbar */}
-      <div className="bg-white border-b border-neutral-200 px-4 py-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div>
-              <h1 className="text-lg font-semibold text-neutral-900">Diagram Studio</h1>
+      <div className="bg-white border-b border-neutral-200 px-2 sm:px-4 py-2 sm:py-3 overflow-x-auto">
+        <div className="flex items-center justify-between min-w-max lg:min-w-0">
+          <div className="flex items-center gap-2 sm:gap-4">
+            <div className="min-w-0">
+              <h1 className="text-base sm:text-lg font-semibold text-neutral-900 truncate">Diagram Studio</h1>
               {isEditingName ? (
                 <Input
                   value={diagramName}
                   onChange={(e) => setDiagramName(e.target.value)}
                   onBlur={() => setIsEditingName(false)}
                   onKeyDown={(e) => e.key === 'Enter' && setIsEditingName(false)}
-                  className="h-6 text-xs w-48 mt-0.5"
+                  className="h-6 text-xs w-32 sm:w-48 mt-0.5"
                   autoFocus
                 />
               ) : (
                 <p 
-                  className="text-xs text-neutral-600 cursor-pointer hover:text-blue-600" 
+                  className="text-xs text-neutral-600 cursor-pointer hover:text-blue-600 truncate max-w-[100px] sm:max-w-none" 
                   onClick={() => setIsEditingName(true)}
                   title="Click to edit name"
                 >
@@ -1344,20 +1346,20 @@ export const DiagramStudio = () => {
               )}
             </div>
             
-            <Separator orientation="vertical" className="h-8" />
+            <Separator orientation="vertical" className="h-8 hidden sm:block" />
 
             {/* File Actions */}
             <div className="flex items-center gap-1">
-              <Button variant="ghost" size="sm" className="gap-2 hover:bg-gray-50" onClick={handleSave}>
+              <Button variant="ghost" size="sm" className="gap-1 sm:gap-2 hover:bg-gray-50 px-2 sm:px-3" onClick={handleSave}>
                 <Save className="h-4 w-4" />
-                Save
+                <span className="hidden sm:inline">Save</span>
               </Button>
               
-              {/* Import JSON */}
-              <Button variant="ghost" size="sm" className="gap-2 hover:bg-gray-50" asChild>
+              {/* Import JSON - Hidden on very small screens */}
+              <Button variant="ghost" size="sm" className="gap-2 hover:bg-gray-50 hidden sm:flex" asChild>
                 <label htmlFor="import-json" className="cursor-pointer">
                   <Upload className="h-4 w-4" />
-                  Import
+                  <span className="hidden md:inline">Import</span>
                 </label>
               </Button>
               <input
@@ -1370,9 +1372,9 @@ export const DiagramStudio = () => {
               
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="gap-2 hover:bg-gray-50">
+                  <Button variant="ghost" size="sm" className="gap-1 sm:gap-2 hover:bg-gray-50 px-2 sm:px-3">
                     <Download className="h-4 w-4" />
-                    Export
+                    <span className="hidden sm:inline">Export</span>
                     <ChevronDown className="h-3 w-3" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -1397,14 +1399,14 @@ export const DiagramStudio = () => {
               </DropdownMenu>
             </div>
 
-            <Separator orientation="vertical" className="h-8" />
+            <Separator orientation="vertical" className="h-8 hidden sm:block" />
 
             {/* Edit Actions */}
             <div className="flex items-center gap-1">
               <Button 
                 variant="ghost" 
                 size="icon" 
-                className="h-9 w-9 hover:bg-gray-50"
+                className="h-8 w-8 sm:h-9 sm:w-9 hover:bg-gray-50"
                 onClick={handleUndo}
                 disabled={historyIndex <= 0}
               >
@@ -1413,7 +1415,7 @@ export const DiagramStudio = () => {
               <Button 
                 variant="ghost" 
                 size="icon" 
-                className="h-9 w-9 hover:bg-gray-50"
+                className="h-8 w-8 sm:h-9 sm:w-9 hover:bg-gray-50"
                 onClick={handleRedo}
                 disabled={historyIndex >= history.length - 1}
               >
@@ -1421,23 +1423,23 @@ export const DiagramStudio = () => {
               </Button>
             </div>
 
-            <Separator orientation="vertical" className="h-8" />
+            <Separator orientation="vertical" className="h-8 hidden sm:block" />
 
             {/* Zoom Controls */}
             <div className="flex items-center gap-1">
-              <Button variant="ghost" size="icon" className="h-9 w-9 hover:bg-gray-50" onClick={handleZoomOut}>
+              <Button variant="ghost" size="icon" className="h-8 w-8 sm:h-9 sm:w-9 hover:bg-gray-50" onClick={handleZoomOut}>
                 <ZoomOut className="h-4 w-4" />
               </Button>
-              <div className="px-3 py-1.5 bg-gray-50 rounded text-sm font-medium min-w-[60px] text-center">
+              <div className="px-2 sm:px-3 py-1 sm:py-1.5 bg-gray-50 rounded text-xs sm:text-sm font-medium min-w-[48px] sm:min-w-[60px] text-center">
                 {zoom}%
               </div>
-              <Button variant="ghost" size="icon" className="h-9 w-9 hover:bg-gray-50" onClick={handleZoomIn}>
+              <Button variant="ghost" size="icon" className="h-8 w-8 sm:h-9 sm:w-9 hover:bg-gray-50" onClick={handleZoomIn}>
                 <ZoomIn className="h-4 w-4" />
               </Button>
               <Button 
                 variant="ghost" 
                 size="icon" 
-                className="h-9 w-9 hover:bg-gray-50"
+                className="h-8 w-8 sm:h-9 sm:w-9 hover:bg-gray-50 hidden sm:flex"
                 onClick={handleZoomToFit}
                 title="Zoom to Fit (Ctrl+0)"
               >
@@ -1646,14 +1648,52 @@ export const DiagramStudio = () => {
               <Grid3x3 className="h-4 w-4" />
               <span className="hidden xl:inline">{snapToGrid ? 'On' : 'Off'}</span>
             </Button>
+
+            {/* Mobile Panel Toggles */}
+            <div className="lg:hidden flex items-center gap-1 ml-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => setShowLeftPanel(true)}
+              >
+                <Layers className="h-4 w-4" />
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => setShowRightPanel(true)}
+              >
+                <Settings className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Main Content - 3 Columns */}
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex overflow-hidden relative">
+        {/* Mobile Overlay for Left Panel */}
+        {showLeftPanel && (
+          <div 
+            className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+            onClick={() => setShowLeftPanel(false)}
+          />
+        )}
+
         {/* Left Sidebar - Tools & Shapes */}
-        <div className="w-56 bg-white border-r border-gray-200 flex flex-col overflow-hidden">
+        <div className={`
+          bg-white border-r border-gray-200 flex flex-col overflow-hidden
+          fixed lg:relative inset-y-0 left-0 z-50 w-56
+          transform transition-transform duration-300 lg:translate-x-0
+          ${showLeftPanel ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+        `}>
+          {/* Mobile close button */}
+          <div className="lg:hidden flex items-center justify-between p-3 border-b">
+            <span className="font-medium text-sm">Tools</span>
+            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setShowLeftPanel(false)}>
+              <Trash2 className="h-4 w-4 rotate-45" />
+            </Button>
+          </div>
           <Tabs defaultValue="shapes" className="flex-1 flex flex-col overflow-hidden">
             <div className="px-4 pt-4 pb-2 flex-shrink-0">
               <TabsList className="grid w-full grid-cols-2">
@@ -2240,8 +2280,28 @@ export const DiagramStudio = () => {
           </div>
         </div>
 
+        {/* Mobile Overlay for Right Panel */}
+        {showRightPanel && (
+          <div 
+            className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+            onClick={() => setShowRightPanel(false)}
+          />
+        )}
+
         {/* Right Sidebar - Properties & Layers */}
-        <div className="w-64 bg-white border-l border-gray-200 flex flex-col">
+        <div className={`
+          bg-white border-l border-gray-200 flex flex-col
+          fixed lg:relative inset-y-0 right-0 z-50 w-64
+          transform transition-transform duration-300 lg:translate-x-0
+          ${showRightPanel ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'}
+        `}>
+          {/* Mobile close button */}
+          <div className="lg:hidden flex items-center justify-between p-3 border-b">
+            <span className="font-medium text-sm">Properties</span>
+            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setShowRightPanel(false)}>
+              <Trash2 className="h-4 w-4 rotate-45" />
+            </Button>
+          </div>
           <Tabs defaultValue="properties" className="flex-1 flex flex-col">
             <div className="px-4 pt-4 pb-2">
               <TabsList className="grid w-full grid-cols-2">

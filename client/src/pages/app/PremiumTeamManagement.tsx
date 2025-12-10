@@ -194,93 +194,95 @@ export const PremiumTeamManagement = () => {
       <div className="min-h-screen bg-white">
         {/* Header */}
         <div className="border-b border-neutral-200 bg-white">
-          <div className="mx-auto px-8 py-8">
-            <div className="flex items-center justify-between">
+          <div className="mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 md:py-8">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <h1 className="text-3xl font-semibold tracking-tight text-neutral-900">Team Management</h1>
-                <p className="text-neutral-600 mt-2 text-[15px]">
+                <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-neutral-900">Team Management</h1>
+                <p className="text-neutral-600 mt-1 sm:mt-2 text-sm sm:text-[15px]">
                   Manage your team members, roles, and permissions
                 </p>
               </div>
-              <div className="flex items-center gap-3">
-                <Button variant="outline" className="h-9">
-                  <Download className="w-4 h-4 mr-2" />
-                  Export
+              <div className="flex items-center gap-2 sm:gap-3">
+                <Button variant="outline" className="h-8 sm:h-9 text-xs sm:text-sm flex-1 sm:flex-none">
+                  <Download className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
+                  <span className="hidden sm:inline">Export</span>
+                  <span className="sm:hidden">Export</span>
                 </Button>
-                <Button className="h-9" onClick={() => setInviteDialogOpen(true)}>
-                  <UserPlus className="w-4 h-4 mr-2" />
-                  Invite Members
+                <Button className="h-8 sm:h-9 text-xs sm:text-sm flex-1 sm:flex-none" onClick={() => setInviteDialogOpen(true)}>
+                  <UserPlus className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
+                  <span className="hidden sm:inline">Invite Members</span>
+                  <span className="sm:hidden">Invite</span>
                 </Button>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="mx-auto px-8 py-8">
+        <div className="mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 md:py-8">
           {/* Team Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-5 mb-8">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-5 mb-6 sm:mb-8">
             <Card className="border-neutral-200 shadow-sm">
-              <CardContent className="pt-6 pb-6 px-6">
-                <div className="flex items-start justify-between mb-3">
-                  <p className="text-sm font-medium text-neutral-600">Total Members</p>
-                  <Users className="w-5 h-5 text-neutral-400" />
+              <CardContent className="pt-4 sm:pt-6 pb-4 sm:pb-6 px-3 sm:px-6">
+                <div className="flex items-start justify-between mb-2 sm:mb-3">
+                  <p className="text-xs sm:text-sm font-medium text-neutral-600">Total Members</p>
+                  <Users className="w-4 h-4 sm:w-5 sm:h-5 text-neutral-400" />
                 </div>
-                <p className="text-4xl font-semibold text-neutral-900">{stats.totalMembers}</p>
-                <p className="text-xs text-neutral-600 mt-2">Across all roles</p>
+                <p className="text-2xl sm:text-4xl font-semibold text-neutral-900">{stats.totalMembers}</p>
+                <p className="text-[10px] sm:text-xs text-neutral-600 mt-1 sm:mt-2 hidden sm:block">Across all roles</p>
               </CardContent>
             </Card>
 
             <Card className="border-neutral-200 shadow-sm">
-              <CardContent className="pt-6 pb-6 px-6">
-                <div className="flex items-start justify-between mb-3">
-                  <p className="text-sm font-medium text-neutral-600">Active</p>
-                  <CheckCircle2 className="w-5 h-5 text-neutral-400" />
+              <CardContent className="pt-4 sm:pt-6 pb-4 sm:pb-6 px-3 sm:px-6">
+                <div className="flex items-start justify-between mb-2 sm:mb-3">
+                  <p className="text-xs sm:text-sm font-medium text-neutral-600">Active</p>
+                  <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-neutral-400" />
                 </div>
-                <p className="text-4xl font-semibold text-neutral-900">{stats.activeMembers}</p>
-                <p className="text-xs text-neutral-600 mt-2">Currently active</p>
+                <p className="text-2xl sm:text-4xl font-semibold text-neutral-900">{stats.activeMembers}</p>
+                <p className="text-[10px] sm:text-xs text-neutral-600 mt-1 sm:mt-2 hidden sm:block">Currently active</p>
               </CardContent>
             </Card>
 
             <Card className="border-neutral-200 shadow-sm">
-              <CardContent className="pt-6 pb-6 px-6">
-                <div className="flex items-start justify-between mb-3">
-                  <p className="text-sm font-medium text-neutral-600">Pending Invites</p>
-                  <Clock className="w-5 h-5 text-neutral-400" />
+              <CardContent className="pt-4 sm:pt-6 pb-4 sm:pb-6 px-3 sm:px-6">
+                <div className="flex items-start justify-between mb-2 sm:mb-3">
+                  <p className="text-xs sm:text-sm font-medium text-neutral-600">Pending</p>
+                  <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-neutral-400" />
                 </div>
-                <p className="text-4xl font-semibold text-neutral-900">{stats.pendingInvites}</p>
-                <p className="text-xs text-neutral-600 mt-2">Awaiting response</p>
+                <p className="text-2xl sm:text-4xl font-semibold text-neutral-900">{stats.pendingInvites}</p>
+                <p className="text-[10px] sm:text-xs text-neutral-600 mt-1 sm:mt-2 hidden sm:block">Awaiting response</p>
               </CardContent>
             </Card>
 
             <Card className="border-neutral-200 shadow-sm">
-              <CardContent className="pt-6 pb-6 px-6">
-                <div className="flex items-start justify-between mb-3">
-                  <p className="text-sm font-medium text-neutral-600">Admins</p>
-                  <Shield className="w-5 h-5 text-neutral-400" />
+              <CardContent className="pt-4 sm:pt-6 pb-4 sm:pb-6 px-3 sm:px-6">
+                <div className="flex items-start justify-between mb-2 sm:mb-3">
+                  <p className="text-xs sm:text-sm font-medium text-neutral-600">Admins</p>
+                  <Shield className="w-4 h-4 sm:w-5 sm:h-5 text-neutral-400" />
                 </div>
-                <p className="text-4xl font-semibold text-neutral-900">{stats.admins}</p>
-                <p className="text-xs text-neutral-600 mt-2">Admin & owner roles</p>
+                <p className="text-2xl sm:text-4xl font-semibold text-neutral-900">{stats.admins}</p>
+                <p className="text-[10px] sm:text-xs text-neutral-600 mt-1 sm:mt-2 hidden sm:block">Admin & owner</p>
               </CardContent>
             </Card>
           </div>
 
           {/* Search and Filters */}
-          <Card className="border-neutral-200 shadow-sm mb-6">
-            <CardContent className="pt-4 pb-4 px-6">
-              <div className="flex items-center gap-4">
+          <Card className="border-neutral-200 shadow-sm mb-4 sm:mb-6">
+            <CardContent className="pt-3 sm:pt-4 pb-3 sm:pb-4 px-3 sm:px-6">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-4">
                 <div className="flex-1 relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+                  <Search className="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 sm:w-4 sm:h-4 text-neutral-400" />
                   <Input
-                    placeholder="Search members by name or email..."
+                    placeholder="Search members..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-9 h-9 border-neutral-200"
+                    className="pl-8 sm:pl-9 h-8 sm:h-9 border-neutral-200 text-xs sm:text-sm"
                   />
                 </div>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="outline" className="h-9">
-                      <Filter className="w-4 h-4 mr-2" />
+                    <Button variant="outline" className="h-8 sm:h-9 text-xs sm:text-sm">
+                      <Filter className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
                       {filterRole === 'all' ? 'All Roles' : filterRole.charAt(0).toUpperCase() + filterRole.slice(1)}
                     </Button>
                   </DropdownMenuTrigger>
@@ -308,13 +310,13 @@ export const PremiumTeamManagement = () => {
 
           {/* Bulk Actions Toolbar */}
           {selectedMembers.length > 0 && (
-            <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg flex items-center justify-between">
-              <p className="text-sm font-medium text-blue-900">
+            <div className="mb-4 p-2 sm:p-3 bg-blue-50 border border-blue-200 rounded-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+              <p className="text-xs sm:text-sm font-medium text-blue-900">
                 {selectedMembers.length} member{selectedMembers.length > 1 ? 's' : ''} selected
               </p>
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" className="h-8 bg-white">
-                  <Mail className="w-3.5 h-3.5 mr-2" />
+                <Button variant="outline" size="sm" className="h-7 sm:h-8 text-xs bg-white">
+                  <Mail className="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-1.5 sm:mr-2" />
                   Email
                 </Button>
                 <Button variant="outline" size="sm" className="h-8 bg-white">
@@ -329,8 +331,8 @@ export const PremiumTeamManagement = () => {
             </div>
           )}
 
-          {/* Members Data Table */}
-          <Card className="border-neutral-200 shadow-sm">
+          {/* Members Data Table - Desktop */}
+          <Card className="border-neutral-200 shadow-sm hidden md:block">
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead className="border-b border-neutral-200 bg-neutral-50">
@@ -447,6 +449,101 @@ export const PremiumTeamManagement = () => {
               </div>
             )}
           </Card>
+
+          {/* Members Cards - Mobile */}
+          <div className="md:hidden space-y-3">
+            {filteredMembers.map((member) => (
+              <Card key={member.id} className="border-neutral-200 shadow-sm p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <Checkbox
+                      checked={selectedMembers.includes(member.id)}
+                      onCheckedChange={() => toggleMemberSelection(member.id)}
+                    />
+                    <Avatar className="w-10 h-10 flex-shrink-0">
+                      {member.avatar && <AvatarImage src={member.avatar} alt={member.name} />}
+                      <AvatarFallback className="bg-blue-100 text-blue-600 text-sm font-medium">
+                        {member.name.split(' ').map(n => n[0]).join('')}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-medium text-sm text-neutral-900 truncate">{member.name}</p>
+                      <p className="text-xs text-neutral-600 truncate">{member.email}</p>
+                    </div>
+                  </div>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0 flex-shrink-0">
+                        <MoreHorizontal className="w-4 h-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => window.location.href = `mailto:${member.email}`}>
+                        <Mail className="w-4 h-4 mr-2" />
+                        Send Email
+                      </DropdownMenuItem>
+                      <DropdownMenuItem>
+                        <Activity className="w-4 h-4 mr-2" />
+                        View Activity
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => setMemberToChangeRole(member)}>
+                        <SettingsIcon className="w-4 h-4 mr-2" />
+                        Change Role
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem 
+                        className="text-red-600"
+                        onClick={() => setMemberToRemove(member)}
+                      >
+                        <UserMinus className="w-4 h-4 mr-2" />
+                        Remove Member
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+                
+                <div className="mt-3 pt-3 border-t border-neutral-100 grid grid-cols-2 gap-2 text-xs">
+                  <div className="flex items-center gap-2">
+                    <span className="text-neutral-500">Role:</span>
+                    <Badge variant="outline" className={`${getRoleBadge(member.role.toLowerCase())} capitalize text-xs px-1.5 py-0`}>
+                      <span className="mr-1">{getRoleIcon(member.role.toLowerCase())}</span>
+                      {member.role}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-neutral-500">Status:</span>
+                    <Badge variant="success" className="border-green-200 bg-green-50 text-green-700 text-xs px-1.5 py-0">
+                      Active
+                    </Badge>
+                  </div>
+                  <div>
+                    <span className="text-neutral-500">Projects: </span>
+                    <span className="text-neutral-900 font-medium">{member.projectCount}</span>
+                  </div>
+                  <div>
+                    <span className="text-neutral-500">Joined: </span>
+                    <span className="text-neutral-700">
+                      {new Date(member.joinedAt).toLocaleDateString('en-US', { month: 'short', year: '2-digit' })}
+                    </span>
+                  </div>
+                </div>
+                
+                <div className="mt-2 text-xs text-neutral-500">
+                  Last active {formatDistanceToNow(new Date(member.lastActive), { addSuffix: true })}
+                </div>
+              </Card>
+            ))}
+
+            {filteredMembers.length === 0 && (
+              <Card className="p-8 text-center border-neutral-200">
+                <Users className="w-10 h-10 text-neutral-300 mx-auto mb-2" />
+                <p className="text-sm font-medium text-neutral-900 mb-1">No members found</p>
+                <p className="text-xs text-neutral-600">
+                  {searchQuery ? 'Try adjusting your search' : 'Start by inviting team members'}
+                </p>
+              </Card>
+            )}
+          </div>
         </div>
       </div>
 

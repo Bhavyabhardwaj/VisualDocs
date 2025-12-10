@@ -821,12 +821,12 @@ export const ShadcnProjectDetail = () => {
       </div>
 
       {/* Content */}
-      <div className="max-w-7xl mx-auto px-6 py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
           {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-2 space-y-4 sm:space-y-6">
             {/* Quick Stats */}
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
               <Card>
                 <CardContent className="pt-6">
                   <div className="flex items-center justify-between">
@@ -1006,7 +1006,7 @@ export const ShadcnProjectDetail = () => {
                   <CardHeader>
                     <CardTitle className="text-base">File Explorer</CardTitle>
                     <CardDescription>
-                      Browse and analyze project files
+                      Browse and analyze project files - Click a file to open in editor
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
@@ -1016,14 +1016,18 @@ export const ShadcnProjectDetail = () => {
                           {files.map((file: any) => (
                             <div 
                               key={file.id || file.path} 
-                              className="flex items-center gap-2 p-2 hover:bg-neutral-50 rounded cursor-pointer"
+                              className="flex items-center gap-2 p-3 hover:bg-neutral-100 rounded-lg cursor-pointer transition-colors group border border-transparent hover:border-neutral-200"
+                              onClick={() => {
+                                const filePath = file.path || file.filename || file.name;
+                                navigate(`/app/editor/${id}?file=${encodeURIComponent(filePath)}`);
+                              }}
                             >
                               {file.path?.endsWith('/') || file.type === 'directory' ? (
-                                <FolderTree className="h-4 w-4 text-neutral-600" />
+                                <FolderTree className="h-4 w-4 text-amber-500" />
                               ) : (
-                                <Code2 className="h-4 w-4 text-neutral-600" />
+                                <Code2 className="h-4 w-4 text-blue-500" />
                               )}
-                              <span className="text-sm flex-1">{file.filename || file.path || file.name}</span>
+                              <span className="text-sm flex-1 group-hover:text-neutral-900">{file.filename || file.path || file.name}</span>
                               {file.language && (
                                 <Badge variant="outline" className="ml-auto text-xs">
                                   {file.language}
@@ -1034,6 +1038,7 @@ export const ShadcnProjectDetail = () => {
                                   {(file.size / 1024).toFixed(1)}KB
                                 </span>
                               )}
+                              <Eye className="h-4 w-4 text-neutral-400 opacity-0 group-hover:opacity-100 transition-opacity" />
                             </div>
                           ))}
                         </div>

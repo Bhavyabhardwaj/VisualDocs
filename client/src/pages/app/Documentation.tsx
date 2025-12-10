@@ -1218,7 +1218,7 @@ export const Documentation = () => {
       <div className="min-h-screen bg-[#F7F5F3]">
         {/* Premium Documentation Detail Dialog */}
         <Dialog open={!!selectedDoc} onOpenChange={(open) => !open && setSelectedDoc(null)}>
-          <DialogContent className="max-w-5xl max-h-[92vh] p-0 bg-white border border-[#37322F]/10 shadow-2xl rounded-2xl overflow-hidden gap-0">
+          <DialogContent className="max-w-5xl max-h-[92vh] w-[95vw] sm:w-full p-0 bg-white border border-[#37322F]/10 shadow-2xl rounded-2xl overflow-hidden gap-0">
             {currentDoc && (
               <div className="flex flex-col h-full">
                 {/* Reading Progress Bar */}
@@ -1230,23 +1230,23 @@ export const Documentation = () => {
                 </div>
 
                 {/* Premium Header */}
-                <div className="px-8 pt-6 pb-5 border-b border-[#37322F]/10 bg-white">
-                  <div className="flex items-center justify-between mb-4">
+                <div className="px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 pb-4 sm:pb-5 border-b border-[#37322F]/10 bg-white">
+                  <div className="flex items-center justify-between mb-3 sm:mb-4">
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => setSelectedDoc(null)}
-                      className="h-9 px-3 text-[#605A57] hover:text-[#37322F] hover:bg-[#E8D5C4]/50 rounded-lg -ml-2"
+                      className="h-8 sm:h-9 px-2 sm:px-3 text-[#605A57] hover:text-[#37322F] hover:bg-[#E8D5C4]/50 rounded-lg -ml-2"
                     >
-                      <ArrowLeft className="h-4 w-4 mr-2" />
-                      Back to docs
+                      <ArrowLeft className="h-4 w-4 sm:mr-2" />
+                      <span className="hidden sm:inline">Back to docs</span>
                     </Button>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1 sm:gap-2">
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => toggleLike(selectedDoc!)}
-                        className={`h-9 w-9 p-0 rounded-lg transition-all ${
+                        className={`h-8 w-8 sm:h-9 sm:w-9 p-0 rounded-lg transition-all ${
                           likedDocs.includes(selectedDoc!) 
                             ? 'text-rose-500 bg-rose-50 hover:bg-rose-100' 
                             : 'text-[#605A57] hover:text-[#37322F] hover:bg-[#E8D5C4]/50'
@@ -1258,7 +1258,7 @@ export const Documentation = () => {
                         variant="ghost"
                         size="sm"
                         onClick={() => toggleBookmark(selectedDoc!)}
-                        className={`h-9 w-9 p-0 rounded-lg transition-all ${
+                        className={`h-8 w-8 sm:h-9 sm:w-9 p-0 rounded-lg transition-all ${
                           bookmarkedDocs.includes(selectedDoc!) 
                             ? 'text-amber-600 bg-amber-50 hover:bg-amber-100' 
                             : 'text-[#605A57] hover:text-[#37322F] hover:bg-[#E8D5C4]/50'
@@ -1270,7 +1270,7 @@ export const Documentation = () => {
                         variant="ghost"
                         size="sm"
                         onClick={() => copyDocLink(selectedDoc!)}
-                        className="h-9 w-9 p-0 rounded-lg text-[#605A57] hover:text-[#37322F] hover:bg-[#E8D5C4]/50"
+                        className="h-8 w-8 sm:h-9 sm:w-9 p-0 rounded-lg text-[#605A57] hover:text-[#37322F] hover:bg-[#E8D5C4]/50 hidden sm:flex"
                       >
                         {copiedCode === 'link' ? <Check className="h-4 w-4 text-green-600" /> : <Share2 className="h-4 w-4" />}
                       </Button>
@@ -1278,7 +1278,7 @@ export const Documentation = () => {
                         variant="ghost"
                         size="sm"
                         onClick={() => setSelectedDoc(null)}
-                        className="h-9 w-9 p-0 rounded-lg text-[#605A57] hover:text-[#37322F] hover:bg-[#E8D5C4]/50 ml-1"
+                        className="h-8 w-8 sm:h-9 sm:w-9 p-0 rounded-lg text-[#605A57] hover:text-[#37322F] hover:bg-[#E8D5C4]/50 ml-1"
                       >
                         <X className="h-4 w-4" />
                       </Button>
@@ -1286,32 +1286,32 @@ export const Documentation = () => {
                   </div>
                   
                   {/* Title and Meta */}
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-3">
-                      <Badge className="bg-[#37322F]/10 text-[#37322F] border-0 font-medium">
+                  <div className="space-y-2 sm:space-y-3">
+                    <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                      <Badge className="bg-[#37322F]/10 text-[#37322F] border-0 font-medium text-xs">
                         <Sparkles className="h-3 w-3 mr-1" />
                         Guide
                       </Badge>
-                      <div className="flex items-center gap-4 text-sm text-[#605A57]">
+                      <div className="flex items-center gap-3 sm:gap-4 text-xs sm:text-sm text-[#605A57]">
                         <span className="flex items-center gap-1.5">
-                          <Timer className="h-3.5 w-3.5" />
-                          {docReadTime} min read
+                          <Timer className="h-3 sm:h-3.5 w-3 sm:w-3.5" />
+                          {docReadTime} min
                         </span>
                         <span className="flex items-center gap-1.5">
-                          <BookMarked className="h-3.5 w-3.5" />
+                          <BookMarked className="h-3 sm:h-3.5 w-3 sm:w-3.5" />
                           {currentDoc.sections.length} sections
                         </span>
                       </div>
                     </div>
-                    <h1 className="text-3xl font-bold text-[#37322F] tracking-tight">{currentDoc.title}</h1>
-                    <p className="text-[#605A57] text-lg">{currentDoc.description}</p>
+                    <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-[#37322F] tracking-tight">{currentDoc.title}</h1>
+                    <p className="text-[#605A57] text-sm sm:text-base lg:text-lg">{currentDoc.description}</p>
                   </div>
                 </div>
 
                 {/* Content Area with Sidebar */}
                 <div className="flex flex-1 overflow-hidden">
-                  {/* Sidebar - Table of Contents */}
-                  <div className={`${sidebarOpen ? 'w-64' : 'w-0'} border-r border-[#37322F]/10 bg-white transition-all duration-300 overflow-hidden flex-shrink-0`}>
+                  {/* Sidebar - Table of Contents - Hidden on mobile */}
+                  <div className={`${sidebarOpen ? 'w-64' : 'w-0'} border-r border-[#37322F]/10 bg-white transition-all duration-300 overflow-hidden flex-shrink-0 hidden md:block`}>
                     <div className="p-5 w-64">
                       <div className="flex items-center justify-between mb-4">
                         <h3 className="font-semibold text-xs uppercase tracking-wider text-[#605A57]">On this page</h3>

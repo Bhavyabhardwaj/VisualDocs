@@ -76,6 +76,7 @@ export const LiveCollaboration = () => {
   const [isVideoOff, setIsVideoOff] = useState(false);
   const [selectedComment, setSelectedComment] = useState<string | null>(null);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [showActivitySidebar, setShowActivitySidebar] = useState(false);
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -105,37 +106,37 @@ export const LiveCollaboration = () => {
     <div className="h-screen bg-white flex flex-col">
       {/* Header with Active Users */}
       <div className="border-b border-gray-200 bg-white">
-        <div className="px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-semibold tracking-tight text-gray-900">Live Collaboration</h1>
-              <p className="text-sm text-gray-600 mt-1">Project: Visual Documentation System</p>
+        <div className="px-3 sm:px-6 py-3 sm:py-4">
+          <div className="flex items-center justify-between gap-3">
+            <div className="min-w-0">
+              <h1 className="text-lg sm:text-2xl font-semibold tracking-tight text-gray-900 truncate">Live Collaboration</h1>
+              <p className="text-xs sm:text-sm text-gray-600 mt-0.5 sm:mt-1 truncate">Project: Visual Documentation System</p>
             </div>
             
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
               {/* Active Users */}
-              <div className="flex items-center gap-3">
-                <div className="flex -space-x-3">
-                  {activeUsers.slice(0, 4).map((user) => (
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="flex -space-x-2 sm:-space-x-3">
+                  {activeUsers.slice(0, 3).map((user) => (
                     <div key={user.id} className="relative group">
                       <Avatar 
-                        className="h-9 w-9 border-2 border-white ring-2 cursor-pointer transition-transform hover:scale-110"
+                        className="h-7 w-7 sm:h-9 sm:w-9 border-2 border-white ring-2 cursor-pointer transition-transform hover:scale-110"
                         style={{ ringColor: user.color }}
                       >
                         <AvatarFallback 
-                          className="text-xs font-semibold text-white"
+                          className="text-[10px] sm:text-xs font-semibold text-white"
                           style={{ backgroundColor: user.color }}
                         >
                           {user.avatar}
                         </AvatarFallback>
                       </Avatar>
                       <div 
-                        className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-white"
+                        className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 sm:h-3 sm:w-3 rounded-full border-2 border-white"
                         style={{ backgroundColor: user.status === 'active' ? '#10b981' : user.status === 'idle' ? '#f59e0b' : '#6b7280' }}
                       />
                       
-                      {/* Tooltip */}
-                      <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 hidden group-hover:block z-50">
+                      {/* Tooltip - Hidden on mobile */}
+                      <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 hidden sm:group-hover:block z-50">
                         <div className="bg-gray-900 text-white text-xs px-3 py-2 rounded-lg whitespace-nowrap shadow-lg">
                           <div className="font-medium">{user.name}</div>
                           {user.currentFile && (
@@ -148,33 +149,33 @@ export const LiveCollaboration = () => {
                       </div>
                     </div>
                   ))}
-                  {activeUsers.length > 4 && (
-                    <div className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-white bg-gray-100 text-xs font-medium text-gray-600 ring-2 ring-gray-200">
-                      +{activeUsers.length - 4}
+                  {activeUsers.length > 3 && (
+                    <div className="flex h-7 w-7 sm:h-9 sm:w-9 items-center justify-center rounded-full border-2 border-white bg-gray-100 text-[10px] sm:text-xs font-medium text-gray-600 ring-2 ring-gray-200">
+                      +{activeUsers.length - 3}
                     </div>
                   )}
                 </div>
-                <Separator orientation="vertical" className="h-6" />
-                <span className="text-sm text-gray-600">
+                <Separator orientation="vertical" className="h-5 sm:h-6 hidden sm:block" />
+                <span className="text-xs sm:text-sm text-gray-600 hidden sm:inline">
                   {activeUsers.filter(u => u.status === 'active').length} online
                 </span>
               </div>
 
               {/* Call Controls */}
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1 sm:gap-2">
                 <Button
                   variant="outline"
                   size="sm"
-                  className="gap-2 hover:bg-gray-50"
+                  className="gap-1 sm:gap-2 hover:bg-gray-50 h-8 px-2 sm:px-3"
                   onClick={() => setShowCallPanel(!showCallPanel)}
                 >
                   <Video className="h-4 w-4" />
-                  Start Call
+                  <span className="hidden sm:inline">Start Call</span>
                 </Button>
-                <Button variant="outline" size="icon" className="h-9 w-9 hover:bg-gray-50">
+                <Button variant="outline" size="icon" className="h-8 w-8 sm:h-9 sm:w-9 hover:bg-gray-50 hidden sm:flex">
                   <Bell className="h-4 w-4" />
                 </Button>
-                <Button variant="outline" size="icon" className="h-9 w-9 hover:bg-gray-50">
+                <Button variant="outline" size="icon" className="h-8 w-8 sm:h-9 sm:w-9 hover:bg-gray-50">
                   <Settings className="h-4 w-4" />
                 </Button>
               </div>
@@ -184,11 +185,44 @@ export const LiveCollaboration = () => {
       </div>
 
       {/* Main Content - 3 Columns */}
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex overflow-hidden relative">
+        {/* Mobile Overlay */}
+        {showActivitySidebar && (
+          <div 
+            className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+            onClick={() => setShowActivitySidebar(false)}
+          />
+        )}
+
+        {/* Mobile Toggle Button */}
+        <Button
+          variant="outline"
+          size="icon"
+          className="fixed bottom-4 left-4 z-30 lg:hidden shadow-lg h-10 w-10 rounded-full bg-white"
+          onClick={() => setShowActivitySidebar(true)}
+        >
+          <Users className="h-4 w-4" />
+        </Button>
+
         {/* Left: Activity Feed */}
-        <div className="w-72 border-r border-gray-200 flex flex-col bg-gray-50">
+        <div className={`
+          bg-gray-50 border-r border-gray-200 flex flex-col
+          fixed lg:relative inset-y-0 left-0 z-50 w-72
+          transform transition-transform duration-300 lg:translate-x-0
+          ${showActivitySidebar ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+        `}>
           <div className="p-4 border-b border-gray-200 bg-white">
-            <h2 className="font-semibold text-sm text-gray-900 mb-3">Activity Feed</h2>
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="font-semibold text-sm text-gray-900">Activity Feed</h2>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-7 w-7 lg:hidden"
+                onClick={() => setShowActivitySidebar(false)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input 
@@ -492,12 +526,12 @@ export const LiveCollaboration = () => {
 
       {/* Video Call Panel (Floating) */}
       {showCallPanel && (
-        <div className="fixed bottom-6 right-6 w-80 bg-white rounded-lg shadow-2xl border border-gray-200 overflow-hidden z-50">
-          <div className="bg-gray-900 text-white p-4 flex items-center justify-between">
-            <div className="flex items-center gap-3">
+        <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 w-[calc(100vw-2rem)] sm:w-80 max-w-80 bg-white rounded-lg shadow-2xl border border-gray-200 overflow-hidden z-50">
+          <div className="bg-gray-900 text-white p-3 sm:p-4 flex items-center justify-between">
+            <div className="flex items-center gap-2 sm:gap-3">
               <div className="flex -space-x-2">
                 {activeUsers.slice(0, 2).map((user) => (
-                  <Avatar key={user.id} className="h-8 w-8 border-2 border-gray-900">
+                  <Avatar key={user.id} className="h-7 w-7 sm:h-8 sm:w-8 border-2 border-gray-900">
                     <AvatarFallback style={{ backgroundColor: user.color }} className="text-white text-xs">
                       {user.avatar}
                     </AvatarFallback>
@@ -519,10 +553,10 @@ export const LiveCollaboration = () => {
             </Button>
           </div>
           
-          <div className="p-4 bg-gradient-to-br from-gray-900 to-gray-800 h-48 flex items-center justify-center">
+          <div className="p-4 bg-gradient-to-br from-gray-900 to-gray-800 h-36 sm:h-48 flex items-center justify-center">
             <div className="text-center text-white">
-              <Video className="h-12 w-12 mx-auto mb-2 opacity-50" />
-              <p className="text-sm opacity-75">Camera is off</p>
+              <Video className="h-10 w-10 sm:h-12 sm:w-12 mx-auto mb-2 opacity-50" />
+              <p className="text-xs sm:text-sm opacity-75">Camera is off</p>
             </div>
           </div>
 
