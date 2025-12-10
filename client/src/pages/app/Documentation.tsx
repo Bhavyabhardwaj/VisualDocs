@@ -1031,7 +1031,7 @@ export const Documentation = () => {
       if (match.index > lastIndex) {
         elements.push(text.substring(lastIndex, match.index));
       }
-      elements.push(<strong key={`${keyPrefix}-bold-${keyIndex++}`} className="font-semibold text-gray-900">{match[1]}</strong>);
+      elements.push(<strong key={`${keyPrefix}-bold-${keyIndex++}`} className="font-semibold text-[#37322F]">{match[1]}</strong>);
       lastIndex = match.index + match[0].length;
     }
     
@@ -1043,7 +1043,7 @@ export const Documentation = () => {
           elements.push(text.substring(lastIndex, match.index));
         }
         elements.push(
-          <code key={`${keyPrefix}-code-${keyIndex++}`} className="bg-gray-100 text-gray-800 px-1.5 py-0.5 rounded text-sm font-mono border border-gray-200">
+          <code key={`${keyPrefix}-code-${keyIndex++}`} className="bg-[#E8D5C4]/50 text-[#37322F] px-1.5 py-0.5 rounded text-sm font-mono border border-[#37322F]/15">
             {match[1]}
           </code>
         );
@@ -1098,8 +1098,8 @@ export const Documentation = () => {
         listType = 'ul';
         const content = line.substring(2);
         listItems.push(
-          <li key={`li-${idx}`} className="flex items-start gap-2 text-gray-700">
-            <span className="text-brand-primary mt-1.5 text-xs">●</span>
+          <li key={`li-${idx}`} className="flex items-start gap-2 text-[#605A57]">
+            <span className="text-[#37322F] mt-1.5 text-xs">●</span>
             <span>{parseInlineFormatting(content, `li-${idx}`)}</span>
           </li>
         );
@@ -1108,7 +1108,7 @@ export const Documentation = () => {
         listType = 'ol';
         const content = line.replace(/^\d+\.\s*/, '');
         listItems.push(
-          <li key={`li-${idx}`} className="text-gray-700 ml-4">
+          <li key={`li-${idx}`} className="text-[#605A57] ml-4">
             {parseInlineFormatting(content, `li-${idx}`)}
           </li>
         );
@@ -1120,7 +1120,7 @@ export const Documentation = () => {
       } else {
         // Regular paragraph with inline formatting
         elements.push(
-          <p key={`p-${idx}`} className="text-gray-700 leading-relaxed mb-2">
+          <p key={`p-${idx}`} className="text-[#605A57] leading-relaxed mb-2">
             {parseInlineFormatting(line, `p-${idx}`)}
           </p>
         );
@@ -1166,13 +1166,13 @@ export const Documentation = () => {
       const codeId = `${sectionId}-${match.index}`;
 
       parts.push(
-        <div key={`code-${match.index}`} className="relative my-5 rounded-xl overflow-hidden border border-gray-200 shadow-sm">
-          <div className="flex items-center justify-between bg-gray-50 px-4 py-2.5 border-b border-gray-200">
-            <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">{language}</span>
+        <div key={`code-${match.index}`} className="relative my-5 rounded-xl overflow-hidden border border-[#37322F]/15 shadow-sm">
+          <div className="flex items-center justify-between bg-[#E8D5C4]/30 px-4 py-2.5 border-b border-[#37322F]/10">
+            <span className="text-xs font-semibold text-[#605A57] uppercase tracking-wide">{language}</span>
             <Button
               variant="ghost"
               size="sm"
-              className="h-7 text-xs text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+              className="h-7 text-xs text-[#605A57] hover:text-[#37322F] hover:bg-[#E8D5C4]/50"
               onClick={() => handleCopyCode(code, codeId)}
             >
               {copiedCode === codeId ? (
@@ -1188,7 +1188,7 @@ export const Documentation = () => {
               )}
             </Button>
           </div>
-          <pre className="bg-gray-900 text-gray-100 p-4 overflow-x-auto text-sm font-mono leading-relaxed">
+          <pre className="bg-[#37322F] text-[#F7F5F3] p-4 overflow-x-auto text-sm font-mono leading-relaxed">
             <code>{code}</code>
           </pre>
         </div>
@@ -1215,28 +1215,28 @@ export const Documentation = () => {
 
   return (
     <PremiumLayout>
-      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+      <div className="min-h-screen bg-[#F7F5F3]">
         {/* Premium Documentation Detail Dialog */}
         <Dialog open={!!selectedDoc} onOpenChange={(open) => !open && setSelectedDoc(null)}>
-          <DialogContent className="max-w-5xl max-h-[92vh] p-0 bg-white border-0 shadow-2xl rounded-2xl overflow-hidden gap-0">
+          <DialogContent className="max-w-5xl max-h-[92vh] p-0 bg-white border border-[#37322F]/10 shadow-2xl rounded-2xl overflow-hidden gap-0">
             {currentDoc && (
               <div className="flex flex-col h-full">
                 {/* Reading Progress Bar */}
-                <div className="h-1 bg-gray-100 w-full">
+                <div className="h-1 bg-[#E8D5C4] w-full">
                   <div 
-                    className="h-full bg-gradient-to-r from-brand-primary to-emerald-500 transition-all duration-300 ease-out"
+                    className="h-full bg-gradient-to-r from-[#37322F] to-[#605A57] transition-all duration-300 ease-out"
                     style={{ width: `${readProgress}%` }}
                   />
                 </div>
 
                 {/* Premium Header */}
-                <div className="px-8 pt-6 pb-5 border-b border-gray-100 bg-gradient-to-r from-white to-gray-50/50">
+                <div className="px-8 pt-6 pb-5 border-b border-[#37322F]/10 bg-white">
                   <div className="flex items-center justify-between mb-4">
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => setSelectedDoc(null)}
-                      className="h-9 px-3 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-lg -ml-2"
+                      className="h-9 px-3 text-[#605A57] hover:text-[#37322F] hover:bg-[#E8D5C4]/50 rounded-lg -ml-2"
                     >
                       <ArrowLeft className="h-4 w-4 mr-2" />
                       Back to docs
@@ -1249,7 +1249,7 @@ export const Documentation = () => {
                         className={`h-9 w-9 p-0 rounded-lg transition-all ${
                           likedDocs.includes(selectedDoc!) 
                             ? 'text-rose-500 bg-rose-50 hover:bg-rose-100' 
-                            : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'
+                            : 'text-[#605A57] hover:text-[#37322F] hover:bg-[#E8D5C4]/50'
                         }`}
                       >
                         <ThumbsUp className={`h-4 w-4 ${likedDocs.includes(selectedDoc!) ? 'fill-current' : ''}`} />
@@ -1260,8 +1260,8 @@ export const Documentation = () => {
                         onClick={() => toggleBookmark(selectedDoc!)}
                         className={`h-9 w-9 p-0 rounded-lg transition-all ${
                           bookmarkedDocs.includes(selectedDoc!) 
-                            ? 'text-amber-500 bg-amber-50 hover:bg-amber-100' 
-                            : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'
+                            ? 'text-amber-600 bg-amber-50 hover:bg-amber-100' 
+                            : 'text-[#605A57] hover:text-[#37322F] hover:bg-[#E8D5C4]/50'
                         }`}
                       >
                         <Bookmark className={`h-4 w-4 ${bookmarkedDocs.includes(selectedDoc!) ? 'fill-current' : ''}`} />
@@ -1270,15 +1270,15 @@ export const Documentation = () => {
                         variant="ghost"
                         size="sm"
                         onClick={() => copyDocLink(selectedDoc!)}
-                        className="h-9 w-9 p-0 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100"
+                        className="h-9 w-9 p-0 rounded-lg text-[#605A57] hover:text-[#37322F] hover:bg-[#E8D5C4]/50"
                       >
-                        {copiedCode === 'link' ? <Check className="h-4 w-4 text-green-500" /> : <Share2 className="h-4 w-4" />}
+                        {copiedCode === 'link' ? <Check className="h-4 w-4 text-green-600" /> : <Share2 className="h-4 w-4" />}
                       </Button>
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => setSelectedDoc(null)}
-                        className="h-9 w-9 p-0 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 ml-1"
+                        className="h-9 w-9 p-0 rounded-lg text-[#605A57] hover:text-[#37322F] hover:bg-[#E8D5C4]/50 ml-1"
                       >
                         <X className="h-4 w-4" />
                       </Button>
@@ -1288,11 +1288,11 @@ export const Documentation = () => {
                   {/* Title and Meta */}
                   <div className="space-y-3">
                     <div className="flex items-center gap-3">
-                      <Badge className="bg-brand-primary/10 text-brand-primary border-0 font-medium">
+                      <Badge className="bg-[#37322F]/10 text-[#37322F] border-0 font-medium">
                         <Sparkles className="h-3 w-3 mr-1" />
                         Guide
                       </Badge>
-                      <div className="flex items-center gap-4 text-sm text-gray-500">
+                      <div className="flex items-center gap-4 text-sm text-[#605A57]">
                         <span className="flex items-center gap-1.5">
                           <Timer className="h-3.5 w-3.5" />
                           {docReadTime} min read
@@ -1303,23 +1303,23 @@ export const Documentation = () => {
                         </span>
                       </div>
                     </div>
-                    <h1 className="text-3xl font-bold text-gray-900 tracking-tight">{currentDoc.title}</h1>
-                    <p className="text-gray-500 text-lg">{currentDoc.description}</p>
+                    <h1 className="text-3xl font-bold text-[#37322F] tracking-tight">{currentDoc.title}</h1>
+                    <p className="text-[#605A57] text-lg">{currentDoc.description}</p>
                   </div>
                 </div>
 
                 {/* Content Area with Sidebar */}
                 <div className="flex flex-1 overflow-hidden">
                   {/* Sidebar - Table of Contents */}
-                  <div className={`${sidebarOpen ? 'w-64' : 'w-0'} border-r border-gray-100 bg-gray-50/50 transition-all duration-300 overflow-hidden flex-shrink-0`}>
+                  <div className={`${sidebarOpen ? 'w-64' : 'w-0'} border-r border-[#37322F]/10 bg-white transition-all duration-300 overflow-hidden flex-shrink-0`}>
                     <div className="p-5 w-64">
                       <div className="flex items-center justify-between mb-4">
-                        <h3 className="font-semibold text-xs uppercase tracking-wider text-gray-400">On this page</h3>
+                        <h3 className="font-semibold text-xs uppercase tracking-wider text-[#605A57]">On this page</h3>
                         <Button
                           variant="ghost"
                           size="sm"
                           onClick={() => setSidebarOpen(false)}
-                          className="h-6 w-6 p-0 text-gray-400 hover:text-gray-600"
+                          className="h-6 w-6 p-0 text-[#605A57] hover:text-[#37322F]"
                         >
                           <X className="h-3.5 w-3.5" />
                         </Button>
@@ -1334,11 +1334,11 @@ export const Documentation = () => {
                             }}
                             className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all duration-200 flex items-center gap-2 group ${
                               activeSection === section.id
-                                ? 'bg-brand-primary/10 text-brand-primary font-medium'
-                                : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                                ? 'bg-[#37322F]/10 text-[#37322F] font-medium'
+                                : 'text-[#605A57] hover:bg-[#E8D5C4]/50 hover:text-[#37322F]'
                             }`}
                           >
-                            <Hash className={`h-3.5 w-3.5 flex-shrink-0 ${activeSection === section.id ? 'text-brand-primary' : 'text-gray-400 group-hover:text-gray-500'}`} />
+                            <Hash className={`h-3.5 w-3.5 flex-shrink-0 ${activeSection === section.id ? 'text-[#37322F]' : 'text-[#605A57] group-hover:text-[#37322F]'}`} />
                             <span className="truncate">{section.title}</span>
                           </button>
                         ))}
@@ -1348,17 +1348,17 @@ export const Documentation = () => {
 
                   {/* Main Content */}
                   <ScrollArea 
-                    className="flex-1 h-[calc(92vh-200px)]"
+                    className="flex-1 h-[calc(92vh-200px)] bg-white"
                     onScrollCapture={handleScroll}
                   >
-                    <div className="p-8 max-w-3xl mx-auto">
+                    <div className="p-8 max-w-3xl mx-auto bg-white">
                       {/* Toggle sidebar button if closed */}
                       {!sidebarOpen && (
                         <Button
                           variant="outline"
                           size="sm"
                           onClick={() => setSidebarOpen(true)}
-                          className="mb-6 text-gray-500 border-gray-200"
+                          className="mb-6 text-[#605A57] border-[#37322F]/15 hover:bg-[#E8D5C4]/30"
                         >
                           <Menu className="h-4 w-4 mr-2" />
                           Show contents
@@ -1367,19 +1367,19 @@ export const Documentation = () => {
 
                       {/* Introduction */}
                       <div className="prose prose-gray max-w-none mb-10">
-                        <p className="text-gray-600 text-lg leading-relaxed">{currentDoc.content}</p>
+                        <p className="text-[#605A57] text-lg leading-relaxed">{currentDoc.content}</p>
                       </div>
 
                       {/* Sections */}
                       {currentDoc.sections.map((section, idx) => (
                         <section key={section.id} id={section.id} className="mb-12 scroll-mt-8">
                           <div className="flex items-center gap-3 mb-5 group">
-                            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gray-100 text-gray-500 font-semibold text-sm group-hover:bg-brand-primary/10 group-hover:text-brand-primary transition-colors">
+                            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-[#E8D5C4]/50 text-[#605A57] font-semibold text-sm group-hover:bg-[#37322F]/10 group-hover:text-[#37322F] transition-colors">
                               {idx + 1}
                             </div>
-                            <h2 className="text-2xl font-bold text-gray-900">{section.title}</h2>
+                            <h2 className="text-2xl font-bold text-[#37322F]">{section.title}</h2>
                           </div>
-                          <div className="pl-11 text-gray-700 leading-relaxed">
+                          <div className="pl-11 text-[#605A57] leading-relaxed">
                             {renderCodeBlock(section.content, section.id)}
                           </div>
                         </section>
@@ -1387,9 +1387,9 @@ export const Documentation = () => {
 
                       {/* Related Docs */}
                       {currentDoc.relatedDocs && currentDoc.relatedDocs.length > 0 && (
-                        <div className="mt-12 pt-8 border-t border-gray-200">
-                          <h3 className="text-lg font-semibold mb-4 text-gray-900 flex items-center gap-2">
-                            <BookOpen className="h-5 w-5 text-gray-400" />
+                        <div className="mt-12 pt-8 border-t border-[#37322F]/10">
+                          <h3 className="text-lg font-semibold mb-4 text-[#37322F] flex items-center gap-2">
+                            <BookOpen className="h-5 w-5 text-[#605A57]" />
                             Continue reading
                           </h3>
                           <div className="grid gap-3 sm:grid-cols-2">
@@ -1404,16 +1404,16 @@ export const Documentation = () => {
                                     setReadProgress(0);
                                     setActiveSection(null);
                                   }}
-                                  className="flex items-center gap-3 p-4 rounded-xl border border-gray-200 hover:border-brand-primary/30 hover:bg-brand-primary/5 transition-all duration-200 text-left group"
+                                  className="flex items-center gap-3 p-4 rounded-xl border border-[#37322F]/10 bg-white hover:border-[#37322F]/25 hover:bg-[#E8D5C4]/20 transition-all duration-200 text-left group"
                                 >
-                                  <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center group-hover:bg-brand-primary/10 transition-colors">
-                                    <FileText className="h-5 w-5 text-gray-500 group-hover:text-brand-primary" />
+                                  <div className="w-10 h-10 rounded-lg bg-[#E8D5C4]/50 flex items-center justify-center group-hover:bg-[#37322F]/10 transition-colors">
+                                    <FileText className="h-5 w-5 text-[#605A57] group-hover:text-[#37322F]" />
                                   </div>
                                   <div className="flex-1 min-w-0">
-                                    <h4 className="font-medium text-gray-900 group-hover:text-brand-primary truncate">{relatedDoc.title}</h4>
-                                    <p className="text-sm text-gray-500 truncate">{relatedDoc.description}</p>
+                                    <h4 className="font-medium text-[#37322F] group-hover:text-[#37322F] truncate">{relatedDoc.title}</h4>
+                                    <p className="text-sm text-[#605A57] truncate">{relatedDoc.description}</p>
                                   </div>
-                                  <ChevronRight className="h-5 w-5 text-gray-300 group-hover:text-brand-primary flex-shrink-0" />
+                                  <ChevronRight className="h-5 w-5 text-[#E8D5C4] group-hover:text-[#37322F] flex-shrink-0" />
                                 </button>
                               );
                             })}
@@ -1422,20 +1422,20 @@ export const Documentation = () => {
                       )}
 
                       {/* Feedback Section */}
-                      <div className="mt-12 p-6 rounded-2xl bg-gradient-to-br from-gray-50 to-gray-100/50 border border-gray-200">
-                        <h3 className="font-semibold text-gray-900 mb-2">Was this helpful?</h3>
-                        <p className="text-sm text-gray-500 mb-4">Let us know if this documentation helped you.</p>
+                      <div className="mt-12 p-6 rounded-2xl bg-white border border-[#37322F]/10">
+                        <h3 className="font-semibold text-[#37322F] mb-2">Was this helpful?</h3>
+                        <p className="text-sm text-[#605A57] mb-4">Let us know if this documentation helped you.</p>
                         <div className="flex items-center gap-3">
                           <Button
                             variant={likedDocs.includes(selectedDoc!) ? "default" : "outline"}
                             size="sm"
                             onClick={() => toggleLike(selectedDoc!)}
-                            className={likedDocs.includes(selectedDoc!) ? "bg-green-600 hover:bg-green-700" : ""}
+                            className={likedDocs.includes(selectedDoc!) ? "bg-[#37322F] hover:bg-[#37322F]/90 text-white" : "border-[#37322F]/15 text-[#605A57] hover:bg-[#E8D5C4]/30"}
                           >
                             <ThumbsUp className="h-4 w-4 mr-2" />
                             Yes, it helped
                           </Button>
-                          <Button variant="outline" size="sm">
+                          <Button variant="outline" size="sm" className="border-[#37322F]/15 text-[#605A57] hover:bg-[#E8D5C4]/30">
                             <ExternalLink className="h-4 w-4 mr-2" />
                             Suggest edit
                           </Button>
@@ -1448,12 +1448,12 @@ export const Documentation = () => {
                       <Button
                         variant="outline"
                         size="sm"
-                        className="fixed bottom-8 right-8 h-10 w-10 p-0 rounded-full shadow-lg bg-white border-gray-200 hover:bg-gray-50 z-50"
+                        className="fixed bottom-8 right-8 h-10 w-10 p-0 rounded-full shadow-lg bg-white border-[#37322F]/15 hover:bg-[#E8D5C4]/30 z-50"
                         onClick={() => {
                           document.querySelector('[data-radix-scroll-area-viewport]')?.scrollTo({ top: 0, behavior: 'smooth' });
                         }}
                       >
-                        <ArrowUp className="h-4 w-4" />
+                        <ArrowUp className="h-4 w-4 text-[#37322F]" />
                       </Button>
                     )}
                   </ScrollArea>
@@ -1464,16 +1464,16 @@ export const Documentation = () => {
         </Dialog>
 
         {/* Header */}
-        <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
+        <div className="bg-white border-b border-[#37322F]/10 sticky top-0 z-10">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-4">
-                <div className="p-3 bg-gradient-to-br from-brand-primary/10 to-brand-primary/5 rounded-2xl">
-                  <FileText className="h-8 w-8 text-brand-primary" />
+                <div className="p-3 bg-[#E8D5C4]/50 rounded-2xl">
+                  <FileText className="h-8 w-8 text-[#37322F]" />
                 </div>
                 <div>
-                  <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Documentation</h1>
-                  <p className="text-gray-500 mt-0.5">
+                  <h1 className="text-3xl font-bold text-[#37322F] tracking-tight">Documentation</h1>
+                  <p className="text-[#605A57] mt-0.5">
                     Everything you need to know about VisualDocs
                   </p>
                 </div>
@@ -1488,8 +1488,8 @@ export const Documentation = () => {
             
             {/* Search Bar */}
             <div className={`relative max-w-2xl mt-6 transition-all duration-300 ${searchFocused ? 'max-w-3xl' : ''}`}>
-              <div className={`absolute inset-0 bg-brand-primary/5 rounded-2xl transition-all duration-300 ${searchFocused ? 'scale-105 opacity-100' : 'scale-100 opacity-0'}`} />
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 z-10" />
+              <div className={`absolute inset-0 bg-[#E8D5C4]/30 rounded-2xl transition-all duration-300 ${searchFocused ? 'scale-105 opacity-100' : 'scale-100 opacity-0'}`} />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-[#605A57] z-10" />
               <Input
                 type="text"
                 placeholder="Search documentation..."
@@ -1497,13 +1497,13 @@ export const Documentation = () => {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onFocus={() => setSearchFocused(true)}
                 onBlur={() => setSearchFocused(false)}
-                className="pl-12 h-14 bg-gray-50 border-gray-200 focus:bg-white focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20 transition-all rounded-2xl text-base relative z-10"
+                className="pl-12 h-14 bg-[#F7F5F3] border-[#37322F]/15 focus:bg-white focus:border-[#37322F] focus:ring-2 focus:ring-[#37322F]/20 transition-all rounded-2xl text-base relative z-10 text-[#37322F] placeholder:text-[#605A57]"
               />
               {searchQuery && (
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="absolute right-3 top-1/2 -translate-y-1/2 h-8 text-gray-500 hover:text-gray-700 z-10"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 h-8 text-[#605A57] hover:text-[#37322F] z-10"
                   onClick={() => setSearchQuery('')}
                 >
                   <X className="h-4 w-4" />
@@ -1513,11 +1513,11 @@ export const Documentation = () => {
             
             {/* Search Results Summary */}
             {searchQuery && (
-              <div className="mt-4 text-sm text-gray-600 flex items-center gap-2">
-                <span className="inline-flex items-center justify-center min-w-[24px] h-6 px-2 bg-brand-primary text-white text-xs font-semibold rounded-full">
+              <div className="mt-4 text-sm text-[#605A57] flex items-center gap-2">
+                <span className="inline-flex items-center justify-center min-w-[24px] h-6 px-2 bg-[#37322F] text-white text-xs font-semibold rounded-full">
                   {filteredSections.reduce((acc, s) => acc + s.docs.length, 0)}
                 </span>
-                <span>results found for "<span className="font-medium text-gray-900">{searchQuery}</span>"</span>
+                <span>results found for "<span className="font-medium text-[#37322F]">{searchQuery}</span>"</span>
               </div>
             )}
           </div>
@@ -1526,21 +1526,21 @@ export const Documentation = () => {
         {/* Main Content */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <TabsList className="bg-white border border-gray-200 p-1.5 rounded-2xl shadow-sm">
-              <TabsTrigger value="all" className="rounded-xl px-4 py-2.5 data-[state=active]:bg-gray-900 data-[state=active]:text-white data-[state=active]:shadow-sm transition-all">
+            <TabsList className="bg-white border border-[#37322F]/10 p-1.5 rounded-2xl shadow-sm">
+              <TabsTrigger value="all" className="rounded-xl px-4 py-2.5 data-[state=active]:bg-[#37322F] data-[state=active]:text-white data-[state=active]:shadow-sm transition-all text-[#605A57]">
                 <FileText className="h-4 w-4 mr-2" />
                 All Docs
               </TabsTrigger>
-              <TabsTrigger value="popular" className="rounded-xl px-4 py-2.5 data-[state=active]:bg-gray-900 data-[state=active]:text-white data-[state=active]:shadow-sm transition-all">
+              <TabsTrigger value="popular" className="rounded-xl px-4 py-2.5 data-[state=active]:bg-[#37322F] data-[state=active]:text-white data-[state=active]:shadow-sm transition-all text-[#605A57]">
                 <Star className="h-4 w-4 mr-2" />
                 Popular
               </TabsTrigger>
-              <TabsTrigger value="recent" className="rounded-xl px-4 py-2.5 data-[state=active]:bg-gray-900 data-[state=active]:text-white data-[state=active]:shadow-sm transition-all">
+              <TabsTrigger value="recent" className="rounded-xl px-4 py-2.5 data-[state=active]:bg-[#37322F] data-[state=active]:text-white data-[state=active]:shadow-sm transition-all text-[#605A57]">
                 <Clock className="h-4 w-4 mr-2" />
                 Recent
               </TabsTrigger>
               {bookmarkedDocs.length > 0 && (
-                <TabsTrigger value="bookmarks" className="rounded-xl px-4 py-2.5 data-[state=active]:bg-gray-900 data-[state=active]:text-white data-[state=active]:shadow-sm transition-all">
+                <TabsTrigger value="bookmarks" className="rounded-xl px-4 py-2.5 data-[state=active]:bg-[#37322F] data-[state=active]:text-white data-[state=active]:shadow-sm transition-all text-[#605A57]">
                   <Bookmark className="h-4 w-4 mr-2" />
                   Saved ({bookmarkedDocs.length})
                 </TabsTrigger>
@@ -1549,16 +1549,16 @@ export const Documentation = () => {
 
             <TabsContent value="all" className="space-y-6">
               {filteredSections.length === 0 ? (
-                <Card className="p-12 text-center border-gray-200 bg-white rounded-2xl">
-                  <div className="text-gray-500">
-                    <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-gray-100 to-gray-50 rounded-2xl flex items-center justify-center">
-                      <Search className="h-10 w-10 text-gray-300" />
+                <Card className="p-12 text-center border-[#37322F]/10 bg-white rounded-2xl">
+                  <div className="text-[#605A57]">
+                    <div className="w-20 h-20 mx-auto mb-6 bg-[#E8D5C4]/30 rounded-2xl flex items-center justify-center">
+                      <Search className="h-10 w-10 text-[#E8D5C4]" />
                     </div>
-                    <h3 className="font-semibold text-xl mb-2 text-gray-900">No results found</h3>
-                    <p className="text-gray-500 mb-6 max-w-sm mx-auto">We couldn't find any documentation matching your search. Try different keywords.</p>
+                    <h3 className="font-semibold text-xl mb-2 text-[#37322F]">No results found</h3>
+                    <p className="text-[#605A57] mb-6 max-w-sm mx-auto">We couldn't find any documentation matching your search. Try different keywords.</p>
                     <Button
                       variant="outline"
-                      className="border-gray-200 hover:bg-gray-50 rounded-xl"
+                      className="border-[#37322F]/15 hover:bg-[#E8D5C4]/30 rounded-xl text-[#605A57]"
                       onClick={() => setSearchQuery('')}
                     >
                       Clear Search
@@ -1570,15 +1570,15 @@ export const Documentation = () => {
                   {filteredSections.map((section) => {
                     const Icon = section.icon;
                     return (
-                      <Card key={section.id} className="hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border-gray-200 bg-white overflow-hidden group rounded-2xl">
+                      <Card key={section.id} className="hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border-[#37322F]/10 bg-white overflow-hidden group rounded-2xl">
                         <CardHeader className="pb-3">
                           <div className="flex items-center gap-3">
-                            <div className="p-2.5 bg-gray-50 rounded-xl group-hover:bg-brand-bg transition-colors">
-                              <Icon className="h-5 w-5 text-gray-600 group-hover:text-brand-primary transition-colors" />
+                            <div className="p-2.5 bg-[#E8D5C4]/30 rounded-xl group-hover:bg-[#E8D5C4]/60 transition-colors">
+                              <Icon className="h-5 w-5 text-[#605A57] group-hover:text-[#37322F] transition-colors" />
                             </div>
                             <div>
-                              <CardTitle className="text-gray-900">{section.title}</CardTitle>
-                              <CardDescription className="text-gray-500">{section.description}</CardDescription>
+                              <CardTitle className="text-[#37322F]">{section.title}</CardTitle>
+                              <CardDescription className="text-[#605A57]">{section.description}</CardDescription>
                             </div>
                           </div>
                         </CardHeader>
@@ -1588,17 +1588,17 @@ export const Documentation = () => {
                               <Button
                                 key={idx}
                                 variant="ghost"
-                                className="w-full justify-start h-auto py-3 px-3 hover:bg-gray-50 rounded-lg group/item"
+                                className="w-full justify-start h-auto py-3 px-3 hover:bg-[#E8D5C4]/30 rounded-lg group/item"
                                 onClick={() => handleDocClick(doc.slug)}
                               >
                                 <div className="flex items-center gap-3 w-full">
                                   {doc.status === 'complete' ? (
-                                    <CheckCircle2 className="h-4 w-4 text-green-500 flex-shrink-0" />
+                                    <CheckCircle2 className="h-4 w-4 text-green-600 flex-shrink-0" />
                                   ) : (
-                                    <Clock className="h-4 w-4 text-amber-500 flex-shrink-0" />
+                                    <Clock className="h-4 w-4 text-amber-600 flex-shrink-0" />
                                   )}
-                                  <span className="flex-1 text-left text-gray-700 group-hover/item:text-gray-900 transition-colors">{doc.title}</span>
-                                  <Badge variant="secondary" className="text-xs bg-gray-100 text-gray-600 border-0">
+                                  <span className="flex-1 text-left text-[#605A57] group-hover/item:text-[#37322F] transition-colors">{doc.title}</span>
+                                  <Badge variant="secondary" className="text-xs bg-[#E8D5C4]/50 text-[#605A57] border-0">
                                     {doc.time}
                                   </Badge>
                                 </div>
@@ -1614,25 +1614,25 @@ export const Documentation = () => {
             </TabsContent>
 
             <TabsContent value="popular">
-              <Card className="border-gray-200 bg-white rounded-2xl">
+              <Card className="border-[#37322F]/10 bg-white rounded-2xl">
                 <CardHeader className="pb-4">
                   <div className="flex items-center gap-3">
-                    <div className="p-2.5 bg-gradient-to-br from-amber-100 to-orange-50 rounded-xl">
-                      <Star className="h-5 w-5 text-amber-500" />
+                    <div className="p-2.5 bg-[#E8D5C4]/50 rounded-xl">
+                      <Star className="h-5 w-5 text-amber-600" />
                     </div>
                     <div>
-                      <CardTitle className="text-gray-900">Popular Documentation</CardTitle>
-                      <CardDescription className="text-gray-500">Most viewed and highly rated guides</CardDescription>
+                      <CardTitle className="text-[#37322F]">Popular Documentation</CardTitle>
+                      <CardDescription className="text-[#605A57]">Most viewed and highly rated guides</CardDescription>
                     </div>
                   </div>
                 </CardHeader>
                 <CardContent className="pt-0">
                   {filteredPopularDocs.length === 0 ? (
-                    <div className="text-center py-12 text-gray-500">
-                      <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-2xl flex items-center justify-center">
-                        <Search className="h-7 w-7 text-gray-300" />
+                    <div className="text-center py-12 text-[#605A57]">
+                      <div className="w-16 h-16 mx-auto mb-4 bg-[#E8D5C4]/30 rounded-2xl flex items-center justify-center">
+                        <Search className="h-7 w-7 text-[#E8D5C4]" />
                       </div>
-                      <p className="font-medium text-gray-900 mb-1">No results</p>
+                      <p className="font-medium text-[#37322F] mb-1">No results</p>
                       <p className="text-sm">No popular docs match your search.</p>
                     </div>
                   ) : (
@@ -1640,7 +1640,7 @@ export const Documentation = () => {
                       {filteredPopularDocs.map((doc, idx) => (
                         <div
                           key={idx}
-                          className="flex items-center justify-between p-4 border border-gray-100 rounded-xl hover:bg-gradient-to-r hover:from-gray-50 hover:to-white hover:border-gray-200 hover:shadow-sm cursor-pointer transition-all duration-300 group"
+                          className="flex items-center justify-between p-4 border border-[#37322F]/10 rounded-xl hover:bg-[#E8D5C4]/20 hover:border-[#37322F]/20 hover:shadow-sm cursor-pointer transition-all duration-300 group"
                           onClick={() => handleDocClick(doc.slug)}
                         >
                           <div className="flex items-center gap-4">
@@ -1648,25 +1648,25 @@ export const Documentation = () => {
                               idx === 0 ? 'bg-gradient-to-br from-amber-400 to-orange-500 text-white shadow-lg shadow-amber-200' :
                               idx === 1 ? 'bg-gradient-to-br from-gray-300 to-gray-400 text-white' :
                               idx === 2 ? 'bg-gradient-to-br from-amber-600 to-amber-700 text-white' :
-                              'bg-gray-100 text-gray-500 group-hover:bg-brand-primary/10 group-hover:text-brand-primary'
+                              'bg-[#E8D5C4]/50 text-[#605A57] group-hover:bg-[#37322F]/10 group-hover:text-[#37322F]'
                             }`}>
                               {idx + 1}
                             </div>
                             <div>
-                              <h3 className="font-semibold text-gray-900 group-hover:text-brand-primary transition-colors">{doc.title}</h3>
-                              <div className="flex items-center gap-4 mt-1.5 text-sm text-gray-500">
+                              <h3 className="font-semibold text-[#37322F] group-hover:text-[#37322F] transition-colors">{doc.title}</h3>
+                              <div className="flex items-center gap-4 mt-1.5 text-sm text-[#605A57]">
                                 <span className="flex items-center gap-1.5">
                                   <FileText className="h-3.5 w-3.5" />
                                   {doc.views.toLocaleString()} views
                                 </span>
                                 <div className="flex items-center gap-1">
-                                  <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
-                                  <span className="font-semibold text-gray-700">{doc.rating}</span>
+                                  <Star className="h-3.5 w-3.5 fill-amber-500 text-amber-500" />
+                                  <span className="font-semibold text-[#37322F]">{doc.rating}</span>
                                 </div>
                               </div>
                             </div>
                           </div>
-                          <Button variant="ghost" size="sm" className="text-gray-400 group-hover:text-brand-primary group-hover:bg-brand-primary/5 transition-all rounded-lg">
+                          <Button variant="ghost" size="sm" className="text-[#605A57] group-hover:text-[#37322F] group-hover:bg-[#E8D5C4]/50 transition-all rounded-lg">
                             Read
                             <ChevronRight className="h-4 w-4 ml-1" />
                           </Button>
@@ -1679,25 +1679,25 @@ export const Documentation = () => {
             </TabsContent>
 
             <TabsContent value="recent">
-              <Card className="border-gray-200 bg-white rounded-2xl">
+              <Card className="border-[#37322F]/10 bg-white rounded-2xl">
                 <CardHeader className="pb-4">
                   <div className="flex items-center gap-3">
-                    <div className="p-2.5 bg-gradient-to-br from-blue-100 to-indigo-50 rounded-xl">
-                      <Clock className="h-5 w-5 text-blue-500" />
+                    <div className="p-2.5 bg-[#E8D5C4]/50 rounded-xl">
+                      <Clock className="h-5 w-5 text-[#605A57]" />
                     </div>
                     <div>
-                      <CardTitle className="text-gray-900">Recently Updated</CardTitle>
-                      <CardDescription className="text-gray-500">Latest documentation changes and additions</CardDescription>
+                      <CardTitle className="text-[#37322F]">Recently Updated</CardTitle>
+                      <CardDescription className="text-[#605A57]">Latest documentation changes and additions</CardDescription>
                     </div>
                   </div>
                 </CardHeader>
                 <CardContent className="pt-0">
                   {filteredRecentDocs.length === 0 ? (
-                    <div className="text-center py-12 text-gray-500">
-                      <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-2xl flex items-center justify-center">
-                        <Clock className="h-7 w-7 text-gray-300" />
+                    <div className="text-center py-12 text-[#605A57]">
+                      <div className="w-16 h-16 mx-auto mb-4 bg-[#E8D5C4]/30 rounded-2xl flex items-center justify-center">
+                        <Clock className="h-7 w-7 text-[#E8D5C4]" />
                       </div>
-                      <p className="font-medium text-gray-900 mb-1">No results</p>
+                      <p className="font-medium text-[#37322F] mb-1">No results</p>
                       <p className="text-sm">No recent docs match your search.</p>
                     </div>
                   ) : (
@@ -1705,22 +1705,22 @@ export const Documentation = () => {
                       {filteredRecentDocs.map((doc, idx) => (
                         <div
                           key={idx}
-                          className="flex items-center justify-between p-4 border border-gray-100 rounded-xl hover:bg-gradient-to-r hover:from-gray-50 hover:to-white hover:border-gray-200 hover:shadow-sm cursor-pointer transition-all duration-300 group"
+                          className="flex items-center justify-between p-4 border border-[#37322F]/10 rounded-xl hover:bg-[#E8D5C4]/20 hover:border-[#37322F]/20 hover:shadow-sm cursor-pointer transition-all duration-300 group"
                           onClick={() => handleDocClick(doc.slug)}
                         >
                           <div className="flex items-center gap-4">
                             <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                              doc.badge === 'New' ? 'bg-gradient-to-br from-green-100 to-emerald-50' : 'bg-gray-100'
+                              doc.badge === 'New' ? 'bg-green-50' : 'bg-[#E8D5C4]/50'
                             }`}>
                               {doc.badge === 'New' ? (
                                 <Sparkles className="h-5 w-5 text-green-600" />
                               ) : (
-                                <FileText className="h-5 w-5 text-gray-400" />
+                                <FileText className="h-5 w-5 text-[#605A57]" />
                               )}
                             </div>
                             <div>
-                              <h3 className="font-semibold text-gray-900 group-hover:text-brand-primary transition-colors">{doc.title}</h3>
-                              <p className="text-sm text-gray-500 mt-1 flex items-center gap-1.5">
+                              <h3 className="font-semibold text-[#37322F] group-hover:text-[#37322F] transition-colors">{doc.title}</h3>
+                              <p className="text-sm text-[#605A57] mt-1 flex items-center gap-1.5">
                                 <Clock className="h-3.5 w-3.5" />
                                 Updated {doc.updated}
                               </p>
@@ -1730,13 +1730,13 @@ export const Documentation = () => {
                             <Badge 
                               variant={doc.badge === 'New' ? 'default' : 'secondary'}
                               className={doc.badge === 'New' 
-                                ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0 shadow-sm' 
-                                : 'bg-gray-100 text-gray-600 border-0'
+                                ? 'bg-green-600 text-white border-0 shadow-sm' 
+                                : 'bg-[#E8D5C4]/50 text-[#605A57] border-0'
                               }
                             >
                               {doc.badge}
                             </Badge>
-                            <ChevronRight className="h-4 w-4 text-gray-400 group-hover:text-brand-primary transition-colors" />
+                            <ChevronRight className="h-4 w-4 text-[#E8D5C4] group-hover:text-[#37322F] transition-colors" />
                           </div>
                         </div>
                       ))}
@@ -1748,25 +1748,25 @@ export const Documentation = () => {
 
             {/* Bookmarks Tab */}
             <TabsContent value="bookmarks">
-              <Card className="border-gray-200 bg-white rounded-2xl">
+              <Card className="border-[#37322F]/10 bg-white rounded-2xl">
                 <CardHeader className="pb-4">
                   <div className="flex items-center gap-3">
-                    <div className="p-2.5 bg-gradient-to-br from-amber-100 to-yellow-50 rounded-xl">
-                      <Bookmark className="h-5 w-5 text-amber-500" />
+                    <div className="p-2.5 bg-amber-50 rounded-xl">
+                      <Bookmark className="h-5 w-5 text-amber-600" />
                     </div>
                     <div>
-                      <CardTitle className="text-gray-900">Saved Documentation</CardTitle>
-                      <CardDescription className="text-gray-500">Your bookmarked articles for quick access</CardDescription>
+                      <CardTitle className="text-[#37322F]">Saved Documentation</CardTitle>
+                      <CardDescription className="text-[#605A57]">Your bookmarked articles for quick access</CardDescription>
                     </div>
                   </div>
                 </CardHeader>
                 <CardContent className="pt-0">
                   {bookmarkedDocs.length === 0 ? (
-                    <div className="text-center py-12 text-gray-500">
-                      <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-2xl flex items-center justify-center">
-                        <Bookmark className="h-7 w-7 text-gray-300" />
+                    <div className="text-center py-12 text-[#605A57]">
+                      <div className="w-16 h-16 mx-auto mb-4 bg-[#E8D5C4]/30 rounded-2xl flex items-center justify-center">
+                        <Bookmark className="h-7 w-7 text-[#E8D5C4]" />
                       </div>
-                      <h3 className="font-medium text-gray-900 mb-2">No bookmarks yet</h3>
+                      <h3 className="font-medium text-[#37322F] mb-2">No bookmarks yet</h3>
                       <p className="text-sm max-w-xs mx-auto">Save documentation articles by clicking the bookmark icon while reading.</p>
                     </div>
                   ) : (
@@ -1777,23 +1777,23 @@ export const Documentation = () => {
                         return (
                           <div
                             key={slug}
-                            className="flex items-center justify-between p-4 border border-gray-100 rounded-xl hover:bg-gray-50 hover:border-gray-200 cursor-pointer transition-all duration-200 group"
+                            className="flex items-center justify-between p-4 border border-[#37322F]/10 rounded-xl hover:bg-[#E8D5C4]/20 hover:border-[#37322F]/20 cursor-pointer transition-all duration-200 group"
                             onClick={() => handleDocClick(slug)}
                           >
                             <div className="flex items-center gap-4">
                               <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center">
-                                <Bookmark className="h-5 w-5 text-amber-500 fill-current" />
+                                <Bookmark className="h-5 w-5 text-amber-600 fill-current" />
                               </div>
                               <div>
-                                <h3 className="font-medium text-gray-900 group-hover:text-brand-primary transition-colors">{doc.title}</h3>
-                                <p className="text-sm text-gray-500">{doc.description}</p>
+                                <h3 className="font-medium text-[#37322F] group-hover:text-[#37322F] transition-colors">{doc.title}</h3>
+                                <p className="text-sm text-[#605A57]">{doc.description}</p>
                               </div>
                             </div>
                             <div className="flex items-center gap-2">
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                className="h-8 w-8 p-0 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                                className="h-8 w-8 p-0 text-[#605A57] hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   toggleBookmark(slug);
@@ -1801,7 +1801,7 @@ export const Documentation = () => {
                               >
                                 <X className="h-4 w-4" />
                               </Button>
-                              <ChevronRight className="h-4 w-4 text-gray-400 group-hover:text-brand-primary transition-colors" />
+                              <ChevronRight className="h-4 w-4 text-[#E8D5C4] group-hover:text-[#37322F] transition-colors" />
                             </div>
                           </div>
                         );
@@ -1814,15 +1814,15 @@ export const Documentation = () => {
           </Tabs>
 
           {/* Quick Tips Section */}
-          <div className="mt-12 p-6 rounded-2xl bg-gradient-to-br from-brand-primary/5 via-brand-primary/10 to-emerald-500/5 border border-brand-primary/10">
+          <div className="mt-12 p-6 rounded-2xl bg-[#E8D5C4]/30 border border-[#37322F]/10">
             <div className="flex items-start gap-4">
               <div className="p-3 bg-white rounded-xl shadow-sm">
-                <Lightbulb className="h-6 w-6 text-brand-primary" />
+                <Lightbulb className="h-6 w-6 text-amber-600" />
               </div>
               <div>
-                <h3 className="font-semibold text-gray-900 mb-1">Pro Tip</h3>
-                <p className="text-gray-600 text-sm">
-                  Use <kbd className="px-2 py-0.5 bg-white rounded text-xs font-mono border border-gray-200">⌘K</kbd> to quickly search across projects and documentation from anywhere in the app.
+                <h3 className="font-semibold text-[#37322F] mb-1">Pro Tip</h3>
+                <p className="text-[#605A57] text-sm">
+                  Use <kbd className="px-2 py-0.5 bg-white rounded text-xs font-mono border border-[#37322F]/15">⌘K</kbd> to quickly search across projects and documentation from anywhere in the app.
                 </p>
               </div>
             </div>

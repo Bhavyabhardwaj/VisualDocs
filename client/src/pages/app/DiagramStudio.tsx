@@ -6,7 +6,9 @@ import {
   Grid3x3, AlignLeft, AlignCenter, Settings, Upload, FileText,
   Copy, Trash2, ChevronDown, Lock, Unlock, 
   AlignRight, AlignJustify, ArrowUp, ArrowDown, Keyboard,
-  Trash, Eye, Minus as MinusIcon
+  Trash, Eye, Minus as MinusIcon, Map, Link2, Maximize2,
+  LayoutGrid, Group, Ungroup, MousePointer2, Hand, MoreHorizontal,
+  RotateCcw, Palette, Wand2, Timer
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -103,6 +105,19 @@ export const DiagramStudio = () => {
   const [canvasBackground, setCanvasBackground] = useState<'dots' | 'grid' | 'none'>('dots');
   const [diagramName, setDiagramName] = useState('Untitled Diagram');
   const [isEditingName, setIsEditingName] = useState(false);
+  
+  // Advanced features - Senior Dev additions
+  const [showMinimap, setShowMinimap] = useState(true);
+  const [isMarqueeSelecting, setIsMarqueeSelecting] = useState(false);
+  const [marqueeStart, setMarqueeStart] = useState({ x: 0, y: 0 });
+  const [marqueeEnd, setMarqueeEnd] = useState({ x: 0, y: 0 });
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number; nodeId: string | null } | null>(null);
+  const [canvasPan, setCanvasPan] = useState({ x: 0, y: 0 });
+  const [isPanning, setIsPanning] = useState(false);
+  const [panStart, setPanStart] = useState({ x: 0, y: 0 });
+  const [showConnectionMode, setShowConnectionMode] = useState(false);
+  const [connectionStart, setConnectionStart] = useState<string | null>(null);
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
 
   // Excalidraw's signature color palette - beautiful, muted, professional
   const excalidrawColors = [
@@ -575,6 +590,225 @@ export const DiagramStudio = () => {
     }
   };
 
+  // ========== SENIOR DEV FEATURES ==========
+
+  // Zoom to Fit - Automatically adjust zoom and pan to show all shapes
+  const handleZoomToFit = () => {
+    if (nodes.length === 0) {
+      setZoom(100);
+      setCanvasPan({ x: 0, y: 0 });
+      toast({ title: "Canvas is empty" });
+      return;
+    }
+
+    const bounds = nodes.reduce((acc, node) => ({
+      minX: Math.min(acc.minX, node.x),
+      minY: Math.min(acc.minY, node.y),
+      maxX: Math.max(acc.maxX, node.x + node.width),
+      maxY: Math.max(acc.maxY, node.y + node.height),
+    }), { minX: Infinity, minY: Infinity, maxX: 0, maxY: 0 });
+
+    const canvasWidth = canvasRef.current?.clientWidth || 800;
+    const canvasHeight = canvasRef.current?.clientHeight || 600;
+    const contentWidth = bounds.maxX - bounds.minX + 100;
+    const contentHeight = bounds.maxY - bounds.minY + 100;
+    
+    const scaleX = canvasWidth / contentWidth;
+    const scaleY = canvasHeight / contentHeight;
+    const newZoom = Math.min(scaleX, scaleY, 1.5) * 100;
+    
+    setZoom(Math.round(Math.max(50, Math.min(150, newZoom))));
+    setCanvasPan({ 
+      x: -bounds.minX + 50, 
+      y: -bounds.minY + 50 
+    });
+    toast({ title: "Zoomed to Fit" });
+  };
+
+  // Auto-layout - Arrange shapes in a clean grid
+  const handleAutoLayout = () => {
+    if (nodes.length === 0) return;
+    
+    const spacing = 40;
+    const cols = Math.ceil(Math.sqrt(nodes.length));
+    const sortedNodes = [...nodes].sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0));
+    
+    const updatedNodes = sortedNodes.map((node, idx) => {
+      const row = Math.floor(idx / cols);
+      const col = idx % cols;
+      return {
+        ...node,
+        x: 100 + col * (180 + spacing),
+        y: 100 + row * (120 + spacing),
+      };
+    });
+    
+    setNodes(updatedNodes);
+    saveToHistory(updatedNodes);
+    toast({ 
+      title: "Auto Layout Applied", 
+      description: `${nodes.length} shapes arranged in a grid` 
+    });
+  };
+
+  // Group selected shapes
+  const handleGroupShapes = () => {
+    if (selectedNodes.length < 2) {
+      toast({ 
+        title: "Select Multiple Shapes", 
+        description: "Select at least 2 shapes to group them" 
+      });
+      return;
+    }
+    
+    const groupId = `group-${Date.now()}`;
+    const updatedNodes = nodes.map(node =>
+      selectedNodes.includes(node.id) ? { ...node, groupId } : node
+    );
+    
+    setNodes(updatedNodes);
+    saveToHistory(updatedNodes);
+    toast({ 
+      title: "Shapes Grouped", 
+      description: `${selectedNodes.length} shapes grouped together` 
+    });
+  };
+
+  // Ungroup shapes
+  const handleUngroupShapes = () => {
+    const selectedGroupIds = new Set(
+      nodes.filter(n => selectedNodes.includes(n.id) || n.id === selectedNode)
+        .map(n => n.groupId)
+        .filter(Boolean)
+    );
+    
+    if (selectedGroupIds.size === 0) {
+      toast({ title: "No grouped shapes selected" });
+      return;
+    }
+    
+    const updatedNodes = nodes.map(node =>
+      selectedGroupIds.has(node.groupId) ? { ...node, groupId: undefined } : node
+    );
+    
+    setNodes(updatedNodes);
+    saveToHistory(updatedNodes);
+    toast({ title: "Shapes Ungrouped" });
+  };
+
+  // Connect two shapes with an arrow
+  const handleConnectShapes = () => {
+    if (selectedNodes.length !== 2) {
+      toast({ 
+        title: "Select Two Shapes", 
+        description: "Select exactly 2 shapes to connect them" 
+      });
+      return;
+    }
+    
+    const [node1, node2] = selectedNodes.map(id => nodes.find(n => n.id === id)!);
+    
+    // Calculate connection points (center of each shape)
+    const startX = node1.x + node1.width / 2;
+    const startY = node1.y + node1.height / 2;
+    const endX = node2.x + node2.width / 2;
+    const endY = node2.y + node2.height / 2;
+    
+    const newArrow: DiagramNode = {
+      id: `arrow-${Date.now()}`,
+      type: 'arrow',
+      x: startX,
+      y: startY,
+      width: endX - startX,
+      height: endY - startY,
+      label: '',
+      color: '#868e96',
+      strokeWidth: 2,
+    };
+    
+    const updatedNodes = [...nodes, newArrow];
+    setNodes(updatedNodes);
+    saveToHistory(updatedNodes);
+    setSelectedNodes([]);
+    toast({ title: "Shapes Connected" });
+  };
+
+  // Randomize colors for selected shapes
+  const handleRandomizeColors = () => {
+    const targetNodes = selectedNodes.length > 0 
+      ? selectedNodes 
+      : selectedNode ? [selectedNode] : [];
+    
+    if (targetNodes.length === 0) return;
+    
+    const updatedNodes = nodes.map(node => {
+      if (targetNodes.includes(node.id)) {
+        const randomColor = excalidrawColors[Math.floor(Math.random() * excalidrawColors.length)];
+        return { ...node, color: randomColor };
+      }
+      return node;
+    });
+    
+    setNodes(updatedNodes);
+    saveToHistory(updatedNodes);
+    toast({ title: "Colors Randomized" });
+  };
+
+  // Reset all shape rotations
+  const handleResetRotations = () => {
+    const updatedNodes = nodes.map(node => ({ ...node, rotation: 0 }));
+    setNodes(updatedNodes);
+    saveToHistory(updatedNodes);
+    toast({ title: "Rotations Reset" });
+  };
+
+  // Context menu handler
+  const handleContextMenu = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    const pos = getCanvasPosition(e as unknown as MouseEvent<HTMLDivElement>);
+    const clickedNode = [...nodes].reverse().find(node => isPointInNode(pos.x, pos.y, node));
+    
+    setContextMenu({
+      x: e.clientX,
+      y: e.clientY,
+      nodeId: clickedNode?.id || null,
+    });
+    
+    if (clickedNode) {
+      setSelectedNode(clickedNode.id);
+    }
+  };
+
+  // Close context menu
+  const closeContextMenu = () => setContextMenu(null);
+
+  // Calculate minimap bounds
+  const getMinimapBounds = () => {
+    if (nodes.length === 0) return { minX: 0, minY: 0, maxX: 800, maxY: 600 };
+    
+    return nodes.reduce((acc, node) => ({
+      minX: Math.min(acc.minX, node.x),
+      minY: Math.min(acc.minY, node.y),
+      maxX: Math.max(acc.maxX, node.x + node.width),
+      maxY: Math.max(acc.maxY, node.y + node.height),
+    }), { minX: Infinity, minY: Infinity, maxX: 0, maxY: 0 });
+  };
+
+  // Get shapes statistics
+  const getShapeStats = () => {
+    const stats = {
+      total: nodes.length,
+      rectangles: nodes.filter(n => n.type === 'rectangle').length,
+      circles: nodes.filter(n => n.type === 'circle').length,
+      arrows: nodes.filter(n => n.type === 'arrow').length,
+      text: nodes.filter(n => n.type === 'text').length,
+      lines: nodes.filter(n => n.type === 'line').length,
+    };
+    return stats;
+  };
+
+  // ========== END SENIOR DEV FEATURES ==========
+
   // Helper to snap to grid
   const snapToGridValue = (value: number, gridSize: number = 20) => {
     return snapToGrid ? Math.round(value / gridSize) * gridSize : value;
@@ -742,6 +976,7 @@ export const DiagramStudio = () => {
         localStorage.setItem('diagram-nodes', JSON.stringify(nodes));
         localStorage.setItem('diagram-name', diagramName);
         localStorage.setItem('diagram-autosave', new Date().toISOString());
+        setLastSaved(new Date());
       }
     }, 30000); // 30 seconds
 
@@ -752,11 +987,13 @@ export const DiagramStudio = () => {
   useEffect(() => {
     const saved = localStorage.getItem('diagram-nodes');
     const savedName = localStorage.getItem('diagram-name');
+    const savedTime = localStorage.getItem('diagram-autosave');
     if (saved) {
       try {
         const loadedNodes = JSON.parse(saved);
         setNodes(loadedNodes);
         saveToHistory(loadedNodes);
+        if (savedTime) setLastSaved(new Date(savedTime));
       } catch (error) {
         console.error('Failed to load diagram:', error);
       }
@@ -949,6 +1186,31 @@ export const DiagramStudio = () => {
         setSelectedNode(null);
         setSelectedNodes([]);
         setSelectedTool('select');
+        closeContextMenu();
+      }
+      
+      // Zoom to Fit (Ctrl+0)
+      if (e.ctrlKey && e.key === '0' && !isInputField) {
+        e.preventDefault();
+        handleZoomToFit();
+      }
+      
+      // Auto Layout (Ctrl+Shift+L)
+      if (e.ctrlKey && e.shiftKey && e.key === 'L' && !isInputField) {
+        e.preventDefault();
+        handleAutoLayout();
+      }
+      
+      // Group (Ctrl+G)
+      if (e.ctrlKey && e.key === 'g' && !isInputField && selectedNodes.length > 1) {
+        e.preventDefault();
+        handleGroupShapes();
+      }
+      
+      // Connect shapes (Ctrl+K)
+      if (e.ctrlKey && e.key === 'k' && !isInputField && selectedNodes.length === 2) {
+        e.preventDefault();
+        handleConnectShapes();
       }
       
       // Select tool shortcuts (only if not typing in input)
@@ -963,13 +1225,15 @@ export const DiagramStudio = () => {
           setSelectedTool('text');
         } else if (e.key === 'l') {
           setSelectedTool('arrow');
+        } else if (e.key === 'm') {
+          setShowMinimap(!showMinimap);
         }
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedNode, selectedNodes, historyIndex, history, nodes, clipboard]);
+  }, [selectedNode, selectedNodes, historyIndex, history, nodes, clipboard, showMinimap]);
 
   const handleZoomIn = () => setZoom(Math.min(200, zoom + 10));
   const handleZoomOut = () => setZoom(Math.max(50, zoom - 10));
@@ -1019,6 +1283,16 @@ export const DiagramStudio = () => {
                 <div className="flex justify-between"><span>Bring Forward</span><kbd className="px-2 py-1 bg-gray-100 rounded">Ctrl+]</kbd></div>
                 <div className="flex justify-between"><span>Send Backward</span><kbd className="px-2 py-1 bg-gray-100 rounded">Ctrl+[</kbd></div>
                 <div className="flex justify-between"><span>Deselect</span><kbd className="px-2 py-1 bg-gray-100 rounded">Esc</kbd></div>
+              </div>
+            </div>
+            <div>
+              <h4 className="font-semibold mb-2">View & Layout</h4>
+              <div className="space-y-1 text-sm">
+                <div className="flex justify-between"><span>Zoom to Fit</span><kbd className="px-2 py-1 bg-gray-100 rounded">Ctrl+0</kbd></div>
+                <div className="flex justify-between"><span>Auto Layout</span><kbd className="px-2 py-1 bg-gray-100 rounded">Ctrl+Shift+L</kbd></div>
+                <div className="flex justify-between"><span>Toggle Minimap</span><kbd className="px-2 py-1 bg-gray-100 rounded">M</kbd></div>
+                <div className="flex justify-between"><span>Group Shapes</span><kbd className="px-2 py-1 bg-gray-100 rounded">Ctrl+G</kbd></div>
+                <div className="flex justify-between"><span>Connect Shapes</span><kbd className="px-2 py-1 bg-gray-100 rounded">Ctrl+K</kbd></div>
               </div>
             </div>
           </div>
@@ -1160,6 +1434,15 @@ export const DiagramStudio = () => {
               <Button variant="ghost" size="icon" className="h-9 w-9 hover:bg-gray-50" onClick={handleZoomIn}>
                 <ZoomIn className="h-4 w-4" />
               </Button>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-9 w-9 hover:bg-gray-50"
+                onClick={handleZoomToFit}
+                title="Zoom to Fit (Ctrl+0)"
+              >
+                <Maximize2 className="h-4 w-4" />
+              </Button>
             </div>
 
             {/* Alignment Tools */}
@@ -1256,6 +1539,59 @@ export const DiagramStudio = () => {
           </div>
 
           <div className="flex items-center gap-2">
+            {/* Advanced Actions Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="gap-2">
+                  <Wand2 className="h-4 w-4" />
+                  Actions
+                  <ChevronDown className="h-3 w-3" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={handleZoomToFit}>
+                  <Maximize2 className="h-4 w-4 mr-2" />
+                  Zoom to Fit
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleAutoLayout}>
+                  <LayoutGrid className="h-4 w-4 mr-2" />
+                  Auto Layout
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleGroupShapes} disabled={selectedNodes.length < 2}>
+                  <Group className="h-4 w-4 mr-2" />
+                  Group Shapes
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleUngroupShapes}>
+                  <Ungroup className="h-4 w-4 mr-2" />
+                  Ungroup
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleConnectShapes} disabled={selectedNodes.length !== 2}>
+                  <Link2 className="h-4 w-4 mr-2" />
+                  Connect Shapes
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleRandomizeColors}>
+                  <Palette className="h-4 w-4 mr-2" />
+                  Randomize Colors
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleResetRotations}>
+                  <RotateCcw className="h-4 w-4 mr-2" />
+                  Reset Rotations
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {/* Minimap Toggle */}
+            <Button 
+              variant={showMinimap ? "default" : "outline"} 
+              size="sm" 
+              className="gap-2"
+              onClick={() => setShowMinimap(!showMinimap)}
+            >
+              <Map className="h-4 w-4" />
+            </Button>
+
             {/* Background Pattern Toggle */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -1465,7 +1801,10 @@ export const DiagramStudio = () => {
           </div>
 
           {/* Canvas Area */}
-          <div className="flex-1 overflow-auto relative bg-gray-50">
+          <div 
+            className="flex-1 overflow-auto relative bg-gray-50"
+            onClick={() => contextMenu && closeContextMenu()}
+          >
             <div
               ref={canvasRef}
               className="relative w-full h-full min-h-[600px] cursor-crosshair"
@@ -1487,6 +1826,7 @@ export const DiagramStudio = () => {
                 setIsDrawing(false);
                 setDraggedNode(null);
               }}
+              onContextMenu={handleContextMenu}
             >
               {/* Empty Canvas Message */}
               {nodes.length === 0 && !isDrawing && (
@@ -1762,6 +2102,141 @@ export const DiagramStudio = () => {
                 return null;
               })}
             </div>
+
+            {/* Minimap Overlay */}
+            {showMinimap && nodes.length > 0 && (
+              <div className="absolute bottom-4 right-4 bg-white border border-gray-200 rounded-lg shadow-lg p-2 z-20">
+                <div className="text-xs font-medium text-gray-600 mb-1 flex items-center justify-between">
+                  <span className="flex items-center gap-1">
+                    <Map className="h-3 w-3" />
+                    Minimap
+                  </span>
+                  <button 
+                    onClick={() => setShowMinimap(false)}
+                    className="text-gray-400 hover:text-gray-600"
+                  >
+                    ×
+                  </button>
+                </div>
+                <div 
+                  className="relative bg-gray-50 rounded border border-gray-100"
+                  style={{ width: 150, height: 100 }}
+                >
+                  {nodes.map(node => {
+                    const bounds = getMinimapBounds();
+                    const scaleX = 150 / (bounds.maxX - bounds.minX + 100);
+                    const scaleY = 100 / (bounds.maxY - bounds.minY + 100);
+                    const scale = Math.min(scaleX, scaleY, 0.15);
+                    
+                    return (
+                      <div
+                        key={node.id}
+                        className="absolute rounded-sm"
+                        style={{
+                          left: (node.x - bounds.minX + 50) * scale,
+                          top: (node.y - bounds.minY + 50) * scale,
+                          width: Math.max(node.width * scale, 3),
+                          height: Math.max(node.height * scale, 3),
+                          backgroundColor: node.color,
+                          border: selectedNode === node.id ? '1px solid #3b82f6' : 'none',
+                        }}
+                      />
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Stats Badge */}
+            <div className="absolute top-4 left-4 flex items-center gap-2 z-20">
+              <Badge variant="secondary" className="bg-white/90 text-gray-700 border border-gray-200 shadow-sm">
+                <Layers className="h-3 w-3 mr-1" />
+                {nodes.length} shapes
+              </Badge>
+              {lastSaved && (
+                <Badge variant="secondary" className="bg-white/90 text-gray-500 border border-gray-200 shadow-sm text-xs">
+                  <Timer className="h-3 w-3 mr-1" />
+                  Saved {lastSaved.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </Badge>
+              )}
+            </div>
+
+            {/* Context Menu */}
+            {contextMenu && (
+              <div 
+                className="fixed bg-white border border-gray-200 rounded-lg shadow-xl py-1 z-50 min-w-[180px]"
+                style={{ left: contextMenu.x, top: contextMenu.y }}
+                onClick={closeContextMenu}
+              >
+                {contextMenu.nodeId ? (
+                  <>
+                    <button 
+                      className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2"
+                      onClick={() => { handleDuplicate(); closeContextMenu(); }}
+                    >
+                      <Copy className="h-4 w-4" /> Duplicate
+                    </button>
+                    <button 
+                      className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2"
+                      onClick={() => { handleCopy(); closeContextMenu(); }}
+                    >
+                      <Copy className="h-4 w-4" /> Copy
+                    </button>
+                    <button 
+                      className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2"
+                      onClick={() => { handleToggleLock(); closeContextMenu(); }}
+                    >
+                      {nodes.find(n => n.id === contextMenu.nodeId)?.locked 
+                        ? <><Unlock className="h-4 w-4" /> Unlock</>
+                        : <><Lock className="h-4 w-4" /> Lock</>
+                      }
+                    </button>
+                    <div className="border-t border-gray-100 my-1" />
+                    <button 
+                      className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2"
+                      onClick={() => { handleBringToFront(); closeContextMenu(); }}
+                    >
+                      <ArrowUp className="h-4 w-4" /> Bring to Front
+                    </button>
+                    <button 
+                      className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2"
+                      onClick={() => { handleSendToBack(); closeContextMenu(); }}
+                    >
+                      <ArrowDown className="h-4 w-4" /> Send to Back
+                    </button>
+                    <div className="border-t border-gray-100 my-1" />
+                    <button 
+                      className="w-full px-3 py-2 text-left text-sm hover:bg-red-50 text-red-600 flex items-center gap-2"
+                      onClick={() => { handleDelete(); closeContextMenu(); }}
+                    >
+                      <Trash2 className="h-4 w-4" /> Delete
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button 
+                      className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2"
+                      onClick={() => { handlePaste(); closeContextMenu(); }}
+                      disabled={clipboard.length === 0}
+                    >
+                      <Copy className="h-4 w-4" /> Paste
+                    </button>
+                    <button 
+                      className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2"
+                      onClick={() => { handleZoomToFit(); closeContextMenu(); }}
+                    >
+                      <Maximize2 className="h-4 w-4" /> Zoom to Fit
+                    </button>
+                    <button 
+                      className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2"
+                      onClick={() => { handleAutoLayout(); closeContextMenu(); }}
+                    >
+                      <LayoutGrid className="h-4 w-4" /> Auto Layout
+                    </button>
+                  </>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
