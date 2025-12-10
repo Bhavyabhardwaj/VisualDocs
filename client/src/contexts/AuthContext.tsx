@@ -16,6 +16,7 @@ interface AuthContextType {
   logout: () => Promise<void>;
   updateUser: (data: Partial<User>) => Promise<void>;
   refreshUser: () => Promise<void>;
+  handleOAuthToken: (token: string, userData?: any) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -200,12 +201,40 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const response = await authService.getProfile();
       
       if (response.success && response.data) {
-        setUser(response.data);
+        const userData = (response.data as any).user || response.data;
+        setUser(userData);
+        setHasToken(true);
       }
     } catch (error) {
       console.error('Refresh user error:', error);
     }
   }, []);
+
+  // Handle OAuth token from callback
+  const handleOAuthToken = useCallback(async (token: string, userData?: any) => {
+    try {
+      console.log('🔐 AuthContext: Handling OAuth token...');
+      
+      // Store the token
+      localStorage.setItem('authToken', token);
+      setHasToken(true);
+      
+      // If user data was provided, use it directly
+      if (userData) {
+        console.log('✅ AuthContext: Setting user from OAuth data:', userData);
+        setUser(userData);
+      } else {
+        // Otherwise, fetch the user profile
+        console.log('🔐 AuthContext: Fetching user profile with OAuth token...');
+        await refreshUser();
+      }
+      
+      console.log('✅ AuthContext: OAuth login complete');
+    } catch (error) {
+      console.error('❌ AuthContext: OAuth token handling error:', error);
+      throw error;
+    }
+  }, [refreshUser]);
 
   const value: AuthContextType = {
     user,
@@ -216,6 +245,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     logout,
     updateUser,
     refreshUser,
+    handleOAuthToken,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

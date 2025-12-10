@@ -11,6 +11,7 @@ import { Toaster as Sonner } from 'sonner';
 import NewLanding from './pages/NewLanding';
 import LandingLogin from './pages/auth/LandingLogin';
 import LandingRegister from './pages/auth/LandingRegister';
+import OAuthCallback from './pages/auth/OAuthCallback';
 import { ForgotPassword } from './pages/ForgotPassword';
 import { PricingSelection } from './pages/auth/PricingSelection';
 
@@ -39,6 +40,7 @@ function App() {
             <Route path="/" element={<NewLanding />} />
             <Route path="/login" element={<LandingLogin />} />
             <Route path="/register" element={<LandingRegister />} />
+            <Route path="/auth/callback" element={<OAuthCallback />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/select-plan" element={
               <ProtectedRoute>

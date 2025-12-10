@@ -80,8 +80,10 @@ export default function LandingLogin() {
   };
 
   const handleOAuthLogin = (provider: 'google' | 'github') => {
-    // OAuth logic here
-    console.log(`Login with ${provider}`);
+    // Redirect to OAuth endpoint
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3004';
+    console.log(`🔐 Redirecting to ${provider} OAuth at:`, `${apiUrl}/api/oauth/${provider}`);
+    window.location.href = `${apiUrl}/api/oauth/${provider}`;
   };
 
   return (

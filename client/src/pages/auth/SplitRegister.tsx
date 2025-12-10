@@ -201,6 +201,10 @@ export default function SplitRegister() {
           <div className="grid grid-cols-2 gap-4">
             <button
               type="button"
+              onClick={() => {
+                const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3004';
+                window.location.href = `${apiUrl}/api/oauth/google`;
+              }}
               className="flex items-center justify-center gap-2 py-3 px-4 bg-[#1a1b26] border border-gray-800 rounded-xl text-gray-300 hover:bg-[#252632] hover:border-gray-700 transition-all"
             >
               <Chrome className="w-5 h-5" />
@@ -208,6 +212,10 @@ export default function SplitRegister() {
             </button>
             <button
               type="button"
+              onClick={() => {
+                const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3004';
+                window.location.href = `${apiUrl}/api/oauth/github`;
+              }}
               className="flex items-center justify-center gap-2 py-3 px-4 bg-[#1a1b26] border border-gray-800 rounded-xl text-gray-300 hover:bg-[#252632] hover:border-gray-700 transition-all"
             >
               <Github className="w-5 h-5" />

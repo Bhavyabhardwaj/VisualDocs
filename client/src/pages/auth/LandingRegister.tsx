@@ -67,8 +67,10 @@ export default function LandingRegister() {
   };
 
   const handleOAuthSignup = (provider: 'google' | 'github') => {
-    // OAuth logic here
-    console.log(`Sign up with ${provider}`);
+    // Redirect to OAuth endpoint - same as login, server handles new user creation
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3004';
+    console.log(`🔐 Redirecting to ${provider} OAuth at:`, `${apiUrl}/api/oauth/${provider}`);
+    window.location.href = `${apiUrl}/api/oauth/${provider}`;
   };
 
   return (
