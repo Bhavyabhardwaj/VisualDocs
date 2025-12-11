@@ -2,7 +2,7 @@ import { Router } from 'express';
 import Razorpay from 'razorpay';
 import crypto from 'crypto';
 import { PrismaClient, SubscriptionPlan, SubscriptionStatus, BillingPeriod, PaymentStatus } from '@prisma/client';
-import { authenticate } from '../middleware/auth';
+import { isAuthenticated } from '../middleware';
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -14,7 +14,7 @@ const razorpay = new Razorpay({
 });
 
 // Plan prices in INR (paise for Razorpay)
-const PLAN_PRICES = {
+const PLAN_PRICES: Record<string, Record<string, number>> = {
   PROFESSIONAL: {
     MONTHLY: 99900, // ₹999 in paise
     ANNUALLY: 999900, // ₹9999 in paise
@@ -26,9 +26,9 @@ const PLAN_PRICES = {
 };
 
 // Select FREE plan
-router.post('/select-free', authenticate, async (req, res) => {
+router.post('/select-free', isAuthenticated, async (req, res) => {
   try {
-    const userId = req.user?.id;
+    const userId = req.user?.userId;
 
     if (!userId) {
       return res.status(401).json({ error: 'Unauthorized' });
@@ -57,9 +57,9 @@ router.post('/select-free', authenticate, async (req, res) => {
 });
 
 // Create Razorpay order
-router.post('/create-order', authenticate, async (req, res) => {
+router.post('/create-order', isAuthenticated, async (req, res) => {
   try {
-    const userId = req.user?.id;
+    const userId = req.user?.userId;
     const { plan, billingPeriod, amount } = req.body;
 
     if (!userId) {
@@ -77,7 +77,10 @@ router.post('/create-order', authenticate, async (req, res) => {
     }
 
     // Get expected amount
-    const expectedAmount = PLAN_PRICES[plan][billingPeriod];
+    const expectedAmount = PLAN_PRICES[plan]?.[billingPeriod];
+    if (!expectedAmount) {
+      return res.status(400).json({ error: 'Invalid plan or billing period' });
+    }
 
     // Create Razorpay order
     const order = await razorpay.orders.create({
@@ -115,9 +118,9 @@ router.post('/create-order', authenticate, async (req, res) => {
 });
 
 // Verify payment
-router.post('/verify', authenticate, async (req, res) => {
+router.post('/verify', isAuthenticated, async (req, res) => {
   try {
-    const userId = req.user?.id;
+    const userId = req.user?.userId;
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
 
     if (!userId) {
@@ -186,9 +189,9 @@ router.post('/verify', authenticate, async (req, res) => {
 });
 
 // Get user subscription
-router.get('/subscription', authenticate, async (req, res) => {
+router.get('/subscription', isAuthenticated, async (req, res) => {
   try {
-    const userId = req.user?.id;
+    const userId = req.user?.userId;
 
     if (!userId) {
       return res.status(401).json({ error: 'Unauthorized' });
@@ -213,9 +216,9 @@ router.get('/subscription', authenticate, async (req, res) => {
 });
 
 // Get payment history
-router.get('/history', authenticate, async (req, res) => {
+router.get('/history', isAuthenticated, async (req, res) => {
   try {
-    const userId = req.user?.id;
+    const userId = req.user?.userId;
 
     if (!userId) {
       return res.status(401).json({ error: 'Unauthorized' });
